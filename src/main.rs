@@ -107,7 +107,7 @@ fn main() {
         panic!("Pas fini !");
     }
 
-    let ok = lambdaterme.check();
+    let ok = lambdaterme.check(goal);
     if ok {
         println!("OK !");
     } else {

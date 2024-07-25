@@ -47,8 +47,50 @@ impl LambdaTerm {
         }
         found
     }
-    pub fn check(self) -> bool {
-        false
+    pub fn check(self, goal: Type) -> bool {
+        fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type {
+            match lambdaterm {
+                LambdaTerm::App(box first, box second) => {
+                    let var_name = match first {LambdaTerm::Var(name) => name, _ => panic!("Error !")};
+                    let res = mytypes.get(&var_name).unwrap().clone();
+                    let typea = compute_type(second, mytypes);
+                    let globala: Type;
+                    let globalb: Type;
+                    match res {
+                        Type::Impl(box a, box b) => {
+                            globala = a;
+                            globalb = b;
+                        }
+                        _ => panic!("Error !")
+                    }
+                    if typea == globala {
+                        globalb
+                    } else {
+                        panic!("Error !")
+                    }
+                }
+                LambdaTerm::Var(name) => {
+                    let res = mytypes.get(&name).unwrap().clone();
+                    res
+                }
+                LambdaTerm::Abs(name, typ, box other) => {
+                    let mut newtypes = mytypes.clone();
+                    newtypes.insert(name, typ.clone());
+                    Type::Impl(
+                        Box::new(typ), 
+                        Box::new(compute_type(other, newtypes))
+                    )
+                }
+                LambdaTerm::Goal(..) => {
+                    panic!("Not supposed to happend !")
+                }
+                LambdaTerm::Fst | LambdaTerm::Snd | LambdaTerm::Couple(..) => {
+                    todo!()
+                }
+            }
+        }
+        let computed = compute_type(self, HashMap::new());
+        goal == computed
     }
     pub fn intro(self, name: String) -> LambdaTerm {
         aux_intro(self, name)
