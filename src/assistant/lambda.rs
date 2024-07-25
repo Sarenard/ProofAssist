@@ -13,6 +13,27 @@ pub enum LambdaTerm {
 }
 
 impl LambdaTerm {
+    pub fn containsgoal(self) -> bool {
+        let mut found = false;
+        match self {
+            LambdaTerm::Goal(..) => {
+                found = true
+            }
+            LambdaTerm::Var(..) | LambdaTerm::Fst | LambdaTerm::Snd => {},
+            LambdaTerm::Couple(box term1, box term2) => {
+                found |= term1.containsgoal();
+                found |= term2.containsgoal();
+            }
+            LambdaTerm::App(box first, box second) => {
+                found |= first.containsgoal();
+                found |= second.containsgoal();
+            }
+            LambdaTerm::Abs(str, typ, box lambdaterm) => {
+                found |= lambdaterm.containsgoal();
+            }
+        }
+        found
+    }
     pub fn intro(self, var: String) -> LambdaTerm {
         remplace_intro(self, var)
     }
