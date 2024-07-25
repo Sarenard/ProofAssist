@@ -1,4 +1,3 @@
-use std::collections::VecDeque;
 use std::collections::HashMap;
 use std::sync::Mutex;
 
@@ -12,12 +11,18 @@ lazy_static! {
 
 #[derive(Debug, Clone)]
 pub enum LambdaTerm {
-   Var(String),
-   Couple(Box<LambdaTerm>, Box<LambdaTerm>),
-   App(Box<LambdaTerm>, Box<LambdaTerm>),
-   Abs(String, Type, Box<LambdaTerm>),
-   Fst, Snd, // for Couple
-   Goal(Type)
+    #[allow(dead_code)]
+    Var(String),
+    #[allow(dead_code)]
+    Couple(Box<LambdaTerm>, Box<LambdaTerm>),
+    App(Box<LambdaTerm>, Box<LambdaTerm>),
+    #[allow(dead_code)]
+    Abs(String, Type, Box<LambdaTerm>),
+    #[allow(dead_code)]
+    Fst, // for Couple
+    #[allow(dead_code)]
+    Snd, // for Couple
+    Goal(Type)
 }
 
 impl LambdaTerm {
@@ -36,7 +41,7 @@ impl LambdaTerm {
                 found |= first.containsgoal();
                 found |= second.containsgoal();
             }
-            LambdaTerm::Abs(str, typ, box lambdaterm) => {
+            LambdaTerm::Abs(_str, _typ, box lambdaterm) => {
                 found |= lambdaterm.containsgoal();
             }
         }

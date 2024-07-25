@@ -6,7 +6,6 @@ use std::process::exit;
 #[macro_use]
 extern crate pest_derive;
 
-use pest::iterators::Pairs;
 use pest::Parser;
 
 #[derive(Parser)]
@@ -18,7 +17,7 @@ mod assistant;
 use assistant::lambda::LambdaTerm as LambdaTerm;
 use assistant::types::Type as Type;
 
-static SHELL: bool = true;
+static SHELL: bool = false;
 
 fn main() {
     // on veut prouver a => (a => b) => b
