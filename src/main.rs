@@ -103,6 +103,10 @@ fn main() {
     let lambdaterme = lambdaterme.exact("h1".to_string());
     println!("{:?}", lambdaterme);
 
+    if lambdaterme.clone().containsgoal() {
+        panic!("Pas fini !");
+    }
+
     let ok = lambdaterme.check();
     if ok {
         println!("OK !");
