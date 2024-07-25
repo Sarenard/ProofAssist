@@ -109,9 +109,9 @@ fn main() {
 
     let ok = lambdaterme.check(goal);
     if ok {
-        println!("OK !");
+        println!("Checked the proof, yelds the good type !");
     } else {
-        panic!("Ehh i'm wrong");
+        panic!("Ehh i'm wrong somewhere");
     }
 
 }
