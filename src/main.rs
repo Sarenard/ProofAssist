@@ -1,17 +1,27 @@
 #![feature(box_patterns)]
 
-mod assistant;
-
 use std::io;
 use std::process::exit;
+
+#[macro_use]
+extern crate pest_derive;
+
+use pest::iterators::Pairs;
+use pest::Parser;
+
+#[derive(Parser)]
+#[grammar = "simple.pest"] // relative to src
+struct SimpleParser;
+
+mod assistant;
 
 use assistant::lambda::LambdaTerm as LambdaTerm;
 use assistant::types::Type as Type;
 
-static SHELL: bool = false;
+static SHELL: bool = true;
 
 fn main() {
-    // on veut prouver a ^ b => b ^ a
+    // on veut prouver a => (a => b) => b
     let goal = Type::Impl(
         Box::new(Type::Var("A".to_string())),
         Box::new(Type::Impl(
@@ -47,8 +57,22 @@ fn main() {
                     lambdaterme = lambdaterme.exact(var.to_string());
                     println!("{:?}", lambdaterme);
                 }
-                ["cut", _] => {
-                    println!("Idk how to implement it shellwise");
+                ["cut", var] => {
+                    let parse_result = SimpleParser::parse(
+                        Rule::main, 
+                        var
+                    );
+                    let mut val = match parse_result {
+                        Ok(parsed) => parsed,
+                        Err(_) => {
+                            println!("Invalid command, please retry.");
+                            continue;
+                        },
+                    };
+
+                    let my_type = parse_type(val.next().unwrap());
+                    lambdaterme = lambdaterme.cut(my_type);
+                    println!("{:?}", lambdaterme);
                 }
                 ["apply", var] => {
                     lambdaterme = lambdaterme.apply(var.to_string());
@@ -80,5 +104,40 @@ fn main() {
     let lambdaterme = lambdaterme.exact("h1".to_string());
     println!("{:?}", lambdaterme);
 
+    let ok = lambdaterme.check();
+    if ok {
+        println!("OK !");
+    } else {
+        panic!("Ehh i'm wrong");
+    }
+
 }
 
+fn parse_type(pair: pest::iterators::Pair<Rule>) -> Type {
+    match pair.as_rule() {
+        Rule::main => {
+            let inner_pair = pair.into_inner().next().unwrap();
+            parse_type(inner_pair)
+        }
+        Rule::var => {
+            let inner = pair.into_inner().next().unwrap();
+            let text = inner.as_str();
+            let length = text.len();
+            let text = &text[1..length-1];
+            Type::Var(text.to_string())
+        }
+        Rule::impl_type => {
+            let mut inner = pair.into_inner();
+            let first = parse_type(inner.next().unwrap());
+            let second = parse_type(inner.next().unwrap());
+            Type::Impl(Box::new(first), Box::new(second))
+        }
+        Rule::and_type => {
+            let mut inner = pair.into_inner();
+            let first = parse_type(inner.next().unwrap());
+            let second = parse_type(inner.next().unwrap());
+            Type::And(Box::new(first), Box::new(second))
+        }
+        _ => unreachable!(),
+    }
+}

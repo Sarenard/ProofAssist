@@ -42,6 +42,9 @@ impl LambdaTerm {
         }
         found
     }
+    pub fn check(self) -> bool {
+        false
+    }
     pub fn intro(self, name: String) -> LambdaTerm {
         aux_intro(self, name)
     }

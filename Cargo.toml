@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 lazy_static = "1.4"
+pest = "2.1"
+pest_derive = "2.1"

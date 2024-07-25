@@ -1,0 +1,7 @@
+WHITESPACE = _{ " " | "\t" | "\n" }
+
+main      =  { impl_type | and_type | var }
+impl_type =  { "Impl(" ~ main ~ "," ~ main ~ ")" }
+and_type  =  { "And(" ~ main ~ "," ~ main ~ ")" }
+var       =  { "Var(" ~ string ~ ")" }
+string    =  { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }
