@@ -99,7 +99,7 @@ fn main() {
     println!("Final typecheck running :");
     let ok = lambdaterme.check(goal);
     if ok {
-        println!("Checked the proof, yelds the good type !");
+        println!("Checked the proof, yields the good type !");
     } else {
         panic!("Ehh there is an error somewhere");
     }
