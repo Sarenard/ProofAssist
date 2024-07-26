@@ -275,7 +275,7 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
                 other => panic!("Error, unknown : {:?}", other)
             }
         }
-        LambdaTerm::Var((name, nb)) => {
+        LambdaTerm::Var((name, _nb)) => {
             let res = mytypes.get(&name).unwrap().clone();
             res
         }
