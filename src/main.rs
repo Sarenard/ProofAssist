@@ -20,12 +20,13 @@ use assistant::types::Type as Type;
 static SHELL: bool = false;
 
 fn main() {
-    // on veut prouver a => (a => b) => b
-    let goal = Type::Not(
+    // on veut prouver (A ^ (not A)) => B
+    let goal = Type::Impl(
         Box::new(Type::And(
             Box::new(Type::Var("a".to_string())),
             Box::new(Type::Not(Box::new(Type::Var("a".to_string()))))
-        ))
+        )),
+        Box::new(Type::Var("b".to_string()))
     ).removenot();
 
     let mut lambdaterme = LambdaTerm::Goal(goal.clone());
@@ -90,6 +91,9 @@ fn main() {
     let lambdaterme = lambdaterme.intro("h1".to_string());
     println!("{:?}", lambdaterme);
 
+    let lambdaterme = lambdaterme.absurd(Type::Var("b".to_string()));
+    println!("{:?}", lambdaterme);
+
     let lambdaterme = lambdaterme.elim("h1".to_string());
     println!("{:?}", lambdaterme);
 
@@ -104,6 +108,7 @@ fn main() {
 
     let lambdaterme = lambdaterme.exact("h2".to_string());
     println!("{:?}", lambdaterme);
+
 
     if lambdaterme.clone().containsgoal() {
         panic!("Pas fini !");

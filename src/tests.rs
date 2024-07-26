@@ -14,6 +14,29 @@ fn check(goal: Type, lambdaterme: LambdaTerm) {
 
 
 #[test]
+// (A ^ (not A)) => B
+fn absurd() {
+    let goal = Type::Impl(
+        Box::new(Type::And(
+            Box::new(Type::Var("a".to_string())),
+            Box::new(Type::Not(Box::new(Type::Var("a".to_string()))))
+        )),
+        Box::new(Type::Var("b".to_string()))
+    ).removenot();
+
+    let lambdaterme = LambdaTerm::Goal(goal.clone());
+    let lambdaterme = lambdaterme.intro("h1".to_string());
+    let lambdaterme = lambdaterme.absurd(Type::Var("b".to_string()));
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.intro("h2".to_string());
+    let lambdaterme = lambdaterme.intro("h3".to_string());
+    let lambdaterme = lambdaterme.apply("h3".to_string());
+    let lambdaterme = lambdaterme.exact("h2".to_string());
+
+    check(goal, lambdaterme);
+}
+
+#[test]
 // not (a ^ (not a))
 fn test_not_3() {
     let goal = Type::Not(

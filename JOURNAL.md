@@ -35,6 +35,7 @@ If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `
 ## main new things
 
 - support for and, fst, snd and couple
+- support for not and pretty printing for not
 
 ## commands added
 
@@ -42,3 +43,5 @@ If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `
 If `h` is of type `A ^ B` and `Goal(A)` then we transform the goal into `App(App(Goal(a->b->a),Fst(h1)),Snd(h1))`
 ### split
 If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
+### absurd h
+If `Goal(A)` then transforms it to `...`

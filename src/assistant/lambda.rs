@@ -14,7 +14,7 @@ pub enum LambdaTerm {
     #[allow(dead_code)]
     Snd(String), // for Couple
     Goal(Type),
-    // Not(Box<LambdaTerm>),
+    ExFalso(Type, Box<LambdaTerm>)
 }
 
 #[allow(dead_code)]
@@ -36,6 +36,9 @@ impl LambdaTerm {
             }
             LambdaTerm::Abs(_str, _typ, box lambdaterm) => {
                 found |= lambdaterm.containsgoal();
+            }
+            LambdaTerm::ExFalso(_t, box proof) => {
+                found |= proof.containsgoal();
             }
         }
         found
@@ -63,6 +66,44 @@ impl LambdaTerm {
     }
     pub fn elim(self, name: String) -> LambdaTerm {
         aux_elim(self, name, HashMap::new())
+    }
+    pub fn absurd(self, statement: Type) -> LambdaTerm {
+        aux_absurd(self, statement, HashMap::new())
+    }
+}
+
+fn aux_absurd(root: LambdaTerm, statement: Type, context: HashMap<String, Type>) -> LambdaTerm {
+    match root {
+        LambdaTerm::Goal(_) => {
+            LambdaTerm::ExFalso(
+                statement,
+                Box::new(LambdaTerm::Goal(Type::Bottom))
+            )
+        }
+        // we propagate
+        LambdaTerm::ExFalso(t, box proof) => {
+            LambdaTerm::ExFalso(t, Box::new(aux_absurd(proof, statement, context)))
+        }
+        LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) => {
+            root
+        },
+        LambdaTerm::Couple(box term1, box term2) => {
+            LambdaTerm::Couple(
+                Box::new(aux_absurd(term1, statement.clone(), context.clone())), 
+                Box::new(aux_absurd(term2, statement, context)), 
+            )
+        }
+        LambdaTerm::App(box first, box second) => {
+            LambdaTerm::App(
+                Box::new(aux_absurd(first, statement.clone(), context.clone())), 
+                Box::new(aux_absurd(second, statement, context)), 
+            )
+        }
+        LambdaTerm::Abs(str, typ, box lambdaterm) => {
+            let mut new_context = context.clone();
+            new_context.insert(str.clone(), typ.clone());
+            LambdaTerm::Abs(str, typ, Box::new(aux_absurd(lambdaterm, statement, new_context)))
+        }
     }
 }
 
@@ -110,6 +151,9 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> L
             )
         }
         // we propagate
+        LambdaTerm::ExFalso(t, box proof) => {
+            LambdaTerm::ExFalso(t, Box::new(aux_elim(proof, name, context)))
+        }
         LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) | LambdaTerm::Goal(..) => {
             root
         },
@@ -142,6 +186,9 @@ fn aux_split(root: LambdaTerm, context: HashMap<String, Type>) -> LambdaTerm {
             )
         }
         // we propagate
+        LambdaTerm::ExFalso(t, box proof) => {
+            LambdaTerm::ExFalso(t, Box::new(aux_split(proof, context)))
+        }
         LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) | LambdaTerm::Goal(..) => {
             root
         },
@@ -175,6 +222,13 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
                 panic!("Impossible ! {:?} {:?}", input_type, wanted_type);
             }
             compute_type(mybody, newtypes)
+        }
+        LambdaTerm::ExFalso(t, box proof) => {
+            let ret = compute_type(proof, mytypes);
+            match ret {
+                Type::Bottom => {return t;}
+                _ => panic!("Unreachable")
+            }
         }
         LambdaTerm::App(box func, box body) => {
             let functype = compute_type(func, mytypes.clone());
@@ -234,6 +288,9 @@ fn aux_intro(root: LambdaTerm, name: String) -> LambdaTerm {
             LambdaTerm::Abs(name, a, Box::new(LambdaTerm::Goal(b)))
         }
         // we propagate
+        LambdaTerm::ExFalso(t, box proof) => {
+            LambdaTerm::ExFalso(t, Box::new(aux_intro(proof, name)))
+        }
         LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) | LambdaTerm::Goal(..) => {
             root
         },
@@ -256,6 +313,9 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
             LambdaTerm::Var(name)
         }
         // we propagate
+        LambdaTerm::ExFalso(t, box proof) => {
+            LambdaTerm::ExFalso(t, Box::new(aux_exact(proof, name, context)))
+        }
         LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) | LambdaTerm::Goal(..) => {
             root
         },
@@ -288,6 +348,9 @@ fn aux_cut(root: LambdaTerm, type_a: Type) -> LambdaTerm{
             )
         }
         // we propagate
+        LambdaTerm::ExFalso(t, box proof) => {
+            LambdaTerm::ExFalso(t, Box::new(aux_cut(proof, type_a)))
+        }
         LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) => {
             root
         },
@@ -324,6 +387,9 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
             LambdaTerm::App(Box::new(LambdaTerm::Var(name)), Box::new(LambdaTerm::Goal(type_a)))
         }
         // we propagate
+        LambdaTerm::ExFalso(t, box proof) => {
+            LambdaTerm::ExFalso(t, Box::new(aux_apply(proof, name, context)))
+        }
         LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) | LambdaTerm::Goal(..) => {
             root
         },
