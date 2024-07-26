@@ -15,7 +15,7 @@ pub enum LambdaTerm {
     Fst, // for Couple
     #[allow(dead_code)]
     Snd, // for Couple
-    Goal(Type)
+    Goal(Type),
 }
 
 impl LambdaTerm {

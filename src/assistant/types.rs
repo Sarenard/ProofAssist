@@ -4,5 +4,5 @@ pub enum Type {
     Impl(Box<Type>, Box<Type>),
     And(Box<Type>, Box<Type>),
 
-    Error
+    Error,
 }

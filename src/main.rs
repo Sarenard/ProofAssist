@@ -116,6 +116,9 @@ fn main() {
 
 }
 
+#[cfg(test)]
+mod tests;
+
 fn parse_type(pair: pest::iterators::Pair<Rule>) -> Type {
     match pair.as_rule() {
         Rule::main => {
