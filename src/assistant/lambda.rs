@@ -14,6 +14,7 @@ pub enum LambdaTerm {
     #[allow(dead_code)]
     Snd(String), // for Couple
     Goal(Type),
+    // Not(Box<LambdaTerm>),
 }
 
 #[allow(dead_code)]

@@ -21,15 +21,12 @@ static SHELL: bool = false;
 
 fn main() {
     // on veut prouver a => (a => b) => b
-    let goal = Type::Impl(
+    let goal = Type::Not(
         Box::new(Type::And(
             Box::new(Type::Var("a".to_string())),
-            Box::new(Type::Var("b".to_string())),
-        )),
-        Box::new(
-            Type::Var("b".to_string())
-        )
-    );
+            Box::new(Type::Not(Box::new(Type::Var("a".to_string()))))
+        ))
+    ).removenot();
 
     let mut lambdaterme = LambdaTerm::Goal(goal.clone());
     println!("{:?}", lambdaterme);
@@ -102,7 +99,10 @@ fn main() {
     let lambdaterme = lambdaterme.intro("h3".to_string());
     println!("{:?}", lambdaterme);
 
-    let lambdaterme = lambdaterme.exact("h3".to_string());
+    let lambdaterme = lambdaterme.apply("h3".to_string());
+    println!("{:?}", lambdaterme);
+
+    let lambdaterme = lambdaterme.exact("h2".to_string());
     println!("{:?}", lambdaterme);
 
     if lambdaterme.clone().containsgoal() {

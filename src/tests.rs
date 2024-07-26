@@ -12,6 +12,79 @@ fn check(goal: Type, lambdaterme: LambdaTerm) {
     }
 }
 
+
+#[test]
+// not (a ^ (not a))
+fn test_not_3() {
+    let goal = Type::Not(
+        Box::new(Type::And(
+            Box::new(Type::Var("a".to_string())),
+            Box::new(Type::Not(Box::new(Type::Var("a".to_string()))))
+        ))
+    ).removenot();
+
+    let lambdaterme = LambdaTerm::Goal(goal.clone());
+    let lambdaterme = lambdaterme.intro("h1".to_string());
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.intro("h2".to_string());
+    let lambdaterme = lambdaterme.intro("h3".to_string());
+    let lambdaterme = lambdaterme.apply("h3".to_string());
+    let lambdaterme = lambdaterme.exact("h2".to_string());
+
+    check(goal, lambdaterme);
+}
+
+#[test]
+// (not (a ^ b)) => a => (not b)
+fn test_not_2() {
+    let goal = Type::Impl(
+        Box::new(Type::Not(
+            Box::new(Type::And(
+                Box::new(Type::Var("a".to_string())),
+                Box::new(Type::Var("b".to_string())),
+            )))
+        ),
+        Box::new(Type::Impl(
+            Box::new(Type::Var("a".to_string())),
+            Box::new(Type::Not(Box::new(Type::Var("b".to_string()))))
+        ))
+
+    ).removenot();
+
+    let lambdaterme = LambdaTerm::Goal(goal.clone());
+    let lambdaterme = lambdaterme.intro("h1".to_string());
+    let lambdaterme = lambdaterme.intro("h2".to_string());
+    let lambdaterme = lambdaterme.intro("h3".to_string());
+    let lambdaterme = lambdaterme.apply("h1".to_string());
+    let lambdaterme = lambdaterme.split();
+    let lambdaterme = lambdaterme.exact("h2".to_string());
+    let lambdaterme = lambdaterme.exact("h3".to_string());
+
+    check(goal, lambdaterme);
+}
+
+#[test]
+// (not a) => a => bottom
+fn test_not() {
+    let goal = Type::Impl(
+        Box::new(
+            Type::Not(
+                Box::new(Type::Var("a".to_string())),
+            )),
+            Box::new(Type::Impl(
+                Box::new(Type::Var("a".to_string())),
+                Box::new(Type::Bottom)
+            )
+        )
+    ).removenot();
+
+    let lambdaterme = LambdaTerm::Goal(goal.clone());
+    let lambdaterme = lambdaterme.intro("h1".to_string());
+    let lambdaterme = lambdaterme.exact("h1".to_string());
+
+    check(goal, lambdaterme);
+}
+
 #[test]
 // (a ^ b) => b
 fn and_destruct_right() {
