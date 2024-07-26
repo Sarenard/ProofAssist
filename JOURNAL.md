@@ -26,3 +26,7 @@ If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `
 - `a => (a => b) => b`
 - `a => a`
 - `a => b => a`
+
+## TODO
+
+- Add support for And and Couple
