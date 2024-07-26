@@ -52,8 +52,10 @@ impl LambdaTerm {
     }
     pub fn check(self, goal: Type) -> bool {
         let computed = compute_type(self, HashMap::new());
-        println!("Computed : {:?}", computed);
-        println!("Goal : {:?}", goal);
+        if goal != computed {
+            println!("Computed : {:?}", computed);
+            println!("Goal : {:?}", goal);
+        }
         goal == computed
     }
     pub fn intros(self) -> (Vec<String>, LambdaTerm) {
@@ -165,10 +167,10 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> L
                 Box::new(
                     LambdaTerm::App(
                         Box::new(LambdaTerm::Goal(
-                            Type::Impl(
+                            Type::Imp(
                                 Box::new(type_a.clone()),
                                 Box::new(
-                                    Type::Impl(
+                                    Type::Imp(
                                         Box::new(type_b),
                                         Box::new(type_c),
                                     )
@@ -269,7 +271,7 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
             let functype = compute_type(func, mytypes.clone());
             let bodytype = compute_type(body, mytypes);
             match functype {
-                Type::Impl(box type1, box type2) if type1 == bodytype => {
+                Type::Imp(box type1, box type2) if type1 == bodytype => {
                     return type2
                 }
                 other => panic!("Error, unknown : {:?}", other)
@@ -282,7 +284,7 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
         LambdaTerm::Abs(name, typ, box other) => {
             let mut newtypes = mytypes.clone();
             newtypes.insert(name, typ.clone());
-            Type::Impl(
+            Type::Imp(
                 Box::new(typ), 
                 Box::new(compute_type(other, newtypes))
             )
@@ -319,7 +321,7 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
 
 fn aux_intro(root: LambdaTerm, name: String) -> LambdaTerm {
     match root {
-        LambdaTerm::Goal(Type::Impl(box a, box b)) => {
+        LambdaTerm::Goal(Type::Imp(box a, box b)) => {
             LambdaTerm::Abs(name, a, Box::new(LambdaTerm::Goal(b)))
         }
         // we propagate
@@ -379,7 +381,7 @@ fn aux_cut(root: LambdaTerm, type_a: Type) -> LambdaTerm{
     match root {
         LambdaTerm::Goal(type_b) => {
             LambdaTerm::App(
-                Box::new(LambdaTerm::Goal(Type::Impl(Box::new(type_a.clone()), Box::new(type_b)))),
+                Box::new(LambdaTerm::Goal(Type::Imp(Box::new(type_a.clone()), Box::new(type_b)))),
                 Box::new(LambdaTerm::Goal(type_a)),
             )
         }
@@ -408,7 +410,7 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
     let mut type_b = Type::Error;
     if type_h != Type::Error {
         match type_h {
-            Type::Impl(box typea, box typeb) => {
+            Type::Imp(box typea, box typeb) => {
                 type_a = typea.clone();
                 type_b = typeb.clone();
             }

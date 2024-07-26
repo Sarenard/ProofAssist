@@ -16,7 +16,7 @@ fn check(goal: Type, lambdaterme: LambdaTerm) {
 #[test]
 // (A ^ (not A)) => B
 fn absurd() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::And(
             Box::new(Type::Var("a".to_string())),
             Box::new(Type::Not(Box::new(Type::Var("a".to_string()))))
@@ -60,14 +60,14 @@ fn test_not_3() {
 #[test]
 // (not (a ^ b)) => a => (not b)
 fn test_not_2() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::Not(
             Box::new(Type::And(
                 Box::new(Type::Var("a".to_string())),
                 Box::new(Type::Var("b".to_string())),
             )))
         ),
-        Box::new(Type::Impl(
+        Box::new(Type::Imp(
             Box::new(Type::Var("a".to_string())),
             Box::new(Type::Not(Box::new(Type::Var("b".to_string()))))
         ))
@@ -89,12 +89,12 @@ fn test_not_2() {
 #[test]
 // (not a) => a => bottom
 fn test_not() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(
             Type::Not(
                 Box::new(Type::Var("a".to_string())),
             )),
-            Box::new(Type::Impl(
+            Box::new(Type::Imp(
                 Box::new(Type::Var("a".to_string())),
                 Box::new(Type::Bottom)
             )
@@ -111,7 +111,7 @@ fn test_not() {
 #[test]
 // (a ^ b) => b
 fn and_destruct_right() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::And(
             Box::new(Type::Var("a".to_string())),
             Box::new(Type::Var("b".to_string())),
@@ -134,7 +134,7 @@ fn and_destruct_right() {
 #[test]
 // (a ^ b) => a
 fn and_destruct_left() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::And(
             Box::new(Type::Var("a".to_string())),
             Box::new(Type::Var("b".to_string())),
@@ -157,7 +157,7 @@ fn and_destruct_left() {
 #[test]
 // a => a
 fn basic_impl() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::Var("A".to_string())),
         Box::new(Type::Var("A".to_string())),
     );
@@ -172,9 +172,9 @@ fn basic_impl() {
 #[test]
 // a => b => a ^ b
 fn and_construct() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::Var("a".to_string())),
-        Box::new(Type::Impl(
+        Box::new(Type::Imp(
             Box::new(Type::Var("b".to_string())),
             Box::new(Type::And(
                 Box::new(Type::Var("a".to_string())),
@@ -196,10 +196,10 @@ fn and_construct() {
 #[test]
 // a => (a => b) => b
 fn k_combinator() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::Var("A".to_string())),
-        Box::new(Type::Impl(
-            Box::new(Type::Impl(
+        Box::new(Type::Imp(
+            Box::new(Type::Imp(
                 Box::new(Type::Var("A".to_string())),
                 Box::new(Type::Var("B".to_string()))
             )),
@@ -219,9 +219,9 @@ fn k_combinator() {
 #[test]
 // a => b => a
 fn basic_impl_v2() {
-    let goal = Type::Impl(
+    let goal = Type::Imp(
         Box::new(Type::Var("A".to_string())),
-        Box::new(Type::Impl(
+        Box::new(Type::Imp(
             Box::new(Type::Var("B".to_string())),
             Box::new(Type::Var("A".to_string()))
         )),
