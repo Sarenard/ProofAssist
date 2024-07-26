@@ -27,7 +27,7 @@ impl fmt::Debug for Type {
                 }
             }
             Type::And(t1, t2) => write!(f, "And({:?}, {:?})", t1, t2),
-            Type::Not(_) => {panic!("WTF");}
+            Type::Not(_) => {panic!("Unreachable");}
             Type::Bottom => write!(f, "Bottom"),
             Type::Top => write!(f, "Top"),
             Type::Error => write!(f, "Error"),
