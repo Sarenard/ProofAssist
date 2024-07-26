@@ -69,8 +69,8 @@ fn main() {
                         let (_name, new_lambdaterme) = lambdaterme.intro();
                         lambdaterme = new_lambdaterme;
                     }
-                    Some(_str) => {
-                        todo!()
+                    Some(name) => {
+                        lambdaterme = lambdaterme.introv(name.to_string());
                     }
                 }
             }
@@ -84,6 +84,20 @@ fn main() {
             "exact" => {
                 let name_var = splitted.next().unwrap();
                 lambdaterme = lambdaterme.exact(name_var.to_string());
+            }
+            "cut" => {
+                todo!()
+            }
+            "absurd" => {
+                todo!()
+            }
+            "apply" => {
+                let name = splitted.next().unwrap();
+                lambdaterme = lambdaterme.apply(name.to_string());
+            }
+            "elim" => {
+                let name = splitted.next().unwrap();
+                lambdaterme = lambdaterme.elim(name.to_string());
             }
             "+" => {
                 goals_index = min(get_goal_count(lambdaterme.clone()), goals_index+1);
