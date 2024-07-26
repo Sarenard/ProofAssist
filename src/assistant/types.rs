@@ -37,6 +37,7 @@ impl fmt::Debug for Type {
     }
 }
 
+#[allow(dead_code)]
 impl Type {
     pub fn var(str: &str) -> Type {
         Type::Var(str.to_string())
@@ -50,6 +51,9 @@ impl Type {
     pub fn not(type1: Type) -> Type {
         Type::Not(Box::new(type1))
     }
+}
+
+impl Type {
     pub fn removenot(self) -> Type {
         match self {
             Type::Not(box rest) => {
