@@ -21,8 +21,10 @@ parcourir_dossier() {
           parcourir_dossier "$item"
       fi
     elif [ -f "$item" ]; then
-      # Si l'élément est un fichier, compter les lignes
-      compter_lignes "$item"
+      if [ "$(basename "$item")" != "Cargo.lock" ]; then
+        # Si l'élément est un fichier, compter les lignes
+        compter_lignes "$item"
+      fi
     fi
   done
 }
