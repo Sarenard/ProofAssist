@@ -8,6 +8,7 @@
 - type checker at the end of the proof
 - proof verifier at the end
 - shell to interactively input commands
+- tests
 
 ## commands added
 
