@@ -1,10 +1,17 @@
 use std::collections::HashMap;
 
+use lazy_static::lazy_static;
+use std::sync::Mutex;
+
 use crate::assistant::types::Type as Type;
 
-#[derive(Debug, Clone)]
+lazy_static! {
+    static ref HASHMAP: Mutex<HashMap<String, usize>> = Mutex::new(HashMap::new());
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub enum LambdaTerm {
-    Var(String),
+    Var((String, usize)),
     #[allow(dead_code)]
     Couple(Box<LambdaTerm>, Box<LambdaTerm>),
     App(Box<LambdaTerm>, Box<LambdaTerm>),
@@ -49,7 +56,26 @@ impl LambdaTerm {
         println!("Goal : {:?}", goal);
         goal == computed
     }
-    pub fn intro(self, name: String) -> LambdaTerm {
+    pub fn intros(self) -> (Vec<String>, LambdaTerm) {
+        let mut myvec: Vec<String> = vec![];
+        let mut old = LambdaTerm::Var(("placeholder".to_string(), 0));
+        let mut new = self;
+        while old.clone() != new.clone() {
+            old = new.clone();
+            let (str, rnew) = new.intro();
+            new = rnew.clone();
+            myvec.push(str);
+        }
+        (myvec, new)
+    }
+    pub fn intro(self) -> (String, LambdaTerm) {
+        // we find a non used name
+        let nb = update_counter("hyp");
+        let concatenated_name = format!("hyp{}", nb);
+        (concatenated_name.clone(), aux_intro(self, concatenated_name))
+    }
+    pub fn introv(self, name: String) -> LambdaTerm {
+        update_counter(&name.clone());
         aux_intro(self, name)
     }
     pub fn exact(self, name: String) -> LambdaTerm {
@@ -70,6 +96,15 @@ impl LambdaTerm {
     pub fn absurd(self, statement: Type) -> LambdaTerm {
         aux_absurd(self, statement, HashMap::new())
     }
+}
+
+fn update_counter(key: &str) -> usize {
+    let mut map = HASHMAP.lock().unwrap();
+    let counter = map.entry(key.to_string()).or_insert(0);
+    *counter += 1;
+    let cpt = counter.clone();
+    drop(map);
+    cpt
 }
 
 fn aux_absurd(root: LambdaTerm, statement: Type, context: HashMap<String, Type>) -> LambdaTerm {
@@ -240,7 +275,7 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
                 other => panic!("Error, unknown : {:?}", other)
             }
         }
-        LambdaTerm::Var(name) => {
+        LambdaTerm::Var((name, nb)) => {
             let res = mytypes.get(&name).unwrap().clone();
             res
         }
@@ -310,7 +345,8 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
     let type_h = context.get(&name).unwrap_or(&Type::Error).clone();
     match root {
         LambdaTerm::Goal(typ) if typ == type_h => {
-            LambdaTerm::Var(name)
+            let nb = update_counter(&name.clone());
+            LambdaTerm::Var((name, nb))
         }
         // we propagate
         LambdaTerm::ExFalso(t, box proof) => {
@@ -384,7 +420,8 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
     match root {
         LambdaTerm::Goal(typeb)
         if typeb == type_b => {
-            LambdaTerm::App(Box::new(LambdaTerm::Var(name)), Box::new(LambdaTerm::Goal(type_a)))
+            let nb = update_counter(&name.clone());
+            LambdaTerm::App(Box::new(LambdaTerm::Var((name, nb))), Box::new(LambdaTerm::Goal(type_a)))
         }
         // we propagate
         LambdaTerm::ExFalso(t, box proof) => {

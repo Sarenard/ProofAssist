@@ -46,7 +46,7 @@ fn main() {
             let array = if !bad {[splitted[0], splitted[1]]} else {["_", "_"]};
             match array {
                 ["intro", var] => {
-                    lambdaterme = lambdaterme.intro(var.to_string());
+                    lambdaterme = lambdaterme.introv(var.to_string());
                     println!("{:?}", lambdaterme);
                 }
                 ["exact", var] => {
@@ -88,25 +88,22 @@ fn main() {
         exit(0);
     }
 
-    let lambdaterme = lambdaterme.intro("h1".to_string());
+    let (var1, lambdaterme) = lambdaterme.intro();
     println!("{:?}", lambdaterme);
 
     let lambdaterme = lambdaterme.absurd(Type::Var("b".to_string()));
     println!("{:?}", lambdaterme);
 
-    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.elim(var1);
     println!("{:?}", lambdaterme);
 
-    let lambdaterme = lambdaterme.intro("h2".to_string());
+    let (vars, lambdaterme) = lambdaterme.intros();
     println!("{:?}", lambdaterme);
 
-    let lambdaterme = lambdaterme.intro("h3".to_string());
+    let lambdaterme = lambdaterme.apply(vars[1].clone());
     println!("{:?}", lambdaterme);
 
-    let lambdaterme = lambdaterme.apply("h3".to_string());
-    println!("{:?}", lambdaterme);
-
-    let lambdaterme = lambdaterme.exact("h2".to_string());
+    let lambdaterme = lambdaterme.exact(vars[0].clone());
     println!("{:?}", lambdaterme);
 
 
