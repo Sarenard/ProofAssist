@@ -22,14 +22,13 @@ static SHELL: bool = false;
 fn main() {
     // on veut prouver a => (a => b) => b
     let goal = Type::Impl(
-        Box::new(Type::Var("A".to_string())),
-        Box::new(Type::Impl(
-            Box::new(Type::Impl(
-                Box::new(Type::Var("A".to_string())),
-                Box::new(Type::Var("B".to_string()))
-            )),
-            Box::new(Type::Var("B".to_string()))
+        Box::new(Type::And(
+            Box::new(Type::Var("a".to_string())),
+            Box::new(Type::Var("b".to_string())),
         )),
+        Box::new(
+            Type::Var("b".to_string())
+        )
     );
 
     let mut lambdaterme = LambdaTerm::Goal(goal.clone());
@@ -94,13 +93,16 @@ fn main() {
     let lambdaterme = lambdaterme.intro("h1".to_string());
     println!("{:?}", lambdaterme);
 
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    println!("{:?}", lambdaterme);
+
     let lambdaterme = lambdaterme.intro("h2".to_string());
     println!("{:?}", lambdaterme);
 
-    let lambdaterme = lambdaterme.apply("h2".to_string());
+    let lambdaterme = lambdaterme.intro("h3".to_string());
     println!("{:?}", lambdaterme);
 
-    let lambdaterme = lambdaterme.exact("h1".to_string());
+    let lambdaterme = lambdaterme.exact("h3".to_string());
     println!("{:?}", lambdaterme);
 
     if lambdaterme.clone().containsgoal() {

@@ -1,9 +1,8 @@
 # 25/07/2024
 
-- Basic type checker for Impl and Var, with context
-
 ## main new things
 
+- Basic type checker for Impl and Var, with context
 - context-dependant hypothesis for the 4 commands added below
 - type checker at the end of the proof
 - proof verifier at the end
@@ -30,3 +29,16 @@ If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `
 ## TODO
 
 - Add support for And and Couple
+
+# 26/07/2024
+
+## main new things
+
+- support for and, fst, snd and couple
+
+## commands added
+
+### elim h
+If `h` is of type `A ^ B` and `Goal(A)` then we transform the goal into `App(App(Goal(a->b->a),Fst(h1)),Snd(h1))`
+### split
+If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
