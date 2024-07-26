@@ -20,8 +20,7 @@ use assistant::lambda::LambdaTerm as LambdaTerm;
 use assistant::types::Type as Type;
 
 fn main() {
-    let goal = get_goal();
-    /*
+    //let goal = get_goal();
     let goal = Type::imp(
         Type::var("A"),
         Type::imp(
@@ -29,11 +28,10 @@ fn main() {
             Type::and(Type::var("A"), Type::var("B"))
         )
     ).removenot();
-    */
         
     let mut goals_index = 1;
 
-    let mut lambdaterme = LambdaTerm::Goal(goal.clone());
+    let mut lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
     while lambdaterme.clone().containsgoal() {
         goals_index = min(goals_index, get_goal_count(lambdaterme.clone()));
         println!(); // to be beautiful
@@ -66,24 +64,24 @@ fn main() {
                 let name_var = splitted.next();
                 match name_var {
                     None => {
-                        let (_name, new_lambdaterme) = lambdaterme.intro();
+                        let (_name, new_lambdaterme) = lambdaterme.intro(goals_index);
                         lambdaterme = new_lambdaterme;
                     }
                     Some(name) => {
-                        lambdaterme = lambdaterme.introv(name.to_string());
+                        lambdaterme = lambdaterme.introv(name.to_string(), goals_index);
                     }
                 }
             }
             "intros" => {
-                let (_names, new_lambdaterme) = lambdaterme.intros();
+                let (_names, new_lambdaterme) = lambdaterme.intros(goals_index);
                 lambdaterme = new_lambdaterme;
             }
             "split" => {
-                lambdaterme = lambdaterme.split();
+                lambdaterme = lambdaterme.split(goals_index);
             }
             "exact" => {
                 let name_var = splitted.next().unwrap();
-                lambdaterme = lambdaterme.exact(name_var.to_string());
+                lambdaterme = lambdaterme.exact(name_var.to_string(), goals_index);
             }
             "cut" => {
                 todo!()
@@ -93,11 +91,11 @@ fn main() {
             }
             "apply" => {
                 let name = splitted.next().unwrap();
-                lambdaterme = lambdaterme.apply(name.to_string());
+                lambdaterme = lambdaterme.apply(name.to_string(), goals_index);
             }
             "elim" => {
                 let name = splitted.next().unwrap();
-                lambdaterme = lambdaterme.elim(name.to_string());
+                lambdaterme = lambdaterme.elim(name.to_string(), goals_index);
             }
             "+" => {
                 goals_index = min(get_goal_count(lambdaterme.clone()), goals_index+1);
@@ -144,7 +142,7 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {
                 new_path.push(*body.clone());
                 queue.push_back((*body.clone(), new_path));
             },
-            LambdaTerm::Goal(ref ty) => {
+            LambdaTerm::Goal(ref ty, _nb) => {
                 goals.push((ty.clone(), path.clone()));
             },
             LambdaTerm::Fst(_) | LambdaTerm::Snd(_) => {},
