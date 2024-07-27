@@ -37,6 +37,7 @@ If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `
 - support for and, fst, snd and couple
 - support for not and pretty printing for not
 - added intro and intros that doesnt take names
+- added a cool text user interface and more precise goal
 
 ## commands added
 

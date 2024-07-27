@@ -23,7 +23,7 @@ impl fmt::Debug for Type {
             },
             Type::Imp(t1, t2) => {
                 if **t2 == Type::Bottom {
-                    write!(f, "~{:?}", t1)
+                    write!(f, "~({:?})", t1)
                 } else {
                     write!(f, "{:?} -> {:?}", t1, t2)
                 }

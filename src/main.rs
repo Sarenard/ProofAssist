@@ -21,12 +21,18 @@ use assistant::types::Type as Type;
 
 fn main() {
     //let goal = get_goal();
-    let goal = Type::imp(
-        Type::var("A"),
-        Type::imp(
-            Type::var("B"),
-            Type::and(Type::var("A"), Type::var("B"))
-        )
+    let goal = Type::Imp(
+        Box::new(Type::Not(
+            Box::new(Type::And(
+                Box::new(Type::Var("a".to_string())),
+                Box::new(Type::Var("b".to_string())),
+            )))
+        ),
+        Box::new(Type::Imp(
+            Box::new(Type::Var("a".to_string())),
+            Box::new(Type::Not(Box::new(Type::Var("b".to_string()))))
+        ))
+
     ).removenot();
         
     let mut goals_index = 1;
@@ -89,6 +95,11 @@ fn main() {
             "absurd" => {
                 todo!()
             }
+            "restart" => {
+                println!();
+                println!("Starting back the proof :");
+                lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
+            }
             "apply" => {
                 let name = splitted.next().unwrap();
                 lambdaterme = lambdaterme.apply(name.to_string(), goals_index);
@@ -114,6 +125,14 @@ fn main() {
         println!("Checked the proof, yields the good type !");
     } else {
         panic!("Ehh there is an error somewhere");
+    }
+    print!("Do you want to save? (Y/N) : ");
+    io::stdout().flush().unwrap();
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read line for some reason");
+    input = input.trim().to_string();
+    if !["Y".to_string(), "y".to_string()].contains(&input) {
+        println!("Ok, too bad !");
     }
 }
 
