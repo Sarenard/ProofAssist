@@ -1,8 +1,0 @@
-main      =  { impl_type | and_type | not_type | var | bottom | top }
-impl_type =  { "Impl(" ~ main ~ "," ~ main ~ ")" }
-and_type  =  { "And(" ~ main ~ "," ~ main ~ ")" }
-not_type  =  { "Not(" ~ main ~ ")" }
-var       =  { "Var(" ~ string ~ ")" }
-bottom    =  { "Bottom" }
-top       =  { "Top" }
-string    =  { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }

@@ -12,11 +12,14 @@ use assistant::operations::OP;
 use pest::Parser;
 
 #[derive(Parser)]
-#[grammar = "types.pest"] // relative to src
+#[grammar = "patterns.pest"] // relative to src
 #[allow(dead_code)]
 struct SimpleParser;
 
 mod assistant;
+
+#[cfg(test)]
+mod tests;
 
 use assistant::lambda::LambdaTerm as LambdaTerm;
 use assistant::types::Type as Type;
@@ -41,17 +44,19 @@ fn emulate(goal: Type, real: bool) {
 
     let mut lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
 
+    let mut hypothesis : HashMap<Type, Vec<OP>> = HashMap::new();
+
     while lambdaterme.clone().containsgoal() {
         // to fix problems
         goals_index = min(goals_index, get_goal_count(lambdaterme.clone()));
         if real {
             println!(); // to be beautiful
-            print_hyp(lambdaterme.clone(), goals_index);
+            print_hyp(lambdaterme.clone(), goals_index, hypothesis.clone());
             lambdaterme = get_command(lambdaterme, &mut operations, goals_index);
 
         }
         let last_op = operations.last().unwrap().clone();
-        (goals_index, lambdaterme) = run_command(last_op, goals_index, lambdaterme);
+        (goals_index, lambdaterme, hypothesis) = run_command(last_op, goals_index, lambdaterme, hypothesis);
     }
     if real {
         println!();
@@ -79,7 +84,7 @@ fn emulate(goal: Type, real: bool) {
     }
 }
 
-fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize) {
+fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize, theorems: HashMap<Type, Vec<OP>>) {
     let goals = bfs_find_goals(lambdaterme.clone());
     let path = goals[goals_index-1].1.clone();
     let mut hypotheses: HashMap<String, Type> = HashMap::new();
@@ -91,6 +96,9 @@ fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize) {
             _ => {}
         }
     }
+    for (typ, _operations) in theorems.iter() {
+        println!("Theorem : {:?}", typ);
+    }
     for (txt, typ) in hypotheses.iter() {
         println!("{} : {:?}", txt, typ);
     }
@@ -98,36 +106,51 @@ fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize) {
     println!("{:?}", goals[goals_index-1].0);
 }
 
-fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm) -> (usize, LambdaTerm) {
+fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: HashMap<Type, Vec<OP>>) -> (usize, LambdaTerm, HashMap<Type, Vec<OP>>) {
     match op {
         OP::Load(name) => {
             use std::io::BufRead;
             let file = File::open(format!("./theorems/{}.th", name)).unwrap();
             let reader = BufReader::new(file);
-            let lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
-            println!("LOADING OF THEOREM");
+            let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
+            println!("{}", format!("Theorem {} loaded.", name));
+            let first = lines.remove(0);
+            let parse_result = SimpleParser::parse(
+                Rule::typ, 
+                first.as_str()
+            );
+            let mut val = parse_result.unwrap();
+            let local_goal = parse_type(val.next().unwrap());
+            let mut proof_ops: Vec<OP> = vec![];
             for line in lines {
-                println!("{}", line);
+                let mut parse_result = SimpleParser::parse(
+                    Rule::OP, 
+                    line.as_str()
+                ).unwrap();
+                let op = parse_op(parse_result.next().unwrap());
+                proof_ops.push(op)
             }
-            (goals_index, lambdaterme)
+            let mut new_hypotheses = hypothesis.clone();
+            new_hypotheses.insert(local_goal, proof_ops);
+            (goals_index, lambdaterme, new_hypotheses)
         }
         OP::Intro(index) => {
             let (_name, new_lambdaterme) = lambdaterme.intro(index);
-            (goals_index, new_lambdaterme)
+            (goals_index, new_lambdaterme, hypothesis)
         }
         OP::Introv(name, index) => {
             let lt = lambdaterme.introv(name.to_string(), index);
-            (goals_index, lt)
+            (goals_index, lt, hypothesis)
         }
         OP::Intros(index) => {
             let (_names, new_lambdaterme) = lambdaterme.intros(index);
-            (goals_index, new_lambdaterme)
+            (goals_index, new_lambdaterme, hypothesis)
         }
         OP::Split(index) => {
-            (goals_index, lambdaterme.split(index))
+            (goals_index, lambdaterme.split(index), hypothesis)
         }
         OP::Exact(name, index) => {
-            (goals_index, lambdaterme.exact(name.to_string(), index))
+            (goals_index, lambdaterme.exact(name.to_string(), index), hypothesis)
         }
         OP::Cut(_typ) => {
             todo!()
@@ -136,16 +159,16 @@ fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm) -> (usize, L
             todo!()
         }
         OP::Apply(name, index) => {
-            (goals_index, lambdaterme.apply(name.to_string(), index))
+            (goals_index, lambdaterme.apply(name.to_string(), index), hypothesis)
         }
         OP::Elim(name, index) => {
-            (goals_index, lambdaterme.elim(name.to_string(), index))
+            (goals_index, lambdaterme.elim(name.to_string(), index), hypothesis)
         }
         OP::Add => {
-            (min(get_goal_count(lambdaterme.clone()), goals_index+1), lambdaterme)
+            (min(get_goal_count(lambdaterme.clone()), goals_index+1), lambdaterme, hypothesis)
         }
         OP::Sub => {
-            (max(1, goals_index-1), lambdaterme)
+            (max(1, goals_index-1), lambdaterme, hypothesis)
         }
     }
 }
@@ -219,7 +242,7 @@ fn save(goal: Type, operations: Vec<OP>) {
     theorem_name = theorem_name.trim().to_string();
     let theorem_name = format!("./theorems/{}.th", theorem_name);
     let mut theorem_file = File::create(theorem_name).expect("Error !");
-    let line = format!("Goal : {}", goal);
+    let line = format!("{}", goal);
     writeln!(theorem_file, "{}", line).unwrap();
     for op in operations {
         match op {
@@ -227,7 +250,7 @@ fn save(goal: Type, operations: Vec<OP>) {
                 writeln!(theorem_file, "Intro({})", index).unwrap();
             }
             OP::Introv(name, index) => {
-                writeln!(theorem_file, "Introv({}, {})", name, index).unwrap();
+                writeln!(theorem_file, "Introv(\"{}\", {})", name, index).unwrap();
             }
             OP::Intros(index) => {
                 writeln!(theorem_file, "Intros({})", index).unwrap();
@@ -236,7 +259,7 @@ fn save(goal: Type, operations: Vec<OP>) {
                 writeln!(theorem_file, "Split({})", index).unwrap();
             }
             OP::Exact(name, index) => {
-                writeln!(theorem_file, "Exact({}, {})", name, index).unwrap();
+                writeln!(theorem_file, "Exact(\"{}\", {})", name, index).unwrap();
             }
             OP::Cut(_typ) => {
                 todo!()
@@ -245,10 +268,10 @@ fn save(goal: Type, operations: Vec<OP>) {
                 todo!()
             }
             OP::Apply(name, index) => {
-                writeln!(theorem_file, "Apply({}, {})", name, index).unwrap();
+                writeln!(theorem_file, "Apply(\"{}\", {})", name, index).unwrap();
             }
             OP::Elim(name, index) => {
-                writeln!(theorem_file, "Elim({}, {})", name, index).unwrap();
+                writeln!(theorem_file, "Elim(\"{}\", {})", name, index).unwrap();
             }
             OP::Add => {
                 writeln!(theorem_file, "Add()").unwrap();
@@ -257,11 +280,10 @@ fn save(goal: Type, operations: Vec<OP>) {
                 writeln!(theorem_file, "Sub()").unwrap();
             }
             OP::Load(name) => {
-                writeln!(theorem_file, "Load({})", name).unwrap();
+                writeln!(theorem_file, "Load(\"{}\")", name).unwrap();
             }
         }
     }
-    writeln!(theorem_file, "End").unwrap();
 }
 
 fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {
@@ -341,7 +363,7 @@ fn get_goal() -> Type {
             "Goal" => {
                 let rest = splitted.collect::<Vec<&str>>().concat();
                 let parse_result = SimpleParser::parse(
-                    Rule::main, 
+                    Rule::typ, 
                     &rest
                 );
                 let mut val = match parse_result {
@@ -360,12 +382,9 @@ fn get_goal() -> Type {
     }
 }
 
-#[cfg(test)]
-mod tests;
-
 fn parse_type(pair: pest::iterators::Pair<Rule>) -> Type {
     match pair.as_rule() {
-        Rule::main => {
+        Rule::typ => {
             let inner_pair = pair.into_inner().next().unwrap();
             parse_type(inner_pair)
         }
@@ -395,6 +414,64 @@ fn parse_type(pair: pest::iterators::Pair<Rule>) -> Type {
         }
         Rule::bottom => Type::Bottom,
         Rule::top => Type::Top,
+        _ => unreachable!(),
+    }
+}
+
+fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
+    match pair.as_rule() {
+        Rule::Intro => {
+            let mut inner = pair.into_inner();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Intro(nb)
+        }
+        Rule::Introv => {
+            let mut inner = pair.into_inner();
+            let text = inner.next().unwrap().as_str().to_string();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Introv(text, nb)
+        }
+        Rule::Intros => {
+            let mut inner = pair.into_inner();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Intros(nb)
+        }
+        Rule::Split => {
+            let mut inner = pair.into_inner();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Split(nb)
+        }
+        Rule::Exact => {
+            let mut inner = pair.into_inner();
+            let text = inner.next().unwrap().as_str().to_string();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Exact(text, nb)
+        }
+        Rule::Cut => {
+            todo!()
+        }
+        Rule::Absurd => {
+            todo!()
+        }
+        Rule::Apply => {
+            let mut inner = pair.into_inner();
+            let text = inner.next().unwrap().as_str().to_string();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Apply(text, nb)
+        }
+        Rule::Elim => {
+            let mut inner = pair.into_inner();
+            let text = inner.next().unwrap().as_str().to_string();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Elim(text, nb)
+        }
+        Rule::Load => {
+            let mut inner = pair.into_inner();
+            let text = inner.next().unwrap().as_str().to_string();
+            OP::Load(text)
+        }
+        Rule::Add => OP::Add,
+        Rule::Sub => OP::Sub,
         _ => unreachable!(),
     }
 }

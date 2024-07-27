@@ -1,0 +1,41 @@
+typ       =  { impl_type | and_type | not_type | var | bottom | top }
+impl_type =  { "Impl(" ~ typ ~ "," ~ typ ~ ")" }
+and_type  =  { "And(" ~ typ ~ "," ~ typ ~ ")" }
+not_type  =  { "Not(" ~ typ ~ ")" }
+var       =  { "Var(" ~ string ~ ")" }
+bottom    =  { "Bottom" }
+top       =  { "Top" }
+
+WHITESPACE = _{ " " | "\t" | "\n" }
+
+// Define the grammar for the OP enum
+OP = _{
+    Intro
+    | Introv
+    | Intros
+    | Split
+    | Exact
+    | Cut
+    | Absurd
+    | Apply
+    | Elim
+    | Load
+    | Add
+    | Sub
+}
+
+Intro = { "Intro(" ~ usize ~ ")" }
+Introv = { "Introv(" ~ string ~ "," ~ usize ~ ")" }
+Intros = { "Intros(" ~ usize ~ ")" }
+Split = { "Split(" ~ usize ~ ")" }
+Exact = { "Exact(" ~ string ~ "," ~ usize ~ ")" }
+Cut = { "Cut(" ~ typ ~ ")" }
+Absurd = { "Absurd(" ~ typ ~ ")" }
+Apply = { "Apply(" ~ string ~ "," ~ usize ~ ")" }
+Elim = { "Elim(" ~ string ~ "," ~ usize ~ ")" }
+Load = { "Load(" ~ string ~ ")" }
+Add = { "Add" }
+Sub = { "Sub" }
+
+usize = @{ ASCII_DIGIT+ }
+string = { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }

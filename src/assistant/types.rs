@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Hash, Eq)]
 pub enum Type {
     Var(String),
     Imp(Box<Type>, Box<Type>),
@@ -18,8 +18,8 @@ impl std::fmt::Display for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Type::Var(s) => {
-                let new = s.trim_matches(|c| c == '\"').to_string();
-                write!(f, "{}", new)
+                let new = s.to_string();
+                write!(f, "Var(\"{}\")", new)
             },
             Type::Imp(t1, t2) => {
                 if **t2 == Type::Bottom {

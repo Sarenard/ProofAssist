@@ -18,7 +18,9 @@ parcourir_dossier() {
     if [ -d "$item" ]; then
       # Si l'élément est un dossier, le parcourir récursivement
       if [ "$(basename "$item")" != "target" ]; then
-          parcourir_dossier "$item"
+        if [ "$(basename "$item")" != "theorems" ]; then
+            parcourir_dossier "$item"
+        fi
       fi
     elif [ -f "$item" ]; then
       if [ "$(basename "$item")" != "Cargo.lock" ]; then

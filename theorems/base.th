@@ -1,4 +1,3 @@
-Goal : Impl(A, Impl(B, A))
+Impl(Var("A"), Impl(Var("B"), Var("A")))
 Intros(1)
-Exact(hyp1, 1)
-End
+Exact("hyp1", 1)
