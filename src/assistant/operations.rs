@@ -2,21 +2,25 @@ use crate::assistant::types::Type;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum OP {
-    Use(String), // for using theorems
+    // for using theorems
+    Use(String),
+    Load(String),
     
-    Assumption(usize), 
-    Intro(usize),
-    Introv(String, usize),
-    Intros(usize),
-    Split(usize),
-    Exact(String, usize),
+    // general
+    Assumption, 
+    Intro,
+    Introv(String),
+    Intros,
+    Split,
+    Exact(String),
     #[allow(dead_code)]
     Cut(Type),
     #[allow(dead_code)]
     Absurd(Type),
-    Apply(String, usize),
-    Elim(String, usize),
-    Load(String),
-    Add,
-    Sub,
+    Apply(String),
+    Elim(String),
+    Left,
+    Right,
+
+    Nothing
 }

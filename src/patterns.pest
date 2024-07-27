@@ -20,26 +20,25 @@ OP = _{
     | Apply
     | Elim
     | Load
-    | Add
-    | Sub
     | Use
     | Assumption
+    | Left
+    | Right
 }
 
-Intro = { "Intro(" ~ usize ~ ")" }
-Introv = { "Introv(" ~ string ~ "," ~ usize ~ ")" }
-Intros = { "Intros(" ~ usize ~ ")" }
-Split = { "Split(" ~ usize ~ ")" }
-Exact = { "Exact(" ~ string ~ "," ~ usize ~ ")" }
+Intro = { "Intro" }
+Introv = { "Introv(" ~ string ~ ")" }
+Intros = { "Intros" }
+Split = { "Split" }
+Exact = { "Exact(" ~ string ~ ")" }
 Cut = { "Cut(" ~ typ ~ ")" }
 Absurd = { "Absurd(" ~ typ ~ ")" }
-Apply = { "Apply(" ~ string ~ "," ~ usize ~ ")" }
-Elim = { "Elim(" ~ string ~ "," ~ usize ~ ")" }
+Apply = { "Apply(" ~ string ~ ")" }
+Elim = { "Elim(" ~ string ~ ")" }
 Load = { "Load(" ~ string ~ ")" }
 Use = { "Use(" ~ string ~ ")" }
-Add = { "Add" }
-Sub = { "Sub" }
-Assumption = { "Assumption(" ~ usize ~ ")" }
+Assumption = { "Assumption" }
+Left = { "Left" }
+Right = { "Right" }
 
-usize = @{ ASCII_DIGIT+ }
 string = { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }

@@ -5,6 +5,7 @@ pub enum Type {
     Var(String),
     Imp(Box<Type>, Box<Type>),
     And(Box<Type>, Box<Type>),
+    Or(Box<Type>, Box<Type>),
     Not(Box<Type>),
     #[allow(dead_code)]
     Bottom,
@@ -28,6 +29,7 @@ impl std::fmt::Display for Type {
                     write!(f, "Impl({}, {})", t1, t2)
                 }
             }
+            Type::Or(t1, t2) => write!(f, "Or({}, {})", t1, t2),
             Type::And(t1, t2) => write!(f, "And({}, {})", t1, t2),
             Type::Bottom => write!(f, "Bottom"),
             Type::Top => write!(f, "Top"),
@@ -51,7 +53,8 @@ impl fmt::Debug for Type {
                     write!(f, "{:?} -> {:?}", t1, t2)
                 }
             }
-            Type::And(t1, t2) => write!(f, "{:?} /\\ {:?}", t1, t2),
+            Type::And(t1, t2) => write!(f, "({:?} /\\ {:?})", t1, t2),
+            Type::Or(t1, t2) => write!(f, "({:?} \\/ {:?})", t1, t2),
             Type::Bottom => write!(f, "Bottom"),
             Type::Top => write!(f, "Top"),
             Type::Error => write!(f, "Error"),
@@ -71,6 +74,9 @@ impl Type {
     pub fn and(type1: Type, type2: Type) -> Type {
         Type::And(Box::new(type1), Box::new(type2))
     }
+    pub fn or(type1: Type, type2: Type) -> Type {
+        Type::Or(Box::new(type1), Box::new(type2))
+    }
     pub fn not(type1: Type) -> Type {
         Type::Not(Box::new(type1))
     }
@@ -87,6 +93,9 @@ impl Type {
             }
             Type::And(box a, box b) => {
                 Type::And(Box::new(a.removenot()), Box::new(b.removenot()))
+            }
+            Type::Or(box a, box b) => {
+                Type::Or(Box::new(a.removenot()), Box::new(b.removenot()))
             }
             Type::Imp(box a, box b) => {
                 Type::Imp(Box::new(a.removenot()), Box::new(b.removenot()))

@@ -25,13 +25,13 @@ fn absurd() {
     ).removenot();
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.absurd(Type::Var("b".to_string()), 1);
-    let lambdaterme = lambdaterme.elim("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h3".to_string(), 1);
-    let lambdaterme = lambdaterme.apply("h3".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h2".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.absurd(Type::Var("b".to_string()));
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.introv("h3".to_string());
+    let lambdaterme = lambdaterme.apply("h3".to_string());
+    let lambdaterme = lambdaterme.exact("h2".to_string());
 
     check(goal, lambdaterme);
 }
@@ -47,12 +47,12 @@ fn test_not_3() {
     ).removenot();
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.elim("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h3".to_string(), 1);
-    let lambdaterme = lambdaterme.apply("h3".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h2".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.introv("h3".to_string());
+    let lambdaterme = lambdaterme.apply("h3".to_string());
+    let lambdaterme = lambdaterme.exact("h2".to_string());
 
     check(goal, lambdaterme);
 }
@@ -75,13 +75,13 @@ fn test_not_2() {
     ).removenot();
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h3".to_string(), 1);
-    let lambdaterme = lambdaterme.apply("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.split(1);
-    let lambdaterme = lambdaterme.exact("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h3".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.introv("h3".to_string());
+    let lambdaterme = lambdaterme.apply("h1".to_string());
+    let lambdaterme = lambdaterme.split();
+    let lambdaterme = lambdaterme.exact("h2".to_string());
+    let lambdaterme = lambdaterme.exact("h3".to_string());
 
     check(goal, lambdaterme);
 }
@@ -102,8 +102,8 @@ fn test_not() {
     ).removenot();
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h1".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.exact("h1".to_string());
 
     check(goal, lambdaterme);
 }
@@ -122,11 +122,11 @@ fn and_destruct_right() {
     );
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.elim("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h3".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h3".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.introv("h3".to_string());
+    let lambdaterme = lambdaterme.exact("h3".to_string());
 
     check(goal, lambdaterme);
 }
@@ -145,11 +145,11 @@ fn and_destruct_left() {
     );
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.elim("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h3".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h2".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.introv("h3".to_string());
+    let lambdaterme = lambdaterme.exact("h2".to_string());
 
     check(goal, lambdaterme);
 }
@@ -163,8 +163,8 @@ fn basic_impl() {
     );
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h1".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.exact("h1".to_string());
 
     check(goal, lambdaterme);
 }
@@ -184,11 +184,11 @@ fn and_construct() {
     );
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.split(1);
-    let lambdaterme = lambdaterme.exact("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h2".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.split();
+    let lambdaterme = lambdaterme.exact("h1".to_string());
+    let lambdaterme = lambdaterme.exact("h2".to_string());
 
     check(goal, lambdaterme);
 }
@@ -208,10 +208,10 @@ fn k_combinator() {
     );
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.apply("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h1".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.apply("h2".to_string());
+    let lambdaterme = lambdaterme.exact("h1".to_string());
 
     check(goal, lambdaterme);
 }
@@ -228,9 +228,9 @@ fn basic_impl_v2() {
     );
 
     let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    let lambdaterme = lambdaterme.introv("h1".to_string(), 1);
-    let lambdaterme = lambdaterme.introv("h2".to_string(), 1);
-    let lambdaterme = lambdaterme.exact("h1".to_string(), 1);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.exact("h1".to_string());
 
     check(goal, lambdaterme);
 }

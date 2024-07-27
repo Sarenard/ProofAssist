@@ -1,5 +1,6 @@
 #![feature(box_patterns)]
 
+use std::clone;
 use std::cmp::{max, min};
 use std::collections::{HashMap, VecDeque};
 use std::fs::File;
@@ -21,29 +22,44 @@ mod assistant;
 #[cfg(test)]
 mod tests;
 
-use assistant::lambda::LambdaTerm as LambdaTerm;
+use assistant::lambda::{rebuild_tree, LambdaTerm as LambdaTerm};
 use assistant::types::Type as Type;
 
 fn main() {
     // let goal = get_goal();
-    let goal = Type::Imp(
-        Box::new(Type::Var("A".to_string())),
-        Box::new(Type::Imp(
-            Box::new(Type::Var("B".to_string())),
-            Box::new(Type::Var("A".to_string()))
-        )),
+    let goal = Type::imp(
+        Type::or(
+            Type::var("a"),
+            Type::var("b"),
+        ),
+        Type::or(
+            Type::var("b"),
+            Type::var("a"),
+        ),
     ).removenot();
+    /*
+    let goal = Type::imp(
+        Type::var("a"),
+        Type::imp(
+            Type::var("b"),
+            Type::or(
+                Type::var("b"),
+                Type::var("a"),
+            ),
+        )
+    ).removenot();
+    */
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
 
     println!();
     println!("Proof ended, no goal left !");
     println!("Final typecheck running :");
-    let ok = lambdaterme.check(goal.clone());
+    let ok = lambdaterme.clone().check(goal.clone());
     if ok {
         println!("Checked the proof, yields the good type !");
     } else {
-        panic!("Ehh there is an error somewhere");
+        panic!("Ehh there is an error somewhere : {:?}", lambdaterme);
     }
     print!("Do you want to save? (Y/N) : ");
     io::stdout().flush().unwrap();
@@ -56,8 +72,6 @@ fn main() {
 }
 
 fn emulate(goal: Type, real: bool) -> (LambdaTerm, Vec<OP>) {
-    let mut goals_index = 1;
-
     let mut operations: Vec<OP> = vec![];
 
     let mut lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
@@ -66,25 +80,29 @@ fn emulate(goal: Type, real: bool) -> (LambdaTerm, Vec<OP>) {
 
     while lambdaterme.clone().containsgoal() {
         // to fix problems
-        goals_index = min(goals_index, get_goal_count(lambdaterme.clone()));
+        lambdaterme = rebuild_tree(lambdaterme.clone(), &mut 1);
         if real {
             println!(); // to be beautiful
-            print_hyp(lambdaterme.clone(), goals_index, hypothesis.clone());
-            lambdaterme = get_command(lambdaterme, &mut operations, goals_index);
-
+            print_hyp(lambdaterme.clone(), hypothesis.clone());
+            get_command(&mut operations);
         }
         let last_op = operations.last().unwrap().clone();
-        (goals_index, lambdaterme, hypothesis, operations) = run_command(last_op, goals_index, lambdaterme, hypothesis, operations, true);
+        println!("{:?}", lambdaterme);
+        (lambdaterme, hypothesis, operations) = run_command(last_op, lambdaterme, hypothesis, operations, true);
+        println!("{:?}", lambdaterme);
     }
 
     (lambdaterme, operations)
 }
 
-fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize, theorems: HashMap<String, (Type, Vec<OP>)>) {
+fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (Type, Vec<OP>)>) {
     let goals = bfs_find_goals(lambdaterme.clone());
-    let path = goals[goals_index-1].1.clone();
+    // we get the good one
+    let paths: Vec<(Type, Vec<LambdaTerm>)> = goals.iter().cloned()
+        .filter(|x| match x.1.last().unwrap().clone() {LambdaTerm::Goal(_, i) => i == 1, _ => false}).collect();
+    let result = paths.first().unwrap().clone();
     let mut hypotheses: HashMap<String, Type> = HashMap::new();
-    for elt in path {
+    for elt in result.1 {
         match elt {
             LambdaTerm::Abs(name, typ, _) => {
                 hypotheses.insert(name, typ);
@@ -104,15 +122,18 @@ fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize, theorems: HashMap<Stri
     for (txt, typ) in hypotheses.iter() {
         println!("{} : {:?}", txt, typ);
     }
-    println!("{}", format!("=============== {}/{}", goals_index, get_goal_count(lambdaterme.clone())));
-    println!("{:?}", goals[goals_index-1].0);
+    println!("{}", format!("=============== {}/{}", 1, get_goal_count(lambdaterme.clone())));
+    println!("{:?}", result.0);
 }
 
-fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Type, Vec<OP>)>, operations: Vec<OP>, real: bool) 
--> (usize, LambdaTerm, HashMap<String, (Type, Vec<OP>)>, Vec<OP>) {
+fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Type, Vec<OP>)>, operations: Vec<OP>, real: bool) 
+-> (LambdaTerm, HashMap<String, (Type, Vec<OP>)>, Vec<OP>) {
     match op {
-        OP::Assumption(index) => {
-            (goals_index, lambdaterme.assumption(index), hypothesis, operations)
+        OP::Nothing => {
+            (lambdaterme, hypothesis, operations)
+        }
+        OP::Assumption => {
+            (lambdaterme.assumption(), hypothesis, operations)
         }
         OP::Load(name) => {
             use std::io::BufRead;
@@ -141,40 +162,49 @@ fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: 
             let mut new_hypotheses = hypothesis.clone();
             new_hypotheses.insert(name, (local_goal.clone(), proof_ops));
 
-            (goals_index, lambdaterme, new_hypotheses, operations)
+            (lambdaterme, new_hypotheses, operations)
         }
         OP::Use(name) => {
             let (output_type, ops) = hypothesis.get(&name).unwrap().clone();
 
             let goals = bfs_find_goals(lambdaterme.clone());
 
-            let (goal_type, _path) = goals[goals_index - 1].clone();
+            let (goal_type, _path) = goals[0].clone();
 
             if goal_type != output_type {
                 println!("Error, theorem unusable.");
-                return (goals_index, lambdaterme, hypothesis, operations);
+                return (lambdaterme, hypothesis, operations);
             }
 
             let mut new_operations = vec![];
 
             for op in ops {
                 match op {
-                    OP::Intro(index) => {
-                        new_operations.push(OP::Intro(index + goals_index - 1));
+                    OP::Nothing => {
+
+                    }
+                    OP::Left => {
+                        new_operations.push(OP::Left)
+                    }
+                    OP::Right => {
+                        new_operations.push(OP::Right)
+                    }
+                    OP::Intro => {
+                        new_operations.push(OP::Intro);
                     }
                     OP::Use(name) => {
                         new_operations.push(OP::Use(name));
                     }
-                    OP::Introv(name, index) => {
-                        new_operations.push(OP::Introv(name, index + goals_index - 1));
+                    OP::Introv(name) => {
+                        new_operations.push(OP::Introv(name));
                     }
-                    OP::Intros(index) => {
-                        new_operations.push(OP::Intros(index + goals_index - 1));
+                    OP::Intros => {
+                        new_operations.push(OP::Intros);
                     }
-                    OP::Split(index) => {
-                        new_operations.push(OP::Split(index + goals_index - 1));
+                    OP::Split => {
+                        new_operations.push(OP::Split);
                     }
-                    OP::Exact(_name, _index) => {
+                    OP::Exact(_name) => {
                         panic!("Cant use Exact in theorem did you want to use assumtion!");
                     }
                     OP::Cut(_typ) => {
@@ -183,17 +213,14 @@ fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: 
                     OP::Absurd(_typ) => {
                         todo!()
                     }
-                    OP::Apply(name, index) => {
-                        new_operations.push(OP::Apply(name, index + goals_index - 1));
+                    OP::Apply(name) => {
+                        new_operations.push(OP::Apply(name));
                     }
-                    OP::Elim(name, index) => {
-                        new_operations.push(OP::Elim(name, index + goals_index - 1));
+                    OP::Elim(name) => {
+                        new_operations.push(OP::Elim(name));
                     }
-                    OP::Assumption(index) => {
-                        new_operations.push(OP::Assumption(index + goals_index - 1));
-                    }
-                    OP::Add | OP::Sub => {
-                        new_operations.push(op);
+                    OP::Assumption => {
+                        new_operations.push(OP::Assumption);
                     }
                     OP::Load(name) => {
                         new_operations.push(OP::Load(name));
@@ -204,31 +231,36 @@ fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: 
             let mut c_lambdaterme = lambdaterme.clone();
             let mut c_operations = operations.clone();
             let mut c_hypothesis = hypothesis.clone();
-            let mut c_goalsindex = goals_index;
 
             for op in new_operations {
-                (c_goalsindex, c_lambdaterme, c_hypothesis, c_operations) = run_command(op, c_goalsindex, c_lambdaterme, c_hypothesis, c_operations, false);
+                (c_lambdaterme, c_hypothesis, c_operations) = run_command(op, c_lambdaterme, c_hypothesis, c_operations, false);
             }
             
-            (c_goalsindex, c_lambdaterme, c_hypothesis, c_operations)
+            (c_lambdaterme, c_hypothesis, c_operations)
         }
-        OP::Intro(index) => {
-            let (_name, new_lambdaterme) = lambdaterme.intro(index);
-            (goals_index, new_lambdaterme, hypothesis, operations)
+        OP::Intro => {
+            let (_name, new_lambdaterme) = lambdaterme.intro();
+            (new_lambdaterme, hypothesis, operations)
         }
-        OP::Introv(name, index) => {
-            let lt = lambdaterme.introv(name.to_string(), index);
-            (goals_index, lt, hypothesis, operations)
+        OP::Introv(name) => {
+            let lt = lambdaterme.introv(name.to_string());
+            (lt, hypothesis, operations)
         }
-        OP::Intros(index) => {
-            let (_names, new_lambdaterme) = lambdaterme.intros(index);
-            (goals_index, new_lambdaterme, hypothesis, operations)
+        OP::Intros => {
+            let (_names, new_lambdaterme) = lambdaterme.intros();
+            (new_lambdaterme, hypothesis, operations)
         }
-        OP::Split(index) => {
-            (goals_index, lambdaterme.split(index), hypothesis, operations)
+        OP::Split => {
+            (lambdaterme.split(), hypothesis, operations)
         }
-        OP::Exact(name, index) => {
-            (goals_index, lambdaterme.exact(name.to_string(), index), hypothesis, operations)
+        OP::Left => {
+            (lambdaterme.left(), hypothesis, operations)
+        }
+        OP::Right => {
+            (lambdaterme.right(), hypothesis, operations)
+        }
+        OP::Exact(name) => {
+            (lambdaterme.exact(name.to_string()), hypothesis, operations)
         }
         OP::Cut(_typ) => {
             todo!()
@@ -236,22 +268,16 @@ fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: 
         OP::Absurd(_typ) => {
             todo!()
         }
-        OP::Apply(name, index) => {
-            (goals_index, lambdaterme.apply(name.to_string(), index), hypothesis, operations)
+        OP::Apply(name) => {
+            (lambdaterme.apply(name.to_string()), hypothesis, operations)
         }
-        OP::Elim(name, index) => {
-            (goals_index, lambdaterme.elim(name.to_string(), index), hypothesis, operations)
-        }
-        OP::Add => {
-            (min(get_goal_count(lambdaterme.clone()), goals_index+1), lambdaterme, hypothesis, operations)
-        }
-        OP::Sub => {
-            (max(1, goals_index-1), lambdaterme, hypothesis, operations)
+        OP::Elim(name) => {
+            (lambdaterme.elim(name.to_string()), hypothesis, operations)
         }
     }
 }
 
-fn get_command(lambdaterme: LambdaTerm, operations: &mut Vec<OP>, goals_index: usize) -> LambdaTerm {
+fn get_command(operations: &mut Vec<OP>) {
     let mut input = String::new();
     print!("> ");
     io::stdout().flush().unwrap();
@@ -260,8 +286,14 @@ fn get_command(lambdaterme: LambdaTerm, operations: &mut Vec<OP>, goals_index: u
     let mut splitted = input.split_whitespace().collect::<Vec<&str>>().into_iter();
     let command = splitted.next().unwrap();
     match command {
+        "left" => {
+            operations.push(OP::Left)
+        }
+        "right" => {
+            operations.push(OP::Right)
+        }
         "assu" => {
-            operations.push(OP::Assumption(goals_index));
+            operations.push(OP::Assumption);
         }
         "use" => {
             let theorem_name = splitted.next().unwrap();
@@ -275,23 +307,23 @@ fn get_command(lambdaterme: LambdaTerm, operations: &mut Vec<OP>, goals_index: u
             let name_var = splitted.next();
             match name_var {
                 None => {
-                    operations.push(OP::Intro(goals_index));
+                    operations.push(OP::Intro);
                 }
                 Some(name) => {
-                    operations.push(OP::Introv(name.to_string(), goals_index));
+                    operations.push(OP::Introv(name.to_string()));
                 }
             }
         }
         "intros" => {
-            operations.push(OP::Intros(goals_index));
+            operations.push(OP::Intros);
             
         }
         "split" => {
-            operations.push(OP::Split(goals_index));
+            operations.push(OP::Split);
         }
         "exact" => {
             let name_var = splitted.next().unwrap();
-            operations.push(OP::Exact(name_var.to_string(), goals_index));
+            operations.push(OP::Exact(name_var.to_string()));
         }
         "cut" => {
             todo!()
@@ -301,21 +333,17 @@ fn get_command(lambdaterme: LambdaTerm, operations: &mut Vec<OP>, goals_index: u
         }
         "apply" => {
             let name = splitted.next().unwrap();
-            operations.push(OP::Apply(name.to_string(), goals_index));
+            operations.push(OP::Apply(name.to_string()));
         }
         "elim" => {
             let name = splitted.next().unwrap();
-            operations.push(OP::Elim(name.to_string(), goals_index));
+            operations.push(OP::Elim(name.to_string()));
         }
-        "+" => {
-            operations.push(OP::Add);
+        _ => {
+            println!("Unknown command.");
+            operations.push(OP::Nothing)
         }
-        "-" => {
-            operations.push(OP::Sub);
-        }
-        _ => println!("Unknown command.")
     }
-    lambdaterme
 }
 
 fn save(goal: Type, operations: Vec<OP>) {
@@ -331,26 +359,35 @@ fn save(goal: Type, operations: Vec<OP>) {
     writeln!(theorem_file, "{}", line).unwrap();
     for op in operations {
         match op {
-            OP::Assumption(index) => {
-                writeln!(theorem_file, "Assumption({})", index).unwrap();
+            OP::Nothing => {
+
             }
-            OP::Intro(index) => {
-                writeln!(theorem_file, "Intro({})", index).unwrap();
+            OP::Left => {
+                writeln!(theorem_file, "Left").unwrap();
+            }
+            OP::Right => {
+                writeln!(theorem_file, "Right").unwrap();
+            }
+            OP::Assumption => {
+                writeln!(theorem_file, "Assumption").unwrap();
+            }
+            OP::Intro => {
+                writeln!(theorem_file, "Intro").unwrap();
             }
             OP::Use(name) => {
                 writeln!(theorem_file, "Use(\"{}\")", name).unwrap();
             }
-            OP::Introv(name, index) => {
-                writeln!(theorem_file, "Introv(\"{}\", {})", name, index).unwrap();
+            OP::Introv(name) => {
+                writeln!(theorem_file, "Introv(\"{}\")", name).unwrap();
             }
-            OP::Intros(index) => {
-                writeln!(theorem_file, "Intros({})", index).unwrap();
+            OP::Intros => {
+                writeln!(theorem_file, "Intros").unwrap();
             }
-            OP::Split(index) => {
-                writeln!(theorem_file, "Split({})", index).unwrap();
+            OP::Split => {
+                writeln!(theorem_file, "Split").unwrap();
             }
-            OP::Exact(name, index) => {
-                writeln!(theorem_file, "Exact(\"{}\", {})", name, index).unwrap();
+            OP::Exact(name) => {
+                writeln!(theorem_file, "Exact(\"{}\")", name).unwrap();
             }
             OP::Cut(_typ) => {
                 todo!()
@@ -358,17 +395,11 @@ fn save(goal: Type, operations: Vec<OP>) {
             OP::Absurd(_typ) => {
                 todo!()
             }
-            OP::Apply(name, index) => {
-                writeln!(theorem_file, "Apply(\"{}\", {})", name, index).unwrap();
+            OP::Apply(name) => {
+                writeln!(theorem_file, "Apply(\"{}\")", name).unwrap();
             }
-            OP::Elim(name, index) => {
-                writeln!(theorem_file, "Elim(\"{}\", {})", name, index).unwrap();
-            }
-            OP::Add => {
-                writeln!(theorem_file, "Add()").unwrap();
-            }
-            OP::Sub => {
-                writeln!(theorem_file, "Sub()").unwrap();
+            OP::Elim(name) => {
+                writeln!(theorem_file, "Elim(\"{}\")", name).unwrap();
             }
             OP::Load(name) => {
                 writeln!(theorem_file, "Load(\"{}\")", name).unwrap();
@@ -387,6 +418,7 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {
         match current {
             LambdaTerm::Var(_) => {},
             LambdaTerm::Couple(ref left, ref right)
+            | LambdaTerm::Union(ref left, ref right)
             | LambdaTerm::App(ref left, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());
@@ -420,6 +452,10 @@ fn get_goal_count(lambda: LambdaTerm) -> usize {
         }
         LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) => {},
         LambdaTerm::Couple(box term1, box term2) => {
+            total += get_goal_count(term1);
+            total += get_goal_count(term2);
+        }
+        LambdaTerm::Union(box term1, box term2) => {
             total += get_goal_count(term1);
             total += get_goal_count(term2);
         }
@@ -512,33 +548,25 @@ fn parse_type(pair: pest::iterators::Pair<Rule>) -> Type {
 fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
     match pair.as_rule() {
         Rule::Intro => {
-            let mut inner = pair.into_inner();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Intro(nb)
+            OP::Intro
         }
         Rule::Introv => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
             let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Introv(text, nb)
+            OP::Introv(text)
         }
         Rule::Intros => {
-            let mut inner = pair.into_inner();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Intros(nb)
+            OP::Intros
         }
         Rule::Split => {
-            let mut inner = pair.into_inner();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Split(nb)
+            OP::Split
         }
         Rule::Exact => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
             let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Exact(text, nb)
+            OP::Exact(text)
         }
         Rule::Cut => {
             todo!()
@@ -550,15 +578,13 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
             let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Apply(text, nb)
+            OP::Apply(text)
         }
         Rule::Elim => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str();
             let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Elim(text, nb)
+            OP::Elim(text)
         }
         Rule::Load => {
             let mut inner = pair.into_inner();
@@ -573,12 +599,14 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
             OP::Use(text)
         }
         Rule::Assumption => {
-            let mut inner = pair.into_inner();
-            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
-            OP::Assumption(nb)
+            OP::Assumption
         }
-        Rule::Add => OP::Add,
-        Rule::Sub => OP::Sub,
+        Rule::Left => {
+            OP::Left
+        }
+        Rule::Right => {
+            OP::Right
+        }
         other => panic!("Other : {:?}", other),
     }
 }
