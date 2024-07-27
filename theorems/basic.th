@@ -1,0 +1,4 @@
+Goal : Impl(A, Impl(B, A))
+Intros(1)
+Exact(hyp1, 1)
+End

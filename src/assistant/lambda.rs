@@ -5,6 +5,8 @@ use std::sync::Mutex;
 
 use crate::assistant::types::Type as Type;
 
+use super::operations::OP;
+
 lazy_static! {
     static ref HASHMAP: Mutex<HashMap<String, usize>> = Mutex::new(HashMap::new());
 }

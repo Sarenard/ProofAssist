@@ -1,0 +1,7 @@
+Goal : Impl(Not(And(a, b)), Impl(a, Not(b)))
+Intros(1)
+Apply(hyp1, 1)
+Split(1)
+Exact(hyp2, 1)
+Exact(hyp3, 1)
+End

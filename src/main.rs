@@ -2,15 +2,17 @@
 
 use std::cmp::{max, min};
 use std::collections::{HashMap, VecDeque};
-use std::io::{self, Write};
+use std::fs::File;
+use std::io::{self, BufReader, Write};
 
 #[macro_use]
 extern crate pest_derive;
 
+use assistant::operations::OP;
 use pest::Parser;
 
 #[derive(Parser)]
-#[grammar = "simple.pest"] // relative to src
+#[grammar = "types.pest"] // relative to src
 #[allow(dead_code)]
 struct SimpleParser;
 
@@ -20,120 +22,246 @@ use assistant::lambda::LambdaTerm as LambdaTerm;
 use assistant::types::Type as Type;
 
 fn main() {
-    //let goal = get_goal();
+    // let goal = get_goal();
     let goal = Type::Imp(
-        Box::new(Type::Not(
-            Box::new(Type::And(
-                Box::new(Type::Var("a".to_string())),
-                Box::new(Type::Var("b".to_string())),
-            )))
-        ),
+        Box::new(Type::Var("A".to_string())),
         Box::new(Type::Imp(
-            Box::new(Type::Var("a".to_string())),
-            Box::new(Type::Not(Box::new(Type::Var("b".to_string()))))
-        ))
-
+            Box::new(Type::Var("B".to_string())),
+            Box::new(Type::Var("A".to_string()))
+        )),
     ).removenot();
-        
+
+    emulate(goal, true);
+}
+
+fn emulate(goal: Type, real: bool) {
     let mut goals_index = 1;
 
-    let mut lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-    while lambdaterme.clone().containsgoal() {
-        goals_index = min(goals_index, get_goal_count(lambdaterme.clone()));
-        println!(); // to be beautiful
+    let mut operations: Vec<OP> = vec![];
 
-        let goals = bfs_find_goals(lambdaterme.clone());
-        let path = goals[goals_index-1].1.clone();
-        let mut hypotheses: HashMap<String, Type> = HashMap::new();
-        for elt in path {
-            match elt {
-                LambdaTerm::Abs(name, typ, _) => {
-                    hypotheses.insert(name, typ);
-                }
-                _ => {}
-            }
+    let mut lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
+
+    while lambdaterme.clone().containsgoal() {
+        // to fix problems
+        goals_index = min(goals_index, get_goal_count(lambdaterme.clone()));
+        if real {
+            println!(); // to be beautiful
+            print_hyp(lambdaterme.clone(), goals_index);
+            lambdaterme = get_command(lambdaterme, &mut operations, goals_index);
+
         }
-        for (txt, typ) in hypotheses.iter() {
-            println!("{} : {:?}", txt, typ);
-        }
-        println!("{}", format!("=============== {}/{}", goals_index, get_goal_count(lambdaterme.clone())));
-        println!("{:?}", goals[goals_index-1].0);
-        let mut input = String::new();
-        print!("> ");
-        io::stdout().flush().unwrap();
-        io::stdin().read_line(&mut input).expect("Failed to read line for some reason");
-        input = input.trim().to_string();
-        let mut splitted = input.split_whitespace().collect::<Vec<&str>>().into_iter();
-        let command = splitted.next().unwrap();
-        match command {
-            "intro" => {
-                let name_var = splitted.next();
-                match name_var {
-                    None => {
-                        let (_name, new_lambdaterme) = lambdaterme.intro(goals_index);
-                        lambdaterme = new_lambdaterme;
-                    }
-                    Some(name) => {
-                        lambdaterme = lambdaterme.introv(name.to_string(), goals_index);
-                    }
-                }
-            }
-            "intros" => {
-                let (_names, new_lambdaterme) = lambdaterme.intros(goals_index);
-                lambdaterme = new_lambdaterme;
-            }
-            "split" => {
-                lambdaterme = lambdaterme.split(goals_index);
-            }
-            "exact" => {
-                let name_var = splitted.next().unwrap();
-                lambdaterme = lambdaterme.exact(name_var.to_string(), goals_index);
-            }
-            "cut" => {
-                todo!()
-            }
-            "absurd" => {
-                todo!()
-            }
-            "restart" => {
-                println!();
-                println!("Starting back the proof :");
-                lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
-            }
-            "apply" => {
-                let name = splitted.next().unwrap();
-                lambdaterme = lambdaterme.apply(name.to_string(), goals_index);
-            }
-            "elim" => {
-                let name = splitted.next().unwrap();
-                lambdaterme = lambdaterme.elim(name.to_string(), goals_index);
-            }
-            "+" => {
-                goals_index = min(get_goal_count(lambdaterme.clone()), goals_index+1);
-            }
-            "-" => {
-                goals_index = max(1, goals_index-1);
-            }
-            _ => println!("Unknown command.")
-        }
+        let last_op = operations.last().unwrap().clone();
+        (goals_index, lambdaterme) = run_command(last_op, goals_index, lambdaterme);
     }
-    println!();
-    println!("Proof ended, no goal left !");
-    println!("Final typecheck running :");
-    let ok = lambdaterme.check(goal);
+    if real {
+        println!();
+        println!("Proof ended, no goal left !");
+        println!("{:?}", operations);
+        println!("Final typecheck running :");
+    }
+    let ok = lambdaterme.check(goal.clone());
     if ok {
-        println!("Checked the proof, yields the good type !");
+        if real {
+            println!("Checked the proof, yields the good type !");
+        }
     } else {
         panic!("Ehh there is an error somewhere");
     }
-    print!("Do you want to save? (Y/N) : ");
-    io::stdout().flush().unwrap();
+    if real {
+        print!("Do you want to save? (Y/N) : ");
+        io::stdout().flush().unwrap();
+        let mut input = String::new();
+        io::stdin().read_line(&mut input).expect("Failed to read line for some reason");
+        input = input.trim().to_string();
+        if ["Y".to_string(), "y".to_string()].contains(&input) {
+            save(goal, operations);
+        }
+    }
+}
+
+fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize) {
+    let goals = bfs_find_goals(lambdaterme.clone());
+    let path = goals[goals_index-1].1.clone();
+    let mut hypotheses: HashMap<String, Type> = HashMap::new();
+    for elt in path {
+        match elt {
+            LambdaTerm::Abs(name, typ, _) => {
+                hypotheses.insert(name, typ);
+            }
+            _ => {}
+        }
+    }
+    for (txt, typ) in hypotheses.iter() {
+        println!("{} : {:?}", txt, typ);
+    }
+    println!("{}", format!("=============== {}/{}", goals_index, get_goal_count(lambdaterme.clone())));
+    println!("{:?}", goals[goals_index-1].0);
+}
+
+fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm) -> (usize, LambdaTerm) {
+    match op {
+        OP::Load(name) => {
+            use std::io::BufRead;
+            let file = File::open(format!("./theorems/{}.th", name)).unwrap();
+            let reader = BufReader::new(file);
+            let lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
+            println!("LOADING OF THEOREM");
+            for line in lines {
+                println!("{}", line);
+            }
+            (goals_index, lambdaterme)
+        }
+        OP::Intro(index) => {
+            let (_name, new_lambdaterme) = lambdaterme.intro(index);
+            (goals_index, new_lambdaterme)
+        }
+        OP::Introv(name, index) => {
+            let lt = lambdaterme.introv(name.to_string(), index);
+            (goals_index, lt)
+        }
+        OP::Intros(index) => {
+            let (_names, new_lambdaterme) = lambdaterme.intros(index);
+            (goals_index, new_lambdaterme)
+        }
+        OP::Split(index) => {
+            (goals_index, lambdaterme.split(index))
+        }
+        OP::Exact(name, index) => {
+            (goals_index, lambdaterme.exact(name.to_string(), index))
+        }
+        OP::Cut(_typ) => {
+            todo!()
+        }
+        OP::Absurd(_typ) => {
+            todo!()
+        }
+        OP::Apply(name, index) => {
+            (goals_index, lambdaterme.apply(name.to_string(), index))
+        }
+        OP::Elim(name, index) => {
+            (goals_index, lambdaterme.elim(name.to_string(), index))
+        }
+        OP::Add => {
+            (min(get_goal_count(lambdaterme.clone()), goals_index+1), lambdaterme)
+        }
+        OP::Sub => {
+            (max(1, goals_index-1), lambdaterme)
+        }
+    }
+}
+
+fn get_command(lambdaterme: LambdaTerm, operations: &mut Vec<OP>, goals_index: usize) -> LambdaTerm {
     let mut input = String::new();
+    print!("> ");
+    io::stdout().flush().unwrap();
     io::stdin().read_line(&mut input).expect("Failed to read line for some reason");
     input = input.trim().to_string();
-    if !["Y".to_string(), "y".to_string()].contains(&input) {
-        println!("Ok, too bad !");
+    let mut splitted = input.split_whitespace().collect::<Vec<&str>>().into_iter();
+    let command = splitted.next().unwrap();
+    match command {
+        "load" => {
+            let theorem_name = splitted.next().unwrap();
+            operations.push(OP::Load(theorem_name.to_string()))
+        }
+        "intro" => {
+            let name_var = splitted.next();
+            match name_var {
+                None => {
+                    operations.push(OP::Intro(goals_index));
+                }
+                Some(name) => {
+                    operations.push(OP::Introv(name.to_string(), goals_index));
+                }
+            }
+        }
+        "intros" => {
+            operations.push(OP::Intros(goals_index));
+            
+        }
+        "split" => {
+            operations.push(OP::Split(goals_index));
+        }
+        "exact" => {
+            let name_var = splitted.next().unwrap();
+            operations.push(OP::Exact(name_var.to_string(), goals_index));
+        }
+        "cut" => {
+            todo!()
+        }
+        "absurd" => {
+            todo!()
+        }
+        "apply" => {
+            let name = splitted.next().unwrap();
+            operations.push(OP::Apply(name.to_string(), goals_index));
+        }
+        "elim" => {
+            let name = splitted.next().unwrap();
+            operations.push(OP::Elim(name.to_string(), goals_index));
+        }
+        "+" => {
+            operations.push(OP::Add);
+        }
+        "-" => {
+            operations.push(OP::Sub);
+        }
+        _ => println!("Unknown command.")
     }
+    lambdaterme
+}
+
+fn save(goal: Type, operations: Vec<OP>) {
+    println!("Saving...");
+    print!("Name of the theorem : ");
+    io::stdout().flush().unwrap();
+    let mut theorem_name = String::new();
+    io::stdin().read_line(&mut theorem_name).expect("Failed to read line for some reason");
+    theorem_name = theorem_name.trim().to_string();
+    let theorem_name = format!("./theorems/{}.th", theorem_name);
+    let mut theorem_file = File::create(theorem_name).expect("Error !");
+    let line = format!("Goal : {}", goal);
+    writeln!(theorem_file, "{}", line).unwrap();
+    for op in operations {
+        match op {
+            OP::Intro(index) => {
+                writeln!(theorem_file, "Intro({})", index).unwrap();
+            }
+            OP::Introv(name, index) => {
+                writeln!(theorem_file, "Introv({}, {})", name, index).unwrap();
+            }
+            OP::Intros(index) => {
+                writeln!(theorem_file, "Intros({})", index).unwrap();
+            }
+            OP::Split(index) => {
+                writeln!(theorem_file, "Split({})", index).unwrap();
+            }
+            OP::Exact(name, index) => {
+                writeln!(theorem_file, "Exact({}, {})", name, index).unwrap();
+            }
+            OP::Cut(_typ) => {
+                todo!()
+            }
+            OP::Absurd(_typ) => {
+                todo!()
+            }
+            OP::Apply(name, index) => {
+                writeln!(theorem_file, "Apply({}, {})", name, index).unwrap();
+            }
+            OP::Elim(name, index) => {
+                writeln!(theorem_file, "Elim({}, {})", name, index).unwrap();
+            }
+            OP::Add => {
+                writeln!(theorem_file, "Add()").unwrap();
+            }
+            OP::Sub => {
+                writeln!(theorem_file, "Sub()").unwrap();
+            }
+            OP::Load(name) => {
+                writeln!(theorem_file, "Load({})", name).unwrap();
+            }
+        }
+    }
+    writeln!(theorem_file, "End").unwrap();
 }
 
 fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {

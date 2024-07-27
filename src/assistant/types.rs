@@ -14,6 +14,29 @@ pub enum Type {
     Error,
 }
 
+impl std::fmt::Display for Type {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Type::Var(s) => {
+                let new = s.trim_matches(|c| c == '\"').to_string();
+                write!(f, "{}", new)
+            },
+            Type::Imp(t1, t2) => {
+                if **t2 == Type::Bottom {
+                    write!(f, "Not({})", t1)
+                } else {
+                    write!(f, "Impl({}, {})", t1, t2)
+                }
+            }
+            Type::And(t1, t2) => write!(f, "And({}, {})", t1, t2),
+            Type::Bottom => write!(f, "Bottom"),
+            Type::Top => write!(f, "Top"),
+            Type::Error => write!(f, "Error"),
+            Type::Not(_) => {panic!("Unreachable");}
+        }
+    }
+}
+
 impl fmt::Debug for Type {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
