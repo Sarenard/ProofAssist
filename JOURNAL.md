@@ -41,7 +41,7 @@ If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `
 
 ## commands added
 
-### elim h
+### elim h (h is an and)
 If `h` is of type `A ^ B` and `Goal(A)` then we transform the goal into `App(App(Goal(a->b->a),Fst(h1)),Snd(h1))`
 ### split
 If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
@@ -54,12 +54,22 @@ If `Goal(A)` then transforms it to `ExFalso(B, Goal(Bottom))`
 
 - load and save of theorems
 - mode emul
+- or related commands
 
 ## commands added
 
 ### Assumption
 If `Goal(A)` and `A` is in the hypotheses, then we complete the goal
+### Left
+If `Goal(A \/ B)` transforms it into a `Left(Goal(A), B)`
+### Right
+If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
+### Elim h (h is an or)
+If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(h,Goal(A -> C),Goal(B -> C))`
 
 ## TODO
 
 - make a real and better emul mode
+- fix some theorem-related panics
+- make an error system
+- make a cancel command
