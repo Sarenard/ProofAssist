@@ -47,3 +47,19 @@ If `h` is of type `A ^ B` and `Goal(A)` then we transform the goal into `App(App
 If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
 ### absurd B
 If `Goal(A)` then transforms it to `ExFalso(B, Goal(Bottom))`
+
+# 27/07/2024
+
+## main new things
+
+- load and save of theorems
+- mode emul
+
+## commands added
+
+### Assumption
+If `Goal(A)` and `A` is in the hypotheses, then we complete the goal
+
+## TODO
+
+- make a real and better emul mode

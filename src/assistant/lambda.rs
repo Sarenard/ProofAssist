@@ -5,8 +5,6 @@ use std::sync::Mutex;
 
 use crate::assistant::types::Type as Type;
 
-use super::operations::OP;
-
 lazy_static! {
     static ref HASHMAP: Mutex<HashMap<String, usize>> = Mutex::new(HashMap::new());
 }
@@ -109,6 +107,35 @@ impl LambdaTerm {
         self = rebuild_tree(self.clone(), &mut 1);
         aux_absurd(self, statement, HashMap::new(), nb)
     }
+    pub fn assumption(mut self, nb: usize) -> LambdaTerm {
+        self = rebuild_tree(self.clone(), &mut 1);
+        aux_assumtion(self, nb)
+    }
+}
+
+
+fn aux_assumtion(term: LambdaTerm, nb: usize) -> LambdaTerm {
+    use crate::bfs_find_goals;
+
+    // TODO : this into a function, used 2 times (other is in main.rs)
+    let goals = bfs_find_goals(term.clone());
+    let (goal_type, path) = goals[nb-1].clone();
+    let mut local_hyp: Vec<(String, Type)> = Vec::new();
+    for elt in path {
+        match elt {
+            LambdaTerm::Abs(name, typ, _) => {
+                local_hyp.push((name, typ));
+            }
+            _ => {}
+        }
+    }
+    for (i, (name, typ)) in local_hyp.iter().enumerate() {
+        if typ.clone() == goal_type {
+            return term.exact(name.clone(), i+1);
+        }
+    }
+
+    term
 }
 
 fn rebuild_tree(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {

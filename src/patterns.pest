@@ -22,6 +22,8 @@ OP = _{
     | Load
     | Add
     | Sub
+    | Use
+    | Assumption
 }
 
 Intro = { "Intro(" ~ usize ~ ")" }
@@ -34,8 +36,10 @@ Absurd = { "Absurd(" ~ typ ~ ")" }
 Apply = { "Apply(" ~ string ~ "," ~ usize ~ ")" }
 Elim = { "Elim(" ~ string ~ "," ~ usize ~ ")" }
 Load = { "Load(" ~ string ~ ")" }
+Use = { "Use(" ~ string ~ ")" }
 Add = { "Add" }
 Sub = { "Sub" }
+Assumption = { "Assumption(" ~ usize ~ ")" }
 
 usize = @{ ASCII_DIGIT+ }
 string = { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }

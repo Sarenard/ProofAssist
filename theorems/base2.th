@@ -1,4 +1,3 @@
 Impl(Var("A"), Impl(Var("B"), Var("A")))
-Intro(1)
-Intro(1)
-Assumption(1)
+Load("base")
+Use("base")

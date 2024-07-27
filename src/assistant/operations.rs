@@ -2,6 +2,9 @@ use crate::assistant::types::Type;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum OP {
+    Use(String), // for using theorems
+    
+    Assumption(usize), 
     Intro(usize),
     Introv(String, usize),
     Intros(usize),

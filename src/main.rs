@@ -34,17 +34,35 @@ fn main() {
         )),
     ).removenot();
 
-    emulate(goal, true);
+    let (lambdaterme, operations) = emulate(goal.clone(), true);
+
+    println!();
+    println!("Proof ended, no goal left !");
+    println!("Final typecheck running :");
+    let ok = lambdaterme.check(goal.clone());
+    if ok {
+        println!("Checked the proof, yields the good type !");
+    } else {
+        panic!("Ehh there is an error somewhere");
+    }
+    print!("Do you want to save? (Y/N) : ");
+    io::stdout().flush().unwrap();
+    let mut input = String::new();
+    io::stdin().read_line(&mut input).expect("Failed to read line for some reason");
+    input = input.trim().to_string();
+    if ["Y".to_string(), "y".to_string()].contains(&input) {
+        save(goal, operations);
+    }
 }
 
-fn emulate(goal: Type, real: bool) {
+fn emulate(goal: Type, real: bool) -> (LambdaTerm, Vec<OP>) {
     let mut goals_index = 1;
 
     let mut operations: Vec<OP> = vec![];
 
     let mut lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
 
-    let mut hypothesis : HashMap<Type, Vec<OP>> = HashMap::new();
+    let mut hypothesis : HashMap<String, (Type, Vec<OP>)> = HashMap::new();
 
     while lambdaterme.clone().containsgoal() {
         // to fix problems
@@ -56,35 +74,13 @@ fn emulate(goal: Type, real: bool) {
 
         }
         let last_op = operations.last().unwrap().clone();
-        (goals_index, lambdaterme, hypothesis) = run_command(last_op, goals_index, lambdaterme, hypothesis);
+        (goals_index, lambdaterme, hypothesis, operations) = run_command(last_op, goals_index, lambdaterme, hypothesis, operations, true);
     }
-    if real {
-        println!();
-        println!("Proof ended, no goal left !");
-        println!("{:?}", operations);
-        println!("Final typecheck running :");
-    }
-    let ok = lambdaterme.check(goal.clone());
-    if ok {
-        if real {
-            println!("Checked the proof, yields the good type !");
-        }
-    } else {
-        panic!("Ehh there is an error somewhere");
-    }
-    if real {
-        print!("Do you want to save? (Y/N) : ");
-        io::stdout().flush().unwrap();
-        let mut input = String::new();
-        io::stdin().read_line(&mut input).expect("Failed to read line for some reason");
-        input = input.trim().to_string();
-        if ["Y".to_string(), "y".to_string()].contains(&input) {
-            save(goal, operations);
-        }
-    }
+
+    (lambdaterme, operations)
 }
 
-fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize, theorems: HashMap<Type, Vec<OP>>) {
+fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize, theorems: HashMap<String, (Type, Vec<OP>)>) {
     let goals = bfs_find_goals(lambdaterme.clone());
     let path = goals[goals_index-1].1.clone();
     let mut hypotheses: HashMap<String, Type> = HashMap::new();
@@ -96,8 +92,14 @@ fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize, theorems: HashMap<Type
             _ => {}
         }
     }
-    for (typ, _operations) in theorems.iter() {
-        println!("Theorem : {:?}", typ);
+    if theorems.len() > 0 {
+        println!("Theorems :");
+    }
+    for (name, (typ, _op)) in theorems.iter() {
+        println!("{} : {:?}", name, typ);
+    }
+    if !hypotheses.is_empty() {
+        println!("Hypotheses :");
     }
     for (txt, typ) in hypotheses.iter() {
         println!("{} : {:?}", txt, typ);
@@ -106,14 +108,20 @@ fn print_hyp(lambdaterme: LambdaTerm, goals_index: usize, theorems: HashMap<Type
     println!("{:?}", goals[goals_index-1].0);
 }
 
-fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: HashMap<Type, Vec<OP>>) -> (usize, LambdaTerm, HashMap<Type, Vec<OP>>) {
+fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Type, Vec<OP>)>, operations: Vec<OP>, real: bool) 
+-> (usize, LambdaTerm, HashMap<String, (Type, Vec<OP>)>, Vec<OP>) {
     match op {
+        OP::Assumption(index) => {
+            (goals_index, lambdaterme.assumption(index), hypothesis, operations)
+        }
         OP::Load(name) => {
             use std::io::BufRead;
             let file = File::open(format!("./theorems/{}.th", name)).unwrap();
             let reader = BufReader::new(file);
             let mut lines: Vec<String> = reader.lines().collect::<Result<_, _>>().unwrap();
-            println!("{}", format!("Theorem {} loaded.", name));
+            if real {
+                println!("{}", format!("Theorem {} loaded.", name));
+            }
             let first = lines.remove(0);
             let parse_result = SimpleParser::parse(
                 Rule::typ, 
@@ -131,26 +139,96 @@ fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: 
                 proof_ops.push(op)
             }
             let mut new_hypotheses = hypothesis.clone();
-            new_hypotheses.insert(local_goal, proof_ops);
-            (goals_index, lambdaterme, new_hypotheses)
+            new_hypotheses.insert(name, (local_goal.clone(), proof_ops));
+
+            (goals_index, lambdaterme, new_hypotheses, operations)
+        }
+        OP::Use(name) => {
+            let (output_type, ops) = hypothesis.get(&name).unwrap().clone();
+
+            let goals = bfs_find_goals(lambdaterme.clone());
+
+            let (goal_type, _path) = goals[goals_index - 1].clone();
+
+            if goal_type != output_type {
+                println!("Error, theorem unusable.");
+                return (goals_index, lambdaterme, hypothesis, operations);
+            }
+
+            let mut new_operations = vec![];
+
+            for op in ops {
+                match op {
+                    OP::Intro(index) => {
+                        new_operations.push(OP::Intro(index + goals_index - 1));
+                    }
+                    OP::Use(name) => {
+                        new_operations.push(OP::Use(name));
+                    }
+                    OP::Introv(name, index) => {
+                        new_operations.push(OP::Introv(name, index + goals_index - 1));
+                    }
+                    OP::Intros(index) => {
+                        new_operations.push(OP::Intros(index + goals_index - 1));
+                    }
+                    OP::Split(index) => {
+                        new_operations.push(OP::Split(index + goals_index - 1));
+                    }
+                    OP::Exact(_name, _index) => {
+                        panic!("Cant use Exact in theorem did you want to use assumtion!");
+                    }
+                    OP::Cut(_typ) => {
+                        todo!()
+                    }
+                    OP::Absurd(_typ) => {
+                        todo!()
+                    }
+                    OP::Apply(name, index) => {
+                        new_operations.push(OP::Apply(name, index + goals_index - 1));
+                    }
+                    OP::Elim(name, index) => {
+                        new_operations.push(OP::Elim(name, index + goals_index - 1));
+                    }
+                    OP::Assumption(index) => {
+                        new_operations.push(OP::Assumption(index + goals_index - 1));
+                    }
+                    OP::Add | OP::Sub => {
+                        new_operations.push(op);
+                    }
+                    OP::Load(name) => {
+                        new_operations.push(OP::Load(name));
+                    }
+                }
+            }
+
+            let mut c_lambdaterme = lambdaterme.clone();
+            let mut c_operations = operations.clone();
+            let mut c_hypothesis = hypothesis.clone();
+            let mut c_goalsindex = goals_index;
+
+            for op in new_operations {
+                (c_goalsindex, c_lambdaterme, c_hypothesis, c_operations) = run_command(op, c_goalsindex, c_lambdaterme, c_hypothesis, c_operations, false);
+            }
+            
+            (c_goalsindex, c_lambdaterme, c_hypothesis, c_operations)
         }
         OP::Intro(index) => {
             let (_name, new_lambdaterme) = lambdaterme.intro(index);
-            (goals_index, new_lambdaterme, hypothesis)
+            (goals_index, new_lambdaterme, hypothesis, operations)
         }
         OP::Introv(name, index) => {
             let lt = lambdaterme.introv(name.to_string(), index);
-            (goals_index, lt, hypothesis)
+            (goals_index, lt, hypothesis, operations)
         }
         OP::Intros(index) => {
             let (_names, new_lambdaterme) = lambdaterme.intros(index);
-            (goals_index, new_lambdaterme, hypothesis)
+            (goals_index, new_lambdaterme, hypothesis, operations)
         }
         OP::Split(index) => {
-            (goals_index, lambdaterme.split(index), hypothesis)
+            (goals_index, lambdaterme.split(index), hypothesis, operations)
         }
         OP::Exact(name, index) => {
-            (goals_index, lambdaterme.exact(name.to_string(), index), hypothesis)
+            (goals_index, lambdaterme.exact(name.to_string(), index), hypothesis, operations)
         }
         OP::Cut(_typ) => {
             todo!()
@@ -159,16 +237,16 @@ fn run_command(op: OP, goals_index: usize, lambdaterme: LambdaTerm, hypothesis: 
             todo!()
         }
         OP::Apply(name, index) => {
-            (goals_index, lambdaterme.apply(name.to_string(), index), hypothesis)
+            (goals_index, lambdaterme.apply(name.to_string(), index), hypothesis, operations)
         }
         OP::Elim(name, index) => {
-            (goals_index, lambdaterme.elim(name.to_string(), index), hypothesis)
+            (goals_index, lambdaterme.elim(name.to_string(), index), hypothesis, operations)
         }
         OP::Add => {
-            (min(get_goal_count(lambdaterme.clone()), goals_index+1), lambdaterme, hypothesis)
+            (min(get_goal_count(lambdaterme.clone()), goals_index+1), lambdaterme, hypothesis, operations)
         }
         OP::Sub => {
-            (max(1, goals_index-1), lambdaterme, hypothesis)
+            (max(1, goals_index-1), lambdaterme, hypothesis, operations)
         }
     }
 }
@@ -182,6 +260,13 @@ fn get_command(lambdaterme: LambdaTerm, operations: &mut Vec<OP>, goals_index: u
     let mut splitted = input.split_whitespace().collect::<Vec<&str>>().into_iter();
     let command = splitted.next().unwrap();
     match command {
+        "assu" => {
+            operations.push(OP::Assumption(goals_index));
+        }
+        "use" => {
+            let theorem_name = splitted.next().unwrap();
+            operations.push(OP::Use(theorem_name.to_string()))
+        }
         "load" => {
             let theorem_name = splitted.next().unwrap();
             operations.push(OP::Load(theorem_name.to_string()))
@@ -246,8 +331,14 @@ fn save(goal: Type, operations: Vec<OP>) {
     writeln!(theorem_file, "{}", line).unwrap();
     for op in operations {
         match op {
+            OP::Assumption(index) => {
+                writeln!(theorem_file, "Assumption({})", index).unwrap();
+            }
             OP::Intro(index) => {
                 writeln!(theorem_file, "Intro({})", index).unwrap();
+            }
+            OP::Use(name) => {
+                writeln!(theorem_file, "Use(\"{}\")", name).unwrap();
             }
             OP::Introv(name, index) => {
                 writeln!(theorem_file, "Introv(\"{}\", {})", name, index).unwrap();
@@ -428,6 +519,7 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
         Rule::Introv => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
+            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
             let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
             OP::Introv(text, nb)
         }
@@ -444,6 +536,7 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
         Rule::Exact => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
+            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
             let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
             OP::Exact(text, nb)
         }
@@ -456,22 +549,36 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
         Rule::Apply => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
+            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
             let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
             OP::Apply(text, nb)
         }
         Rule::Elim => {
             let mut inner = pair.into_inner();
-            let text = inner.next().unwrap().as_str().to_string();
+            let text = inner.next().unwrap().as_str();
+            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
             let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
             OP::Elim(text, nb)
         }
         Rule::Load => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
+            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
             OP::Load(text)
+        }
+        Rule::Use => {
+            let mut inner = pair.into_inner();
+            let text = inner.next().unwrap().as_str().to_string();
+            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
+            OP::Use(text)
+        }
+        Rule::Assumption => {
+            let mut inner = pair.into_inner();
+            let nb = inner.next().unwrap().as_str().parse::<usize>().unwrap();
+            OP::Assumption(nb)
         }
         Rule::Add => OP::Add,
         Rule::Sub => OP::Sub,
-        _ => unreachable!(),
+        other => panic!("Other : {:?}", other),
     }
 }
