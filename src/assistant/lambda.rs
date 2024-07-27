@@ -56,7 +56,7 @@ impl LambdaTerm {
             LambdaTerm::Right(box lambda, _typ) => {
                 found |= lambda.containsgoal();
             }
-            LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(_typ, box case1, box case2) => {
                 found |= case1.containsgoal();
                 found |= case2.containsgoal();
             }
@@ -243,7 +243,7 @@ fn aux_assumtion(term: LambdaTerm) -> LambdaTerm {
         }
     }
     println!("Hyps : {:?}", local_hyp);
-    for (i, (name, typ)) in local_hyp.iter().enumerate() {
+    for (_i, (name, typ)) in local_hyp.iter().enumerate() {
         if typ.clone() == goal_type {
             return term.exact(name.clone());
         }
@@ -565,7 +565,7 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
                 Type::And(box a, box _) => {
                     return a;
                 }
-                Type::Or(box a, box_b) => {
+                Type::Or(box a, _) => {
                     return a
                 }
                 other => panic!("Error, unknown : {:?}", other)
