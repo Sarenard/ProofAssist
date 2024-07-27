@@ -14,7 +14,6 @@ pub enum LambdaTerm {
     Var((String, usize)),
     #[allow(dead_code)]
     Couple(Box<LambdaTerm>, Box<LambdaTerm>),
-    Union(Box<LambdaTerm>, Box<LambdaTerm>),
     App(Box<LambdaTerm>, Box<LambdaTerm>),
     Abs(String, Type, Box<LambdaTerm>),
     #[allow(dead_code)]
@@ -38,10 +37,6 @@ impl LambdaTerm {
             }
             LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) => {},
             LambdaTerm::Couple(box term1, box term2) => {
-                found |= term1.containsgoal();
-                found |= term2.containsgoal();
-            }
-            LambdaTerm::Union(box term1, box term2) => {
                 found |= term1.containsgoal();
                 found |= term2.containsgoal();
             }
@@ -142,8 +137,8 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
     match root {
         LambdaTerm::Goal(typ, nb2) if nb2 == 1 => {
             match typ {
-                Type::Or(box _a, box b) => {
-                    LambdaTerm::Goal(b, 0)
+                Type::Or(box a, box b) => {
+                   LambdaTerm::Right(Box::new(LambdaTerm::Goal(b, 0)), a)
                 }
                 _ => {
                     panic!("Cant use that here, sry !");
@@ -159,12 +154,6 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
         },
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(
-                Box::new(aux_right(term1)), 
-                Box::new(aux_right(term2)), 
-            )
-        }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(
                 Box::new(aux_right(term1)), 
                 Box::new(aux_right(term2)), 
             )
@@ -195,7 +184,7 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Goal(typ, nb2) if nb2 == 1 => {
             match typ {
                 Type::Or(box a, box b) => {
-                    LambdaTerm::Goal(a, 0)
+                   LambdaTerm::Left(Box::new(LambdaTerm::Goal(a, 0)), b)
                 }
                 _ => {
                     panic!("Cant use that here, sry !");
@@ -211,12 +200,6 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
         },
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(
-                Box::new(aux_left(term1)), 
-                Box::new(aux_left(term2)), 
-            )
-        }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(
                 Box::new(aux_left(term1)), 
                 Box::new(aux_left(term2)), 
             )
@@ -278,14 +261,6 @@ pub fn rebuild_tree(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
             let leftside = rebuild_tree(left, goal_index);
             let rightside = rebuild_tree(right, goal_index);
             return LambdaTerm::Couple(
-                Box::new(leftside), 
-                Box::new(rightside)
-            );
-        }
-        LambdaTerm::Union(box left, box right) => {
-            let leftside = rebuild_tree(left, goal_index);
-            let rightside = rebuild_tree(right, goal_index);
-            return LambdaTerm::Union(
                 Box::new(leftside), 
                 Box::new(rightside)
             );
@@ -366,12 +341,6 @@ fn aux_absurd(root: LambdaTerm, statement: Type, context: HashMap<String, Type>)
                 Box::new(aux_absurd(term2, statement, context)), 
             )
         }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(
-                Box::new(aux_absurd(term1, statement.clone(), context.clone())), 
-                Box::new(aux_absurd(term2, statement, context)), 
-            )
-        }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::App(
                 Box::new(aux_absurd(first, statement.clone(), context.clone())), 
@@ -443,23 +412,10 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> L
                     );
                 },
                 1 => {
-                    return LambdaTerm::Union(
-                        Box::new(
-                            LambdaTerm::App(
-                                Box::new(LambdaTerm::Goal(
-                                    Type::Imp(Box::new(type_a.clone()),Box::new(type_c.clone()),),0
-                                )),
-                                Box::new(LambdaTerm::Fst(name.clone()))
-                            )
-                        ),
-                        Box::new(
-                            LambdaTerm::App(
-                                Box::new(LambdaTerm::Goal(
-                                    Type::Imp(Box::new(type_b.clone()),Box::new(type_c.clone()),),0
-                                )),
-                                Box::new(LambdaTerm::Snd(name.clone()))
-                            )
-                        )
+                    return LambdaTerm::Match(
+                        type_c.clone(), 
+                        Box::new(LambdaTerm::Goal(Type::imp(type_a, type_c.clone()), 0)),
+                        Box::new(LambdaTerm::Goal(Type::imp(type_b, type_c), 0)),
                     )
                 }
                 _ => unreachable!()
@@ -474,12 +430,6 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> L
         },
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(
-                Box::new(aux_elim(term1, name.clone(), context.clone())), 
-                Box::new(aux_elim(term2, name, context)), 
-            )
-        }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(
                 Box::new(aux_elim(term1, name.clone(), context.clone())), 
                 Box::new(aux_elim(term2, name, context)), 
             )
@@ -529,12 +479,6 @@ fn aux_split(root: LambdaTerm, context: HashMap<String, Type>) -> LambdaTerm {
         },
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(
-                Box::new(aux_split(term1, context.clone())), 
-                Box::new(aux_split(term2, context)), 
-            )
-        }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(
                 Box::new(aux_split(term1, context.clone())), 
                 Box::new(aux_split(term2, context)), 
             )
@@ -615,12 +559,6 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
                 Box::new(compute_type(second, mytypes)),
             )
         }
-        LambdaTerm::Union(box first, box second) => {
-            Type::Or(
-                Box::new(compute_type(first, mytypes.clone())), 
-                Box::new(compute_type(second, mytypes)),
-            )
-        }
         LambdaTerm::Fst(name) => {
             let mytype = mytypes.get(&name).unwrap().clone();
             match mytype {
@@ -660,16 +598,14 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
                     Type::Imp(box c, box d),
                     Type::Or(box e, box f)
                 ) 
-                if (b == d && a == e && c == f)
+                if (b == d && a == f && c == e)
                 => {
                     return b;
                 }
-                _ => {
-                    panic!("Erreur")
+                other => {
+                    panic!("Erreur {:?}", other)
                 }
             }
-
-            Type::Top
         }
     }
 }
@@ -690,9 +626,6 @@ fn aux_intro(root: LambdaTerm, name: String) -> LambdaTerm {
         },
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(Box::new(aux_intro(term1, name.clone())), Box::new(aux_intro(term2, name)))
-        }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(Box::new(aux_intro(term1, name.clone())), Box::new(aux_intro(term2, name)))
         }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::App(Box::new(aux_intro(first, name.clone())),Box::new(aux_intro(second, name)))
@@ -729,12 +662,6 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
         },
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(
-                Box::new(aux_exact(term1, name.clone(), context.clone())), 
-                Box::new(aux_exact(term2, name, context))
-            )
-        }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(
                 Box::new(aux_exact(term1, name.clone(), context.clone())), 
                 Box::new(aux_exact(term2, name, context))
             )
@@ -785,9 +712,6 @@ fn aux_cut(root: LambdaTerm, type_a: Type) -> LambdaTerm{
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(Box::new(term1.cut(type_a.clone())), Box::new(term2.cut(type_a)))
         }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(Box::new(term1.cut(type_a.clone())), Box::new(term2.cut(type_a)))
-        }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::App(Box::new(first.cut(type_a.clone())), Box::new(second.cut(type_a)))
         }
@@ -836,12 +760,6 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
         },
         LambdaTerm::Couple(box term1, box term2) => {
             LambdaTerm::Couple(
-                Box::new(aux_apply(term1, name.clone(), context.clone())), 
-                Box::new(aux_apply(term2, name, context)), 
-            )
-        }
-        LambdaTerm::Union(box term1, box term2) => {
-            LambdaTerm::Union(
                 Box::new(aux_apply(term1, name.clone(), context.clone())), 
                 Box::new(aux_apply(term2, name, context)), 
             )

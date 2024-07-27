@@ -1,7 +1,8 @@
-typ       =  { impl_type | and_type | not_type | var | bottom | top }
+typ       =  { impl_type | and_type | not_type | var | bottom | top | or_type}
 impl_type =  { "Impl(" ~ typ ~ "," ~ typ ~ ")" }
 and_type  =  { "And(" ~ typ ~ "," ~ typ ~ ")" }
 not_type  =  { "Not(" ~ typ ~ ")" }
+or_type   =  { "Or(" ~ typ ~ "," ~ typ ~ ")" }
 var       =  { "Var(" ~ string ~ ")" }
 bottom    =  { "Bottom" }
 top       =  { "Top" }

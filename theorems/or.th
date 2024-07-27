@@ -1,0 +1,9 @@
+Impl(Or(Var("a"), Var("b")), Or(Var("b"), Var("a")))
+Intro
+Elim("hyp1")
+Intro
+Right
+Assumption
+Intro
+Left
+Assumption

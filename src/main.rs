@@ -417,7 +417,6 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {
             LambdaTerm::Var(_) => {},
             LambdaTerm::Couple(ref left, ref right)
             | LambdaTerm::Match(_, ref left, ref right)
-            | LambdaTerm::Union(ref left, ref right)
             | LambdaTerm::App(ref left, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());
@@ -456,11 +455,6 @@ fn get_goal_count(lambda: LambdaTerm) -> usize {
             total += get_goal_count(term1);
             total += get_goal_count(term2);
         }
-        LambdaTerm::Union(box term1, box term2) => {
-            total += get_goal_count(term1);
-            total += get_goal_count(term2);
-        }
-
         LambdaTerm::Match(_, box term1, box term2) => {
             total += get_goal_count(term1);
             total += get_goal_count(term2);
@@ -550,6 +544,12 @@ fn parse_type(pair: pest::iterators::Pair<Rule>) -> Type {
             let inner = pair.into_inner().next().unwrap();
             let ty = parse_type(inner);
             Type::Not(Box::new(ty))
+        }
+        Rule::or_type => {
+            let mut inner = pair.into_inner();
+            let first = parse_type(inner.next().unwrap());
+            let second = parse_type(inner.next().unwrap());
+            Type::Or(Box::new(first), Box::new(second))
         }
         Rule::bottom => Type::Bottom,
         Rule::top => Type::Top,

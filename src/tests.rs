@@ -12,6 +12,32 @@ fn check(goal: Type, lambdaterme: LambdaTerm) {
     }
 }
 
+#[test]
+// a ou b => b ou a
+fn or_1() {
+    let goal = Type::imp(
+        Type::or(
+            Type::var("a"),
+            Type::var("b"),
+        ),
+        Type::or(
+            Type::var("b"),
+            Type::var("a"),
+        ),
+    ).removenot();
+
+    let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
+    let lambdaterme = lambdaterme.introv("h1".to_string());
+    let lambdaterme = lambdaterme.elim("h1".to_string());
+    let lambdaterme = lambdaterme.introv("h2".to_string());
+    let lambdaterme = lambdaterme.right();
+    let lambdaterme = lambdaterme.exact("h2".to_string());
+    let lambdaterme = lambdaterme.introv("h3".to_string());
+    let lambdaterme = lambdaterme.left();
+    let lambdaterme = lambdaterme.exact("h3".to_string());
+
+    check(goal, lambdaterme);
+}
 
 #[test]
 // (A ^ (not A)) => B
