@@ -1,7 +1,5 @@
 #![feature(box_patterns)]
 
-use std::clone;
-use std::cmp::{max, min};
 use std::collections::{HashMap, VecDeque};
 use std::fs::File;
 use std::io::{self, BufReader, Write};
@@ -418,6 +416,7 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {
         match current {
             LambdaTerm::Var(_) => {},
             LambdaTerm::Couple(ref left, ref right)
+            | LambdaTerm::Match(_, ref left, ref right)
             | LambdaTerm::Union(ref left, ref right)
             | LambdaTerm::App(ref left, ref right) => {
                 let mut left_path = path.clone();
@@ -428,7 +427,9 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {
                 right_path.push(*right.clone());
                 queue.push_back((*right.clone(), right_path));
             },
-            LambdaTerm::Abs(_, _, ref body)
+            LambdaTerm::Left(ref body, _)
+            | LambdaTerm::Right(ref body, _)
+            | LambdaTerm::Abs(_, _, ref body)
             | LambdaTerm::ExFalso(_, ref body) => {
                 let mut new_path = path.clone();
                 new_path.push(*body.clone());
@@ -459,6 +460,11 @@ fn get_goal_count(lambda: LambdaTerm) -> usize {
             total += get_goal_count(term1);
             total += get_goal_count(term2);
         }
+
+        LambdaTerm::Match(_, box term1, box term2) => {
+            total += get_goal_count(term1);
+            total += get_goal_count(term2);
+        }
         LambdaTerm::App(box first, box second) => {
             total += get_goal_count(first);
             total += get_goal_count(second);
@@ -468,6 +474,12 @@ fn get_goal_count(lambda: LambdaTerm) -> usize {
         }
         LambdaTerm::ExFalso(_t, box proof) => {
             total += get_goal_count(proof);
+        }
+        LambdaTerm::Left(box lambda, _) => {
+            total += get_goal_count(lambda);
+        }
+        LambdaTerm::Right(box lambda, _) => {
+            total += get_goal_count(lambda);
         }
     }
     total

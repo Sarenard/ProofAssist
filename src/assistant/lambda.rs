@@ -22,7 +22,10 @@ pub enum LambdaTerm {
     #[allow(dead_code)]
     Snd(String), // for Couple
     Goal(Type, usize),
-    ExFalso(Type, Box<LambdaTerm>)
+    ExFalso(Type, Box<LambdaTerm>),
+    Left(Box<LambdaTerm>, Type),
+    Right(Box<LambdaTerm>, Type),
+    Match(Type, Box<LambdaTerm>, Box<LambdaTerm>), // Match(lambda, case1, case2)
 }
 
 #[allow(dead_code)]
@@ -51,6 +54,16 @@ impl LambdaTerm {
             }
             LambdaTerm::ExFalso(_t, box proof) => {
                 found |= proof.containsgoal();
+            }
+            LambdaTerm::Left(box lambda, _typ) => {
+                found |= lambda.containsgoal();
+            }
+            LambdaTerm::Right(box lambda, _typ) => {
+                found |= lambda.containsgoal();
+            }
+            LambdaTerm::Match(typ, box case1, box case2) => {
+                found |= case1.containsgoal();
+                found |= case2.containsgoal();
             }
         }
         found
@@ -165,6 +178,15 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Abs(str, typ, box lambdaterm) => {
             LambdaTerm::Abs(str, typ, Box::new(aux_right(lambdaterm)))
         }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_right(lambda)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_right(lambda)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(typ, Box::new(aux_right(case1)), Box::new(aux_right(case2)))
+        }
     }
 }
 
@@ -208,6 +230,15 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Abs(str, typ, box lambdaterm) => {
             LambdaTerm::Abs(str, typ, Box::new(aux_left(lambdaterm)))
         }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_left(lambda)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_left(lambda)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(typ, Box::new(aux_left(case1)), Box::new(aux_left(case2)))
+        }
     }
 }
 
@@ -240,8 +271,8 @@ fn aux_assumtion(term: LambdaTerm) -> LambdaTerm {
 
 pub fn rebuild_tree(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
     match term {
-        LambdaTerm::Var((name)) => {
-            return LambdaTerm::Var((name));
+        LambdaTerm::Var(name) => {
+            return LambdaTerm::Var(name);
         }
         LambdaTerm::Couple(box left, box right) => {
             let leftside = rebuild_tree(left, goal_index);
@@ -292,7 +323,15 @@ pub fn rebuild_tree(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
         }
         LambdaTerm::Snd(name) => {
             return LambdaTerm::Snd(name);
-
+        }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(rebuild_tree(lambda, goal_index)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(rebuild_tree(lambda, goal_index)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(typ, Box::new(rebuild_tree(case1, goal_index)), Box::new(rebuild_tree(case2, goal_index)))
         }
     }
 }
@@ -343,6 +382,19 @@ fn aux_absurd(root: LambdaTerm, statement: Type, context: HashMap<String, Type>)
             let mut new_context = context.clone();
             new_context.insert(str.clone(), typ.clone());
             LambdaTerm::Abs(str, typ, Box::new(aux_absurd(lambdaterm, statement, new_context)))
+        }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_absurd(lambda, statement, context)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_absurd(lambda, statement, context)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(
+                typ,
+                Box::new(aux_absurd(case1, statement.clone(), context.clone())), 
+                Box::new(aux_absurd(case2, statement, context))
+            )
         }
     }
 }
@@ -443,6 +495,19 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> L
             new_context.insert(str.clone(), typ.clone());
             LambdaTerm::Abs(str, typ, Box::new(aux_elim(lambdaterm, name, new_context)))
         }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_elim(lambda, name, context)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_elim(lambda, name, context)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(
+                typ,
+                Box::new(aux_elim(case1, name.clone(), context.clone())), 
+                Box::new(aux_elim(case2, name.clone(), context.clone()))
+            )
+        }
     }
 }
 
@@ -484,6 +549,19 @@ fn aux_split(root: LambdaTerm, context: HashMap<String, Type>) -> LambdaTerm {
             let mut new_context = context.clone();
             new_context.insert(str.clone(), typ.clone());
             LambdaTerm::Abs(str, typ, Box::new(aux_split(lambdaterm, new_context)))
+        }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_split(lambda, context)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_split(lambda, context)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(
+                typ,
+                Box::new(aux_split(case1, context.clone())), 
+                Box::new(aux_split(case2, context))
+            )
         }
     }
 }
@@ -567,6 +645,32 @@ fn compute_type(lambdaterm: LambdaTerm, mytypes: HashMap<String, Type>) -> Type 
                 other => panic!("Error, unknown : {:?}", other)
             }
         }
+        LambdaTerm::Left(box lambda, typ) => {
+            return Type::or(compute_type(lambda, mytypes), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            return Type::or(typ, compute_type(lambda, mytypes))
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            let type1 = compute_type(case1, mytypes.clone());
+            let type2 = compute_type(case2, mytypes);
+            match (type1, type2, typ) {
+                (
+                    Type::Imp(box a, box b),
+                    Type::Imp(box c, box d),
+                    Type::Or(box e, box f)
+                ) 
+                if (b == d && a == e && c == f)
+                => {
+                    return b;
+                }
+                _ => {
+                    panic!("Erreur")
+                }
+            }
+
+            Type::Top
+        }
     }
 }
 
@@ -595,6 +699,15 @@ fn aux_intro(root: LambdaTerm, name: String) -> LambdaTerm {
         }
         LambdaTerm::Abs(str, typ, box lambdaterm) => {
             LambdaTerm::Abs(str, typ, Box::new(aux_intro(lambdaterm, name)))
+        }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_intro(lambda, name)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_intro(lambda, name)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(typ, Box::new(aux_intro(case1, name.clone())), Box::new(aux_intro(case2, name)))
         }
     }
 }
@@ -637,6 +750,19 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
             new_context.insert(str.clone(), typ.clone());
             LambdaTerm::Abs(str, typ, Box::new(aux_exact(lambdaterm, name, new_context)))
         }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_exact(lambda, name, context)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_exact(lambda, name, context)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(
+                typ,
+                Box::new(aux_exact(case1, name.clone(), context.clone())), 
+                Box::new(aux_exact(case2, name, context))
+            )
+        }
     }
 }
 
@@ -667,6 +793,15 @@ fn aux_cut(root: LambdaTerm, type_a: Type) -> LambdaTerm{
         }
         LambdaTerm::Abs(str, typ, box lambdaterm) => {
             LambdaTerm::Abs(str, typ, Box::new(lambdaterm.cut(type_a)))
+        }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(lambda.cut(type_a)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(lambda.cut(type_a)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(typ, Box::new(case1.cut(type_a.clone())), Box::new(case2.cut(type_a)))
         }
     }
 }
@@ -721,6 +856,19 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
             let mut new_context = context.clone();
             new_context.insert(str.clone(), typ.clone());
             LambdaTerm::Abs(str, typ, Box::new(aux_apply(lambdaterm, name, new_context)))
+        }
+        LambdaTerm::Left(box lambda, typ) => {
+            LambdaTerm::Left(Box::new(aux_apply(lambda, name, context)), typ)
+        }
+        LambdaTerm::Right(box lambda, typ) => {
+            LambdaTerm::Right(Box::new(aux_apply(lambda, name, context)), typ)
+        }
+        LambdaTerm::Match(typ, box case1, box case2) => {
+            LambdaTerm::Match(
+                typ, 
+                Box::new(aux_apply(case1, name.clone(), context.clone())), 
+                Box::new(aux_apply(case2, name, context))
+            )
         }
     }
 }
