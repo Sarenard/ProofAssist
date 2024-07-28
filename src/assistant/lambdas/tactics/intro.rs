@@ -6,14 +6,24 @@ use lambda::{
     update_counter,
 };
 
-use lambdas::update_nbs::update_goals_nb;
+use lambdas::{
+    update_nbs::update_goals_nb,
+    beta_reduc::substitute,
+};
 
 fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
     match root {
         // we match for a goal of the good type
         LambdaTerm::Goal(box LambdaTerm::Pi(name, box term1, box term2), nb) 
         if nb == 1 => {
-            LambdaTerm::func(name, term1, LambdaTerm::goal(term2))
+            let total_x = update_counter("x");
+            let new_name = format!("x{}", total_x);
+            let term = LambdaTerm::Var(new_name);
+            LambdaTerm::func(
+                name.clone(),
+                term1,
+                LambdaTerm::goal(substitute(term2, name, term)),
+            )
         }
         // we propagate
         LambdaTerm::Var(..) 

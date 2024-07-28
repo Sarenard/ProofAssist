@@ -5,7 +5,7 @@ use lambda::LambdaTerm;
 
 use lambdas::free_var::free_var;
 
-fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> LambdaTerm {
+pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
         LambdaTerm::Var(name) => {
             if name == var_name {
@@ -85,7 +85,7 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
     }
 }
 
-fn beta_reduce(lambda: LambdaTerm) -> LambdaTerm {
+pub fn beta_reduce(lambda: LambdaTerm) -> LambdaTerm {
     match betareduc_step(lambda.clone(), vec![]) {
         Some(reduced) => beta_reduce(reduced),
         None => lambda
