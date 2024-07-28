@@ -31,8 +31,8 @@ fn main() {
     // let goal = get_goal();
     let goal = LambdaTerm::pi(
         "x".to_string(),
-        LambdaTerm::varnb("a", 1), 
-        LambdaTerm::varnb("a", 1), 
+        LambdaTerm::var("a"), 
+        LambdaTerm::var("a"), 
     );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);

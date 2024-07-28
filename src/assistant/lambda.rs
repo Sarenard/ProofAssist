@@ -6,7 +6,7 @@ use lambdas::compute_type::compute_type;
 
 #[derive(Debug, Clone)]
 pub enum LambdaTerm {
-    Var(String, usize),
+    Var(String),
     Goal(Box<LambdaTerm>, usize),
     Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Func(String, Box<LambdaTerm>, Box<LambdaTerm>),

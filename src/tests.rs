@@ -16,8 +16,8 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 fn better_apply() {
     let goal = LambdaTerm::pi(
         "x".to_string(),
-        LambdaTerm::varnb("a", 1), 
-        LambdaTerm::varnb("a", 1), 
+        LambdaTerm::var("a"), 
+        LambdaTerm::var("a"), 
     );
 
     let lambdaterme = LambdaTerm::goal(goal.clone());

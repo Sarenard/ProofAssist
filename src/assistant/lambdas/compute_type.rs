@@ -8,7 +8,7 @@ use lambda::{
 
 pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     match lambdaterm.clone() {
-        LambdaTerm::Var(name, _nb) => {
+        LambdaTerm::Var(name) => {
             let res = context.get(&name).unwrap().clone();
             res
         }

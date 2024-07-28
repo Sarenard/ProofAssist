@@ -6,11 +6,11 @@ impl PartialEq for LambdaTerm {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (
-                Self::Var(l0, l1), 
-                Self::Var(r0, r1)
+                Self::Var(l0), 
+                Self::Var(r0)
             ) => 
             {
-                l0 == r0 && l1 == r1
+                l0 == r0
             }
             (
                 Self::Goal(l0, l1), 
