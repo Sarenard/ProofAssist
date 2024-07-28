@@ -82,6 +82,14 @@ If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(
 - Removed everything
 - Added back Lambdaterms : Var, Goal and Pi
 
+## commands added
+
+### intro
+If the Goal is of the form `Pi(x, A, B)`, make it `Func(x, A, C)`, with `C` being `B` with maybe some renaming of free variables
+### assu
+If `Goal(A)` and `A` is in the hypotheses, then we complete the goal
+
 ## TODO
 
 - remake already existing commands
+- make an alpha conversion routine
