@@ -114,7 +114,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             }
             let first = lines.remove(0);
             let parse_result = SimpleParser::parse(
-                Rule::typ, 
+                Rule::lambdaexpr, 
                 first.as_str()
             );
             let mut val = parse_result.unwrap();
@@ -268,7 +268,7 @@ fn get_goal() -> LambdaTerm {
             "Goal" => {
                 let rest = splitted.collect::<Vec<&str>>().concat();
                 let parse_result = SimpleParser::parse(
-                    Rule::typ, 
+                    Rule::lambdaexpr, 
                     &rest
                 );
                 let mut val = match parse_result {

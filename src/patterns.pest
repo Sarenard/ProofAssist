@@ -1,45 +1,19 @@
-typ       =  { impl_type | and_type | not_type | var | bottom | top | or_type}
-impl_type =  { "Impl(" ~ typ ~ "," ~ typ ~ ")" }
-and_type  =  { "And(" ~ typ ~ "," ~ typ ~ ")" }
-not_type  =  { "Not(" ~ typ ~ ")" }
-or_type   =  { "Or(" ~ typ ~ "," ~ typ ~ ")" }
-var       =  { "Var(" ~ string ~ ")" }
-bottom    =  { "Bottom" }
-top       =  { "Top" }
-
 WHITESPACE = _{ " " | "\t" | "\n" }
+
+lambdaexpr = _{
+    Goal
+}
+
+Goal = { "Goal(" ~ lambdaexpr ~ "," ~ usize ~ ")" }
 
 // Define the grammar for the OP enum
 OP = _{
-    Intro
-    | Introv
-    | Intros
-    | Split
-    | Exact
-    | Cut
-    | Absurd
-    | Apply
-    | Elim
-    | Load
+    Load
     | Use
-    | Assumption
-    | Left
-    | Right
 }
 
-Intro = { "Intro" }
-Introv = { "Introv(" ~ string ~ ")" }
-Intros = { "Intros" }
-Split = { "Split" }
-Exact = { "Exact(" ~ string ~ ")" }
-Cut = { "Cut(" ~ typ ~ ")" }
-Absurd = { "Absurd(" ~ typ ~ ")" }
-Apply = { "Apply(" ~ string ~ ")" }
-Elim = { "Elim(" ~ string ~ ")" }
 Load = { "Load(" ~ string ~ ")" }
 Use = { "Use(" ~ string ~ ")" }
-Assumption = { "Assumption" }
-Left = { "Left" }
-Right = { "Right" }
 
 string = { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }
+usize = @{ ASCII_DIGIT+ }
