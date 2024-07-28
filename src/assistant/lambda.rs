@@ -759,10 +759,10 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> 
         }
     }
     match root {
-        LambdaTerm::Goal(typeb, nb) if nb == 1 => {
+        LambdaTerm::Goal(_typeb, nb) if nb == 1 => {
             let type_objective = context.get(&name).unwrap().clone();
             let mut myvec: Vec<Type> = vec![];
-            let types = get_types(type_objective.clone(), &mut myvec);
+            let _types = get_types(type_objective.clone(), &mut myvec);
             // println!("types : {:?}, vec : {:?}, type_objective : {:?}", types, myvec, type_objective);
             let constructed = construct(&mut myvec, name);
             // println!("new_thing {:?}", constructed);

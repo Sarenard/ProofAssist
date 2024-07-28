@@ -83,6 +83,7 @@ impl Type {
 }
 
 impl Type {
+    #[allow(dead_code)]
     pub fn removenot(self) -> Type {
         match self {
             Type::Not(box rest) => {

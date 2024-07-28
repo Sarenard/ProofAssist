@@ -73,3 +73,12 @@ If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(
 - fix some theorem-related panics
 - make an error system
 - make a cancel command
+
+# 28/07/2024
+
+## TODO
+
+- make it so apply and others commands can also take theorems
+- make it so i dont have to save theorems (?)
+- make it so that exact can be saved
+- make it so that exact can be used with an arbitrary lambda expression (+ lambda parser in .pest)

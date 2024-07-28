@@ -24,7 +24,8 @@ use assistant::lambda::{rebuild_tree, LambdaTerm as LambdaTerm};
 use assistant::types::Type as Type;
 
 fn main() {
-    // let goal = get_goal();
+    let goal = get_goal();
+    /*
     let goal = Type::imp(
         Type::imp(
             Type::var("a"),
@@ -41,7 +42,6 @@ fn main() {
             )
         )
     ).removenot();
-    /*
     let goal = Type::imp(
         Type::var("a"),
         Type::imp(
