@@ -1,3 +1,0 @@
-Impl(Var("A"), Impl(Var("B"), Var("A")))
-Load("base")
-Use("base")

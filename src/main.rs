@@ -21,38 +21,9 @@ mod assistant;
 mod tests;
 
 use assistant::lambda::{rebuild_tree, LambdaTerm as LambdaTerm};
-use assistant::types::Type as Type;
 
 fn main() {
     let goal = get_goal();
-    /*
-    let goal = Type::imp(
-        Type::imp(
-            Type::var("a"),
-            Type::imp(
-                Type::var("b"),
-                Type::var("c"),
-            ),
-        ),
-        Type::imp(
-            Type::var("a"),
-            Type::imp(
-                Type::var("b"),
-                Type::var("c"),
-            )
-        )
-    ).removenot();
-    let goal = Type::imp(
-        Type::var("a"),
-        Type::imp(
-            Type::var("b"),
-            Type::or(
-                Type::var("b"),
-                Type::var("a"),
-            ),
-        )
-    ).removenot();
-    */
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
 
@@ -75,12 +46,12 @@ fn main() {
     }
 }
 
-fn emulate(goal: Type, real: bool) -> (LambdaTerm, Vec<OP>) {
+fn emulate(goal: LambdaTerm, real: bool) -> (LambdaTerm, Vec<OP>) {
     let mut operations: Vec<OP> = vec![];
 
-    let mut lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
+    let mut lambdaterme = LambdaTerm::Goal(Box::new(goal.clone()), 0);
 
-    let mut hypothesis : HashMap<String, (Type, Vec<OP>)> = HashMap::new();
+    let mut hypothesis : HashMap<String, (LambdaTerm, Vec<OP>)> = HashMap::new();
 
     while lambdaterme.clone().containsgoal() {
         // to fix problems
@@ -99,18 +70,15 @@ fn emulate(goal: Type, real: bool) -> (LambdaTerm, Vec<OP>) {
     (lambdaterme, operations)
 }
 
-fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (Type, Vec<OP>)>) {
+fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (LambdaTerm, Vec<OP>)>) {
     let goals = bfs_find_goals(lambdaterme.clone());
     // we get the good one
-    let paths: Vec<(Type, Vec<LambdaTerm>)> = goals.iter().cloned()
+    let paths: Vec<(LambdaTerm, Vec<LambdaTerm>)> = goals.iter().cloned()
         .filter(|x| match x.1.last().unwrap().clone() {LambdaTerm::Goal(_, i) => i == 1, _ => false}).collect();
     let result = paths.first().unwrap().clone();
-    let mut hypotheses: HashMap<String, Type> = HashMap::new();
+    let mut hypotheses: HashMap<String, LambdaTerm> = HashMap::new();
     for elt in result.1 {
         match elt {
-            LambdaTerm::Abs(name, typ, _) => {
-                hypotheses.insert(name, typ);
-            }
             _ => {}
         }
     }
@@ -130,14 +98,11 @@ fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (Type, Vec<OP>)>
     println!("{:?}", result.0);
 }
 
-fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Type, Vec<OP>)>, operations: Vec<OP>, real: bool) 
--> (LambdaTerm, HashMap<String, (Type, Vec<OP>)>, Vec<OP>) {
+fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (LambdaTerm, Vec<OP>)>, operations: Vec<OP>, real: bool) 
+-> (LambdaTerm, HashMap<String, (LambdaTerm, Vec<OP>)>, Vec<OP>) {
     match op {
         OP::Nothing => {
             (lambdaterme, hypothesis, operations)
-        }
-        OP::Assumption => {
-            (lambdaterme.assumption(), hypothesis, operations)
         }
         OP::Load(name) => {
             use std::io::BufRead;
@@ -153,7 +118,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Typ
                 first.as_str()
             );
             let mut val = parse_result.unwrap();
-            let local_goal = parse_type(val.next().unwrap());
+            let local_goal = parse_lambdaterm(val.next().unwrap());
             let mut proof_ops: Vec<OP> = vec![];
             for line in lines {
                 let mut parse_result = SimpleParser::parse(
@@ -187,44 +152,8 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Typ
                     OP::Nothing => {
 
                     }
-                    OP::Left => {
-                        new_operations.push(OP::Left)
-                    }
-                    OP::Right => {
-                        new_operations.push(OP::Right)
-                    }
-                    OP::Intro => {
-                        new_operations.push(OP::Intro);
-                    }
                     OP::Use(name) => {
                         new_operations.push(OP::Use(name));
-                    }
-                    OP::Introv(name) => {
-                        new_operations.push(OP::Introv(name));
-                    }
-                    OP::Intros => {
-                        new_operations.push(OP::Intros);
-                    }
-                    OP::Split => {
-                        new_operations.push(OP::Split);
-                    }
-                    OP::Exact(_name) => {
-                        panic!("Cant use Exact in theorem did you want to use assumtion!");
-                    }
-                    OP::Cut(_typ) => {
-                        todo!()
-                    }
-                    OP::Absurd(_typ) => {
-                        todo!()
-                    }
-                    OP::Apply(name) => {
-                        new_operations.push(OP::Apply(name));
-                    }
-                    OP::Elim(name) => {
-                        new_operations.push(OP::Elim(name));
-                    }
-                    OP::Assumption => {
-                        new_operations.push(OP::Assumption);
                     }
                     OP::Load(name) => {
                         new_operations.push(OP::Load(name));
@@ -242,42 +171,6 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Typ
             
             (c_lambdaterme, c_hypothesis, c_operations)
         }
-        OP::Intro => {
-            let (_name, new_lambdaterme) = lambdaterme.intro();
-            (new_lambdaterme, hypothesis, operations)
-        }
-        OP::Introv(name) => {
-            let lt = lambdaterme.introv(name.to_string());
-            (lt, hypothesis, operations)
-        }
-        OP::Intros => {
-            let (_names, new_lambdaterme) = lambdaterme.intros();
-            (new_lambdaterme, hypothesis, operations)
-        }
-        OP::Split => {
-            (lambdaterme.split(), hypothesis, operations)
-        }
-        OP::Left => {
-            (lambdaterme.left(), hypothesis, operations)
-        }
-        OP::Right => {
-            (lambdaterme.right(), hypothesis, operations)
-        }
-        OP::Exact(name) => {
-            (lambdaterme.exact(name.to_string()), hypothesis, operations)
-        }
-        OP::Cut(_typ) => {
-            todo!()
-        }
-        OP::Absurd(_typ) => {
-            todo!()
-        }
-        OP::Apply(name) => {
-            (lambdaterme.apply(name.to_string()), hypothesis, operations)
-        }
-        OP::Elim(name) => {
-            (lambdaterme.elim(name.to_string()), hypothesis, operations)
-        }
     }
 }
 
@@ -290,15 +183,6 @@ fn get_command(operations: &mut Vec<OP>) {
     let mut splitted = input.split_whitespace().collect::<Vec<&str>>().into_iter();
     let command = splitted.next().unwrap();
     match command {
-        "left" => {
-            operations.push(OP::Left)
-        }
-        "right" => {
-            operations.push(OP::Right)
-        }
-        "assu" => {
-            operations.push(OP::Assumption);
-        }
         "use" => {
             let theorem_name = splitted.next().unwrap();
             operations.push(OP::Use(theorem_name.to_string()))
@@ -307,42 +191,6 @@ fn get_command(operations: &mut Vec<OP>) {
             let theorem_name = splitted.next().unwrap();
             operations.push(OP::Load(theorem_name.to_string()))
         }
-        "intro" => {
-            let name_var = splitted.next();
-            match name_var {
-                None => {
-                    operations.push(OP::Intro);
-                }
-                Some(name) => {
-                    operations.push(OP::Introv(name.to_string()));
-                }
-            }
-        }
-        "intros" => {
-            operations.push(OP::Intros);
-            
-        }
-        "split" => {
-            operations.push(OP::Split);
-        }
-        "exact" => {
-            let name_var = splitted.next().unwrap();
-            operations.push(OP::Exact(name_var.to_string()));
-        }
-        "cut" => {
-            todo!()
-        }
-        "absurd" => {
-            todo!()
-        }
-        "apply" => {
-            let name = splitted.next().unwrap();
-            operations.push(OP::Apply(name.to_string()));
-        }
-        "elim" => {
-            let name = splitted.next().unwrap();
-            operations.push(OP::Elim(name.to_string()));
-        }
         _ => {
             println!("Unknown command.");
             operations.push(OP::Nothing)
@@ -350,7 +198,7 @@ fn get_command(operations: &mut Vec<OP>) {
     }
 }
 
-fn save(goal: Type, operations: Vec<OP>) {
+fn save(goal: LambdaTerm, operations: Vec<OP>) {
     println!("Saving...");
     print!("Name of the theorem : ");
     io::stdout().flush().unwrap();
@@ -366,44 +214,8 @@ fn save(goal: Type, operations: Vec<OP>) {
             OP::Nothing => {
 
             }
-            OP::Left => {
-                writeln!(theorem_file, "Left").unwrap();
-            }
-            OP::Right => {
-                writeln!(theorem_file, "Right").unwrap();
-            }
-            OP::Assumption => {
-                writeln!(theorem_file, "Assumption").unwrap();
-            }
-            OP::Intro => {
-                writeln!(theorem_file, "Intro").unwrap();
-            }
             OP::Use(name) => {
                 writeln!(theorem_file, "Use(\"{}\")", name).unwrap();
-            }
-            OP::Introv(name) => {
-                writeln!(theorem_file, "Introv(\"{}\")", name).unwrap();
-            }
-            OP::Intros => {
-                writeln!(theorem_file, "Intros").unwrap();
-            }
-            OP::Split => {
-                writeln!(theorem_file, "Split").unwrap();
-            }
-            OP::Exact(name) => {
-                writeln!(theorem_file, "Exact(\"{}\")", name).unwrap();
-            }
-            OP::Cut(_typ) => {
-                todo!()
-            }
-            OP::Absurd(_typ) => {
-                todo!()
-            }
-            OP::Apply(name) => {
-                writeln!(theorem_file, "Apply(\"{}\")", name).unwrap();
-            }
-            OP::Elim(name) => {
-                writeln!(theorem_file, "Elim(\"{}\")", name).unwrap();
             }
             OP::Load(name) => {
                 writeln!(theorem_file, "Load(\"{}\")", name).unwrap();
@@ -412,38 +224,17 @@ fn save(goal: Type, operations: Vec<OP>) {
     }
 }
 
-fn bfs_find_goals(root: LambdaTerm) -> Vec<(Type, Vec<LambdaTerm>)> {
+fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
     let mut queue: VecDeque<(LambdaTerm, Vec<LambdaTerm>)> = VecDeque::new();
-    let mut goals: Vec<(Type, Vec<LambdaTerm>)> = Vec::new();
+    let mut goals: Vec<(LambdaTerm, Vec<LambdaTerm>)> = Vec::new();
 
     queue.push_back((root.clone(), vec![root]));
 
     while let Some((current, path)) = queue.pop_front() {
         match current {
-            LambdaTerm::Var(_) => {},
-            LambdaTerm::Couple(ref left, ref right)
-            | LambdaTerm::Match(_, ref left, ref right)
-            | LambdaTerm::App(ref left, ref right) => {
-                let mut left_path = path.clone();
-                left_path.push(*left.clone());
-                queue.push_back((*left.clone(), left_path));
-
-                let mut right_path = path.clone();
-                right_path.push(*right.clone());
-                queue.push_back((*right.clone(), right_path));
-            },
-            LambdaTerm::Left(ref body, _)
-            | LambdaTerm::Right(ref body, _)
-            | LambdaTerm::Abs(_, _, ref body)
-            | LambdaTerm::ExFalso(_, ref body) => {
-                let mut new_path = path.clone();
-                new_path.push(*body.clone());
-                queue.push_back((*body.clone(), new_path));
-            },
-            LambdaTerm::Goal(ref ty, _nb) => {
+            LambdaTerm::Goal(box ref ty, _nb) => {
                 goals.push((ty.clone(), path.clone()));
             },
-            LambdaTerm::Fst(_) | LambdaTerm::Snd(_) => {},
         }
     }
 
@@ -456,37 +247,12 @@ fn get_goal_count(lambda: LambdaTerm) -> usize {
         LambdaTerm::Goal(..) => {
             total += 1
         }
-        LambdaTerm::Var(..) | LambdaTerm::Fst(..) | LambdaTerm::Snd(..) => {},
-        LambdaTerm::Couple(box term1, box term2) => {
-            total += get_goal_count(term1);
-            total += get_goal_count(term2);
-        }
-        LambdaTerm::Match(_, box term1, box term2) => {
-            total += get_goal_count(term1);
-            total += get_goal_count(term2);
-        }
-        LambdaTerm::App(box first, box second) => {
-            total += get_goal_count(first);
-            total += get_goal_count(second);
-        }
-        LambdaTerm::Abs(_str, _typ, box lambdaterm) => {
-            total += get_goal_count(lambdaterm);
-        }
-        LambdaTerm::ExFalso(_t, box proof) => {
-            total += get_goal_count(proof);
-        }
-        LambdaTerm::Left(box lambda, _) => {
-            total += get_goal_count(lambda);
-        }
-        LambdaTerm::Right(box lambda, _) => {
-            total += get_goal_count(lambda);
-        }
     }
     total
 }
 
 #[allow(dead_code)]
-fn get_goal() -> Type {
+fn get_goal() -> LambdaTerm {
     loop {
         let mut input = String::new();
         print!("> ");
@@ -512,7 +278,7 @@ fn get_goal() -> Type {
                         continue;
                     },
                 };
-                let typ = parse_type(val.next().unwrap());
+                let typ = parse_lambdaterm(val.next().unwrap());
                 println!("Goal choosen.");
                 return typ;
             }
@@ -521,89 +287,12 @@ fn get_goal() -> Type {
     }
 }
 
-fn parse_type(pair: pest::iterators::Pair<Rule>) -> Type {
-    match pair.as_rule() {
-        Rule::typ => {
-            let inner_pair = pair.into_inner().next().unwrap();
-            parse_type(inner_pair)
-        }
-        Rule::var => {
-            let inner = pair.into_inner().next().unwrap();
-            let text = inner.as_str();
-            let length = text.len();
-            let text = &text[1..length-1];
-            Type::Var(text.to_string())
-        }
-        Rule::impl_type => {
-            let mut inner = pair.into_inner();
-            let first = parse_type(inner.next().unwrap());
-            let second = parse_type(inner.next().unwrap());
-            Type::Imp(Box::new(first), Box::new(second))
-        }
-        Rule::and_type => {
-            let mut inner = pair.into_inner();
-            let first = parse_type(inner.next().unwrap());
-            let second = parse_type(inner.next().unwrap());
-            Type::And(Box::new(first), Box::new(second))
-        }
-        Rule::not_type => {
-            let inner = pair.into_inner().next().unwrap();
-            let ty = parse_type(inner);
-            Type::Not(Box::new(ty))
-        }
-        Rule::or_type => {
-            let mut inner = pair.into_inner();
-            let first = parse_type(inner.next().unwrap());
-            let second = parse_type(inner.next().unwrap());
-            Type::Or(Box::new(first), Box::new(second))
-        }
-        Rule::bottom => Type::Bottom,
-        Rule::top => Type::Top,
-        _ => unreachable!(),
-    }
+fn parse_lambdaterm(pair: pest::iterators::Pair<Rule>) -> LambdaTerm {
+    todo!()
 }
 
 fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
     match pair.as_rule() {
-        Rule::Intro => {
-            OP::Intro
-        }
-        Rule::Introv => {
-            let mut inner = pair.into_inner();
-            let text = inner.next().unwrap().as_str().to_string();
-            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            OP::Introv(text)
-        }
-        Rule::Intros => {
-            OP::Intros
-        }
-        Rule::Split => {
-            OP::Split
-        }
-        Rule::Exact => {
-            let mut inner = pair.into_inner();
-            let text = inner.next().unwrap().as_str().to_string();
-            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            OP::Exact(text)
-        }
-        Rule::Cut => {
-            todo!()
-        }
-        Rule::Absurd => {
-            todo!()
-        }
-        Rule::Apply => {
-            let mut inner = pair.into_inner();
-            let text = inner.next().unwrap().as_str().to_string();
-            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            OP::Apply(text)
-        }
-        Rule::Elim => {
-            let mut inner = pair.into_inner();
-            let text = inner.next().unwrap().as_str();
-            let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
-            OP::Elim(text)
-        }
         Rule::Load => {
             let mut inner = pair.into_inner();
             let text = inner.next().unwrap().as_str().to_string();
@@ -615,15 +304,6 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
             let text = inner.next().unwrap().as_str().to_string();
             let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
             OP::Use(text)
-        }
-        Rule::Assumption => {
-            OP::Assumption
-        }
-        Rule::Left => {
-            OP::Left
-        }
-        Rule::Right => {
-            OP::Right
         }
         other => panic!("Other : {:?}", other),
     }

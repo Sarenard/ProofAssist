@@ -78,7 +78,7 @@ If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(
 
 ## main new things
 
-- Archiving of the `intuitionist proofassist` branch, as i'm going for dependant type theory 
+- Archiving of the `intuitionist` branch, as i'm going for dependant type theory 
 
 ## TODO
 
