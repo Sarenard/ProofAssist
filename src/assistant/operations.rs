@@ -7,6 +7,7 @@ pub enum OP {
     // general
     Intro,
     Assumption,
+    Apply(String),
 
     Nothing
 }

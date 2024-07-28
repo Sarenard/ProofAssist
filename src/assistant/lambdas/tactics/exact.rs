@@ -10,11 +10,15 @@ use lambda::{
 
 use lambdas::update_nbs::update_goals_nb;
 
+use crate::DEBUG;
+
 fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     let goal_h = context.get(&name).unwrap_or(&LambdaTerm::Error).clone();
+    println!("goal : {:?} name : {}", goal_h, name);
     match root {
         LambdaTerm::Goal(box goal, nb2) 
         if goal_h == goal && nb2 == 1 => {
+            if DEBUG {println!("Substitution {} {:?} {:?}", name, goal_h, goal)}
             LambdaTerm::var(&name)
         }
         // we propagate
@@ -23,20 +27,26 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         | LambdaTerm::Error => {
             root
         },
-        LambdaTerm::Pi(name, box first, box second) => {
+        LambdaTerm::Pi(func_name, box first, box second) => {
             LambdaTerm::pi(
-                name.clone(),
+                func_name.clone(),
                 aux_exact(first, name.clone(), context.clone()),
                 aux_exact(second, name, context)
             )
         }
-        LambdaTerm::Func(name, box first, box second) => {
+        LambdaTerm::Func(func_name, box first, box second) => {
             let mut new_context = context.clone();
-            new_context.insert(name.clone(), first.clone());
+            new_context.insert(func_name.clone(), first.clone());
             LambdaTerm::func(
-                name.clone(),
+                func_name.clone(),
                 aux_exact(first, name.clone(), new_context.clone()),
                 aux_exact(second, name, new_context)
+            )
+        }
+        LambdaTerm::App(box first, box second) => {
+            LambdaTerm::app(
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name, context)
             )
         }
     }

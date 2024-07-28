@@ -10,6 +10,7 @@ pub enum LambdaTerm {
     Goal(Box<LambdaTerm>, usize),
     Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Func(String, Box<LambdaTerm>, Box<LambdaTerm>),
+    App(Box<LambdaTerm>, Box<LambdaTerm>),
 
     Error,
 }

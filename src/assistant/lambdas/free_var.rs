@@ -25,6 +25,16 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
 
             vec_tot
         }
+        LambdaTerm::App(box first, box second) => {
+            let mut vec_tot: Vec<String> = vec![];
+            let variables_typ = free_var(first);
+            let variables_body: Vec<String> = free_var(second);
+
+            vec_tot.extend(variables_typ);
+            vec_tot.extend(variables_body);
+
+            vec_tot
+        }
         LambdaTerm::Error => unreachable!()
     }
 }

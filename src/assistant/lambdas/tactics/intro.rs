@@ -45,6 +45,12 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(second, var_name)
             )
         }
+        LambdaTerm::App(box first, box second) => {
+            LambdaTerm::app(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
     }
 }
 

@@ -37,4 +37,10 @@ impl LambdaTerm {
             Box::new(term2),
         )
     }
+    pub fn app(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::App(
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
 }

@@ -30,6 +30,19 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
             let body_type = compute_type(body, new_context);
             LambdaTerm::pi(var, typ, body_type)
         }
+        LambdaTerm::App(box first, box second) => {
+            let functype = compute_type(first, context.clone());
+            let bodytype = compute_type(second, context);
+            match functype {
+                LambdaTerm::Func(_name, box type1, box type2) if type1 == bodytype => {
+                    return type2
+                }
+                LambdaTerm::Pi(_name, box type1, box type2) if type1 == bodytype => {
+                    return type2
+                }
+                other => panic!("Error, unknown : {:?}", other)
+            }
+        }
 
     }
 }

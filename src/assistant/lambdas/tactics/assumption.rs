@@ -30,6 +30,7 @@ fn aux_assumtion(term: LambdaTerm) -> LambdaTerm {
     if DEBUG {println!("local_hyp : {:?}", local_hyp);}
     for (_i, (name, typ)) in local_hyp.iter().enumerate() {
         if typ.clone() == goal_type {
+            if DEBUG {println!("applying : {:?}", name);}
             return term.exact(name.clone());
         }
     }

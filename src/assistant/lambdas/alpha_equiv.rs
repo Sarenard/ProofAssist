@@ -40,6 +40,12 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 
             first && second
         }
+        (LambdaTerm::App(box a1, box b1), LambdaTerm::App(box a2, box b2)) => {
+            let first = alpha_equiv(a1, a2);
+            let second = alpha_equiv(b1, b2);
+
+            first && second
+        }
         other => {
             if DEBUG {
                 println!("ALPHA EQUIV FALSE : {:?}", other);
@@ -83,17 +89,29 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 )
             }
         }
+        LambdaTerm::App(box first, box second) => {
+            LambdaTerm::app(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name, new_thing, second), 
+            )
+        }
         LambdaTerm::Error => panic!()
     }
 }
 
 fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
-        LambdaTerm::Var(name) => {
+        LambdaTerm::Var(_name) => {
             lambda
         }
         LambdaTerm::Goal(box typ, nb) => {
             LambdaTerm::goalnb(alpha_convert(used_names, typ), nb)
+        }
+        LambdaTerm::App(box first, box second) => {
+            LambdaTerm::app(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names, second),
+            )
         }
         LambdaTerm::Func(name, box first, box second) => {
             let new_name = gen_name(used_names.clone());

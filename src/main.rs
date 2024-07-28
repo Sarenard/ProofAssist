@@ -30,9 +30,25 @@ static DEBUG: bool = true;
 fn main() {
     // let goal = get_goal();
     let goal = LambdaTerm::pi(
-        "x".to_string(),
-        LambdaTerm::var("a"), 
-        LambdaTerm::var("a"), 
+        "n1".to_string(),
+        LambdaTerm::pi(
+            "n2".to_string(),
+            LambdaTerm::var("a"),
+            LambdaTerm::pi(
+                "n3".to_string(),
+                LambdaTerm::var("b"),
+                LambdaTerm::var("c"),
+            ),
+        ),
+        LambdaTerm::pi(
+            "n4".to_string(),
+            LambdaTerm::var("a"),
+            LambdaTerm::pi(
+                "n5".to_string(),
+                LambdaTerm::var("b"),
+                LambdaTerm::var("c"),
+            )
+        )
     );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
@@ -99,16 +115,16 @@ fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (LambdaTerm, Vec
         println!("Theorems :");
     }
     for (name, (typ, _op)) in theorems.iter() {
-        println!("{} : {:?}", name, typ);
+        println!("{} : {}", name, typ);
     }
     if !hypotheses.is_empty() {
         println!("Hypotheses :");
     }
     for (txt, typ) in hypotheses.iter() {
-        println!("{} : {:?}", txt, typ);
+        println!("{} : {}", txt, typ);
     }
     println!("{}", format!("=============== {}/{}", 1, get_goal_count(lambdaterme.clone())));
-    println!("{:?}", result.0);
+    println!("{}", result.0);
 }
 
 fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (LambdaTerm, Vec<OP>)>, operations: Vec<OP>, real: bool) 
@@ -168,7 +184,8 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
                     OP::Use(..)
                     | OP::Load(..)
                     | OP::Intro
-                    | OP::Assumption => {
+                    | OP::Assumption
+                    | OP::Apply(..) => {
                         new_operations.push(op)
                     }
                 }
@@ -186,6 +203,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
         },
         OP::Intro => {
             let (_name, new_lambdaterm) = lambdaterme.intro();
+            (new_lambdaterm, hypothesis, operations)
+        }
+        OP::Apply(name) => {
+            let new_lambdaterm = lambdaterme.apply(name);
             (new_lambdaterm, hypothesis, operations)
         }
         OP::Assumption => {
@@ -218,6 +239,10 @@ fn get_command(operations: &mut Vec<OP>) {
         "assu" => {
             operations.push(OP::Assumption)
         }
+        "apply" => {
+            let name = splitted.next().unwrap();
+            operations.push(OP::Apply(name.to_string()))
+        }
         _ => {
             println!("Command unknown.");
             operations.push(OP::Nothing)
@@ -234,7 +259,7 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
     theorem_name = theorem_name.trim().to_string();
     let theorem_name = format!("./theorems/{}.th", theorem_name);
     let mut theorem_file = File::create(theorem_name).expect("Error !");
-    let line = format!("{}", goal);
+    let line = format!("{:?}", goal);
     writeln!(theorem_file, "{}", line).unwrap();
     for op in operations {
         match op {
@@ -252,6 +277,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             }
             OP::Assumption => {
                 writeln!(theorem_file, "Assumption").unwrap();
+            }
+            OP::Apply(name) => {
+                writeln!(theorem_file, "Apply(\"{}\")", name).unwrap();
             }
         }
     }
@@ -272,6 +300,15 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
             },
             LambdaTerm::Func(_name, ref left, ref right)
             | LambdaTerm::Pi(_name, ref left, ref right) => {
+                let mut left_path = path.clone();
+                left_path.push(*left.clone());
+                queue.push_back((*left.clone(), left_path));
+
+                let mut right_path = path.clone();
+                right_path.push(*right.clone());
+                queue.push_back((*right.clone(), right_path));
+            },
+            LambdaTerm::App(ref left, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());
                 queue.push_back((*left.clone(), left_path));

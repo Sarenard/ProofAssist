@@ -12,12 +12,14 @@ OP = _{
     | Use
     | Intro
     | Assumption
+    | Apply
 }
 
 Load = { "Load(" ~ string ~ ")" }
 Use = { "Use(" ~ string ~ ")" }
 Intro = { "Intro" }
 Assumption = { "Assumption" }
+Apply = { "Apply(" ~ string ~ ")" }
 
 string = { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }
 usize = @{ ASCII_DIGIT+ }
