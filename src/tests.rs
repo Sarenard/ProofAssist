@@ -13,6 +13,40 @@ fn check(goal: Type, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// (a -> b -> c) -> a -> b -> c
+fn better_apply() {
+    let goal = Type::imp(
+        Type::imp(
+            Type::var("a"),
+            Type::imp(
+                Type::var("b"),
+                Type::var("c"),
+            ),
+        ),
+        Type::imp(
+            Type::var("a"),
+            Type::imp(
+                Type::var("b"),
+                Type::var("c"),
+            )
+        )
+    ).removenot();
+
+    let lambdaterme = LambdaTerm::Goal(goal.clone(), 0);
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.apply("hyp1".to_string());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
 // a ou b => b ou a
 fn or_1() {
     let goal = Type::imp(

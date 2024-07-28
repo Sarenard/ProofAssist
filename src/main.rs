@@ -26,14 +26,20 @@ use assistant::types::Type as Type;
 fn main() {
     // let goal = get_goal();
     let goal = Type::imp(
-        Type::or(
+        Type::imp(
             Type::var("a"),
-            Type::var("b"),
+            Type::imp(
+                Type::var("b"),
+                Type::var("c"),
+            ),
         ),
-        Type::or(
-            Type::var("b"),
+        Type::imp(
             Type::var("a"),
-        ),
+            Type::imp(
+                Type::var("b"),
+                Type::var("c"),
+            )
+        )
     ).removenot();
     /*
     let goal = Type::imp(

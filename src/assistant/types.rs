@@ -50,7 +50,7 @@ impl fmt::Debug for Type {
                 if **t2 == Type::Bottom {
                     write!(f, "~({:?})", t1)
                 } else {
-                    write!(f, "{:?} -> {:?}", t1, t2)
+                    write!(f, "({:?} -> {:?})", t1, t2)
                 }
             }
             Type::And(t1, t2) => write!(f, "({:?} /\\ {:?})", t1, t2),

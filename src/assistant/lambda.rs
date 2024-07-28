@@ -120,7 +120,8 @@ impl LambdaTerm {
         self = rebuild_tree(self.clone(), &mut 1);
         aux_absurd(self.clone(), statement, HashMap::new())
     }
-    pub fn assumption(self) -> LambdaTerm {
+    pub fn assumption(mut self) -> LambdaTerm {
+        self = rebuild_tree(self.clone(), &mut 1);
         aux_assumtion(self.clone())
     }
     pub fn left(mut self) -> LambdaTerm {
@@ -242,7 +243,6 @@ fn aux_assumtion(term: LambdaTerm) -> LambdaTerm {
             _ => {}
         }
     }
-    println!("Hyps : {:?}", local_hyp);
     for (_i, (name, typ)) in local_hyp.iter().enumerate() {
         if typ.clone() == goal_type {
             return term.exact(name.clone());
@@ -731,25 +731,43 @@ fn aux_cut(root: LambdaTerm, type_a: Type) -> LambdaTerm{
 }
 
 fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, Type>) -> LambdaTerm {
-    let type_h = context.get(&name).unwrap_or(&Type::Error).clone();
-    let mut type_a = Type::Error;
-    let mut type_b = Type::Error;
-    if type_h != Type::Error {
-        match type_h {
-            Type::Imp(box typea, box typeb) => {
-                type_a = typea.clone();
-                type_b = typeb.clone();
+    fn get_types(typ: Type, vector: &mut Vec<Type>) -> Type {
+        match typ {
+            Type::Imp(box typea, box Type::Imp(box typeb, box typec)) => {
+                vector.push(typea);
+                return get_types(Type::Imp(Box::new(typeb), Box::new(typec)), vector)
             }
-            _ => {
-                panic!("Impossible...")
+            Type::Imp(box typea, box typeb) => {
+                vector.push(typea);
+                return typeb;
+            }
+            other => {
+                panic!("Impossible... : {:?}", other)
+            }
+        }
+    }
+    fn construct(types: &mut Vec<Type>, name: String) -> LambdaTerm {
+        let new = types.pop();
+        match new.clone() {
+            Some(typ) => {
+                return LambdaTerm::App(Box::new(construct(types, name)), Box::new(LambdaTerm::Goal(typ, 0)));
+            }
+            None => {
+                let nb = update_counter(&name.clone());
+                return LambdaTerm::Var((name, nb));
             }
         }
     }
     match root {
-        LambdaTerm::Goal(typeb, _nb)
-        if typeb == type_b => {
-            let nb = update_counter(&name.clone());
-            LambdaTerm::App(Box::new(LambdaTerm::Var((name, nb))), Box::new(LambdaTerm::Goal(type_a, 0)))
+        LambdaTerm::Goal(typeb, nb) if nb == 1 => {
+            let type_objective = context.get(&name).unwrap().clone();
+            let mut myvec: Vec<Type> = vec![];
+            let types = get_types(type_objective.clone(), &mut myvec);
+            // println!("types : {:?}, vec : {:?}, type_objective : {:?}", types, myvec, type_objective);
+            let constructed = construct(&mut myvec, name);
+            // println!("new_thing {:?}", constructed);
+
+            constructed
         }
         // we propagate
         LambdaTerm::ExFalso(t, box proof) => {
