@@ -76,6 +76,10 @@ If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(
 
 # 28/07/2024
 
+## main new things
+
+- Archiving of the `intuitionist proofassist` branch, as i'm going for dependant type theory 
+
 ## TODO
 
 - make it so apply and others commands can also take theorems
