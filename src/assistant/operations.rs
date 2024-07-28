@@ -6,6 +6,7 @@ pub enum OP {
     
     // general
     Intro,
+    Assumption,
 
     Nothing
 }

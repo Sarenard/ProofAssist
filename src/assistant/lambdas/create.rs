@@ -7,8 +7,16 @@ use lambda::{
 
 impl LambdaTerm {
     pub fn var(name: &str) -> LambdaTerm {
+        let nb = update_counter(name);
         LambdaTerm::Var(
             name.to_string(),
+            nb
+        )
+    }
+    pub fn varnb(name: &str, nb: usize) -> LambdaTerm {
+        LambdaTerm::Var(
+            name.to_string(),
+            nb
         )
     }
     pub fn goal(lambda: LambdaTerm, nb: usize) -> LambdaTerm {

@@ -25,12 +25,14 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
+static DEBUG: bool = false;
+
 fn main() {
     // let goal = get_goal();
     let goal = LambdaTerm::pi(
         "x".to_string(),
-        LambdaTerm::var("a"), 
-        LambdaTerm::var("a"), 
+        LambdaTerm::varnb("a", 1), 
+        LambdaTerm::varnb("a", 1), 
     );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
@@ -70,16 +72,16 @@ fn emulate(goal: LambdaTerm, real: bool) -> (LambdaTerm, Vec<OP>) {
             get_command(&mut operations);
         }
         let last_op = operations.last().unwrap().clone();
-        println!("OLD : {:?}", lambdaterme);
+        if DEBUG {println!("OLD : {:?}", lambdaterme);}
         (lambdaterme, hypothesis, operations) = run_command(last_op, lambdaterme, hypothesis, operations, true);
-        println!("NEW : {:?}", lambdaterme);
+        if DEBUG {println!("NEW : {:?}", lambdaterme);}
     }
 
     (lambdaterme, operations)
 }
 
 fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (LambdaTerm, Vec<OP>)>) {
-    let goals = dfs_find_goals(lambdaterme.clone());
+    let goals = bfs_find_goals(lambdaterme.clone());
     // we get the good one
     let paths: Vec<(LambdaTerm, Vec<LambdaTerm>)> = goals.iter().cloned()
         .filter(|x| match x.1.last().unwrap().clone() {LambdaTerm::Goal(_, i) => i == 1, _ => false}).collect();
@@ -147,7 +149,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
         OP::Use(name) => {
             let (output_type, ops) = hypothesis.get(&name).unwrap().clone();
 
-            let goals = dfs_find_goals(lambdaterme.clone());
+            let goals = bfs_find_goals(lambdaterme.clone());
 
             let (goal_type, _path) = goals[0].clone();
 
@@ -163,14 +165,11 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
                     OP::Nothing => {
 
                     }
-                    OP::Use(name) => {
-                        new_operations.push(OP::Use(name));
-                    }
-                    OP::Load(name) => {
-                        new_operations.push(OP::Load(name));
-                    }
-                    OP::Intro => {
-                        new_operations.push(OP::Intro);
+                    OP::Use(..)
+                    | OP::Load(..)
+                    | OP::Intro
+                    | OP::Assumption => {
+                        new_operations.push(op)
                     }
                 }
             }
@@ -187,6 +186,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
         },
         OP::Intro => {
             let (_name, new_lambdaterm) = lambdaterme.intro();
+            (new_lambdaterm, hypothesis, operations)
+        }
+        OP::Assumption => {
+            let new_lambdaterm = lambdaterme.assu();
             (new_lambdaterm, hypothesis, operations)
         }
     }
@@ -211,6 +214,9 @@ fn get_command(operations: &mut Vec<OP>) {
         }
         "intro" => {
             operations.push(OP::Intro)
+        }
+        "assu" => {
+            operations.push(OP::Assumption)
         }
         _ => {
             println!("Command unknown.");
@@ -244,11 +250,14 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             OP::Intro => {
                 writeln!(theorem_file, "Intro").unwrap();
             }
+            OP::Assumption => {
+                writeln!(theorem_file, "Assumption").unwrap();
+            }
         }
     }
 }
 
-fn dfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
+fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
     let mut queue: VecDeque<(LambdaTerm, Vec<LambdaTerm>)> = VecDeque::new();
     let mut goals: Vec<(LambdaTerm, Vec<LambdaTerm>)> = Vec::new();
 
@@ -256,7 +265,8 @@ fn dfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
 
     while let Some((current, path)) = queue.pop_front() {
         match current {
-            LambdaTerm::Var(_name) => {}
+            LambdaTerm::Var(..)
+            | LambdaTerm::Error => {}
             LambdaTerm::Goal(box ref ty, _nb) => {
                 goals.push((ty.clone(), path.clone()));
             },
@@ -277,7 +287,7 @@ fn dfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
 }
 
 pub fn get_goal_count(lambda: LambdaTerm) -> usize {
-    dfs_find_goals(lambda).len()
+    bfs_find_goals(lambda).len()
 }
 
 #[allow(dead_code)]
@@ -336,6 +346,9 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
         }
         Rule::Intro => {
             OP::Intro
+        }
+        Rule::Assumption => {
+            OP::Assumption
         }
         other => panic!("Other : {:?}", other),
     }

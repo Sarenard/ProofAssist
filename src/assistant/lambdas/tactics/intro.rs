@@ -16,7 +16,9 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
             LambdaTerm::func(name, term1, LambdaTerm::goal(term2, 0))
         }
         // we propagate
-        LambdaTerm::Var(..) | LambdaTerm::Goal(..) => {
+        LambdaTerm::Var(..) 
+        | LambdaTerm::Goal(..)
+        | LambdaTerm::Error => {
             root
         },
         LambdaTerm::Pi(name, box first, box second) => {

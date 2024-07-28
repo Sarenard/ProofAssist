@@ -2,15 +2,14 @@ use std::collections::HashMap;
 
 use crate::assistant::lambdas as lambdas;
 
-use lambdas::update_nbs::update_goals_nb;
-
-// in dependant type theory, lambdaexpr and types are the same exact thing
 #[derive(Debug, Clone, PartialEq)]
 pub enum LambdaTerm {
-    Var(String),
+    Var(String, usize),
     Goal(Box<LambdaTerm>, usize),
     Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Func(String, Box<LambdaTerm>, Box<LambdaTerm>),
+
+    Error,
 }
 
 #[allow(dead_code)]

@@ -4,7 +4,8 @@ use lambda::LambdaTerm;
 
 pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
     match term {
-        LambdaTerm::Var(..) => {
+        LambdaTerm::Var(..)
+        | LambdaTerm::Error => {
             term
         }
         LambdaTerm::Goal(box typ, _index) => {
