@@ -7,7 +7,6 @@ use std::io::{self, BufReader, Write};
 #[macro_use]
 extern crate pest_derive;
 
-use assistant::operations::OP;
 use pest::Parser;
 
 #[derive(Parser)]
@@ -15,12 +14,16 @@ use pest::Parser;
 #[allow(dead_code)]
 struct SimpleParser;
 
-mod assistant;
-
 #[cfg(test)]
 mod tests;
 
-use assistant::lambda::{update_goals_nb, LambdaTerm as LambdaTerm};
+mod assistant;
+
+use assistant::{
+    operations::OP,
+    lambda::LambdaTerm as LambdaTerm,
+    lambdas::update_nbs::update_goals_nb as update_goals_nb,
+};
 
 fn main() {
     // let goal = get_goal();
@@ -67,9 +70,9 @@ fn emulate(goal: LambdaTerm, real: bool) -> (LambdaTerm, Vec<OP>) {
             get_command(&mut operations);
         }
         let last_op = operations.last().unwrap().clone();
-        println!("{:?}", lambdaterme);
+        println!("OLD : {:?}", lambdaterme);
         (lambdaterme, hypothesis, operations) = run_command(last_op, lambdaterme, hypothesis, operations, true);
-        println!("{:?}", lambdaterme);
+        println!("NEW : {:?}", lambdaterme);
     }
 
     (lambdaterme, operations)
@@ -84,6 +87,9 @@ fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (LambdaTerm, Vec
     let mut hypotheses: HashMap<String, LambdaTerm> = HashMap::new();
     for elt in result.1 {
         match elt {
+            LambdaTerm::Func(name, box typ, _index) => {
+                hypotheses.insert(name, typ);
+            }
             _ => {}
         }
     }
@@ -163,6 +169,9 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
                     OP::Load(name) => {
                         new_operations.push(OP::Load(name));
                     }
+                    OP::Intro => {
+                        new_operations.push(OP::Intro);
+                    }
                 }
             }
 
@@ -175,6 +184,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             }
             
             (c_lambdaterme, c_hypothesis, c_operations)
+        },
+        OP::Intro => {
+            let (_name, new_lambdaterm) = lambdaterme.intro();
+            (new_lambdaterm, hypothesis, operations)
         }
     }
 }
@@ -196,8 +209,11 @@ fn get_command(operations: &mut Vec<OP>) {
             let theorem_name = splitted.next().unwrap();
             operations.push(OP::Load(theorem_name.to_string()))
         }
+        "intro" => {
+            operations.push(OP::Intro)
+        }
         _ => {
-            println!("Unknown command.");
+            println!("Command unknown.");
             operations.push(OP::Nothing)
         }
     }
@@ -225,6 +241,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             OP::Load(name) => {
                 writeln!(theorem_file, "Load(\"{}\")", name).unwrap();
             }
+            OP::Intro => {
+                writeln!(theorem_file, "Intro").unwrap();
+            }
         }
     }
 }
@@ -237,11 +256,12 @@ fn dfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
 
     while let Some((current, path)) = queue.pop_front() {
         match current {
-            LambdaTerm::Var(_name, _nb) => {}
+            LambdaTerm::Var(_name) => {}
             LambdaTerm::Goal(box ref ty, _nb) => {
                 goals.push((ty.clone(), path.clone()));
             },
-            LambdaTerm::Pi(_name, ref left, ref right) => {
+            LambdaTerm::Func(_name, ref left, ref right)
+            | LambdaTerm::Pi(_name, ref left, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());
                 queue.push_back((*left.clone(), left_path));
@@ -313,6 +333,9 @@ fn parse_op(pair: pest::iterators::Pair<Rule>) -> OP {
             let text = inner.next().unwrap().as_str().to_string();
             let text = text.chars().skip(1).take(text.chars().count() - 2).collect();
             OP::Use(text)
+        }
+        Rule::Intro => {
+            OP::Intro
         }
         other => panic!("Other : {:?}", other),
     }

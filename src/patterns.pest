@@ -10,10 +10,12 @@ Goal = { "Goal(" ~ lambdaexpr ~ "," ~ usize ~ ")" }
 OP = _{
     Load
     | Use
+    | Intro
 }
 
 Load = { "Load(" ~ string ~ ")" }
 Use = { "Use(" ~ string ~ ")" }
+Intro = { "Intro" }
 
 string = { "\"" ~ ASCII_ALPHANUMERIC+ ~ "\"" }
 usize = @{ ASCII_DIGIT+ }
