@@ -20,7 +20,7 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
             true
         }
         (LambdaTerm::Func(name1, box first1, box second1), LambdaTerm::Func(name2, box first2, box second2))
-        | (LambdaTerm::Pi(name1, box first1, box second1), LambdaTerm::Func(name2, box first2, box second2)) => {
+        | (LambdaTerm::Pi(name1, box first1, box second1), LambdaTerm::Pi(name2, box first2, box second2)) => {
             let mut free_names: Vec<String> = vec![];
 
             free_names.extend(free_var(second1.clone()));
@@ -31,7 +31,14 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
             let replaced_second1 = rename_free_variable(name1, new_name.clone(), second1);
             let replaced_second2 = rename_free_variable(name2, new_name, second2);
 
-            alpha_equiv(replaced_second1, replaced_second2) && alpha_equiv(first1, first2)
+            let first = alpha_equiv(replaced_second1, replaced_second2);
+            let second = alpha_equiv(first1, first2);
+
+            if DEBUG {
+                println!("First : {}, Second : {}", first, second);
+            }
+
+            first && second
         }
         other => {
             if DEBUG {

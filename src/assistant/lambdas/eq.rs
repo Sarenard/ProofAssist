@@ -4,38 +4,12 @@ use crate::assistant::lambda as lambda;
 use lambda::LambdaTerm;
 
 use lambdas::beta_reduc::beta_reduce;
+use lambdas::alpha_equiv::alpha_equiv;
 
 impl PartialEq for LambdaTerm {
     fn eq(&self, other: &Self) -> bool {
         let beta_self = beta_reduce(self.clone());
         let beta_other = beta_reduce(other.clone());
-        match (beta_self, beta_other) {
-            (
-                Self::Var(l0), 
-                Self::Var(r0)
-            ) => 
-            {
-                l0 == r0
-            }
-            (
-                Self::Goal(l0, l1), 
-                Self::Goal(r0, r1)
-            ) => {
-                l0 == r0 && l1 == r1
-            }
-            (
-                Self::Pi(l0, l1, l2), 
-                Self::Pi(r0, r1, r2)
-            ) => {
-                l0 == r0 && l1 == r1 && l2 == r2
-            }
-            (
-                Self::Func(l0, l1, l2), 
-                Self::Func(r0, r1, r2)
-            ) => {
-                l0 == r0 && l1 == r1 && l2 == r2
-            }
-            _ => core::mem::discriminant(self) == core::mem::discriminant(other),
-        }
+        alpha_equiv(beta_other, beta_self)
     }
 }
