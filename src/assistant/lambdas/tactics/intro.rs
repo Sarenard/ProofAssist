@@ -8,7 +8,7 @@ use lambda::{
 
 use lambdas::{
     update_nbs::update_goals_nb,
-    beta_reduc::substitute,
+    substitute::substitute,
 };
 
 fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {

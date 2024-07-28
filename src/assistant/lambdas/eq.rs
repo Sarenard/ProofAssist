@@ -1,10 +1,15 @@
+use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
 use lambda::LambdaTerm;
 
+use lambdas::beta_reduc::beta_reduce;
+
 impl PartialEq for LambdaTerm {
     fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
+        let beta_self = beta_reduce(self.clone());
+        let beta_other = beta_reduce(other.clone());
+        match (beta_self, beta_other) {
             (
                 Self::Var(l0), 
                 Self::Var(r0)
