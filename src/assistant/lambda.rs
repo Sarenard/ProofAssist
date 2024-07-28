@@ -7,52 +7,54 @@ lazy_static! {
     static ref HASHMAP: Mutex<HashMap<String, usize>> = Mutex::new(HashMap::new());
 }
 
+use crate::assistant::lambdas as lambdas;
+
+// in dependant type theory, lambdaexpr and types are the same exact thing
 #[derive(Debug, Clone, PartialEq)]
 pub enum LambdaTerm {
+    Var(String, usize),
     Goal(Box<LambdaTerm>, usize),
-}
-
-impl std::fmt::Display for LambdaTerm {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            _ => unimplemented!()
-        }
-    }
+    Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
 }
 
 #[allow(dead_code)]
 impl LambdaTerm {
     pub fn containsgoal(self) -> bool {
-        let mut found = false;
-        match self {
-            LambdaTerm::Goal(..) => {
-                found = true
-            }
-        }
-        found
+        use crate::get_goal_count;
+        get_goal_count(self) != 0
     }
+
     pub fn check(self, goal: LambdaTerm) -> bool {
         todo!()
     }
+    
     pub fn model(mut self, thing: LambdaTerm) -> LambdaTerm {
-        self = rebuild_tree(self.clone(), &mut 1);
+        self = update_goals_nb(self.clone(), &mut 1);
         todo!()
     }
 }
 
-pub fn rebuild_tree(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
+pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
     match term {
-        LambdaTerm::Goal(typ, _index) => {
+        LambdaTerm::Var(..) => {
+            term
+        }
+        LambdaTerm::Goal(box typ, _index) => {
             *goal_index += 1;
-            return LambdaTerm::Goal(
+            LambdaTerm::goal(
                 typ,
                 *goal_index - 1
             )
         }
+        LambdaTerm::Pi(name, box lb1, box lb2) => {
+            let part1 = update_goals_nb(lb1, goal_index);
+            let part2 = update_goals_nb(lb2, goal_index);
+            LambdaTerm::pi(name, part1, part2)
+        }
     }
 }
 
-fn update_counter(key: &str) -> usize {
+pub fn update_counter(key: &str) -> usize {
     let mut map = HASHMAP.lock().unwrap();
     let counter = map.entry(key.to_string()).or_insert(0);
     *counter += 1;

@@ -20,10 +20,15 @@ mod assistant;
 #[cfg(test)]
 mod tests;
 
-use assistant::lambda::{rebuild_tree, LambdaTerm as LambdaTerm};
+use assistant::lambda::{update_goals_nb, LambdaTerm as LambdaTerm};
 
 fn main() {
-    let goal = get_goal();
+    // let goal = get_goal();
+    let goal = LambdaTerm::pi(
+        "x".to_string(),
+        LambdaTerm::var("a"), 
+        LambdaTerm::var("a"), 
+    );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
 
@@ -55,7 +60,7 @@ fn emulate(goal: LambdaTerm, real: bool) -> (LambdaTerm, Vec<OP>) {
 
     while lambdaterme.clone().containsgoal() {
         // to fix problems
-        lambdaterme = rebuild_tree(lambdaterme.clone(), &mut 1);
+        lambdaterme = update_goals_nb(lambdaterme.clone(), &mut 1);
         if real {
             println!(); // to be beautiful
             print_hyp(lambdaterme.clone(), hypothesis.clone());
@@ -71,7 +76,7 @@ fn emulate(goal: LambdaTerm, real: bool) -> (LambdaTerm, Vec<OP>) {
 }
 
 fn print_hyp(lambdaterme: LambdaTerm, theorems: HashMap<String, (LambdaTerm, Vec<OP>)>) {
-    let goals = bfs_find_goals(lambdaterme.clone());
+    let goals = dfs_find_goals(lambdaterme.clone());
     // we get the good one
     let paths: Vec<(LambdaTerm, Vec<LambdaTerm>)> = goals.iter().cloned()
         .filter(|x| match x.1.last().unwrap().clone() {LambdaTerm::Goal(_, i) => i == 1, _ => false}).collect();
@@ -136,7 +141,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
         OP::Use(name) => {
             let (output_type, ops) = hypothesis.get(&name).unwrap().clone();
 
-            let goals = bfs_find_goals(lambdaterme.clone());
+            let goals = dfs_find_goals(lambdaterme.clone());
 
             let (goal_type, _path) = goals[0].clone();
 
@@ -224,7 +229,7 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
     }
 }
 
-fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
+fn dfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
     let mut queue: VecDeque<(LambdaTerm, Vec<LambdaTerm>)> = VecDeque::new();
     let mut goals: Vec<(LambdaTerm, Vec<LambdaTerm>)> = Vec::new();
 
@@ -232,8 +237,18 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
 
     while let Some((current, path)) = queue.pop_front() {
         match current {
+            LambdaTerm::Var(_name, _nb) => {}
             LambdaTerm::Goal(box ref ty, _nb) => {
                 goals.push((ty.clone(), path.clone()));
+            },
+            LambdaTerm::Pi(_name, ref left, ref right) => {
+                let mut left_path = path.clone();
+                left_path.push(*left.clone());
+                queue.push_back((*left.clone(), left_path));
+
+                let mut right_path = path.clone();
+                right_path.push(*right.clone());
+                queue.push_back((*right.clone(), right_path));
             },
         }
     }
@@ -241,14 +256,8 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
     goals
 }
 
-fn get_goal_count(lambda: LambdaTerm) -> usize {
-    let mut total = 0;
-    match lambda {
-        LambdaTerm::Goal(..) => {
-            total += 1
-        }
-    }
-    total
+pub fn get_goal_count(lambda: LambdaTerm) -> usize {
+    dfs_find_goals(lambda).len()
 }
 
 #[allow(dead_code)]

@@ -78,11 +78,10 @@ If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(
 
 ## main new things
 
-- Archiving of the `intuitionist` branch, as i'm going for dependant type theory 
+- Archiving of the `intuitionist` branch, as i'm going for dependant type theory
+- Removed everything
+- Added back Lambdaterms : Var, Goal and Pi
 
 ## TODO
 
-- make it so apply and others commands can also take theorems
-- make it so i dont have to save theorems (?)
-- make it so that exact can be saved
-- make it so that exact can be used with an arbitrary lambda expression (+ lambda parser in .pest)
+- remake already existing commands
