@@ -11,3 +11,21 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
     }
 }
 
+#[test]
+// Pi(x:a, a)
+fn better_apply() {
+    let goal = LambdaTerm::pi(
+        "x".to_string(),
+        LambdaTerm::varnb("a", 1), 
+        LambdaTerm::varnb("a", 1), 
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}

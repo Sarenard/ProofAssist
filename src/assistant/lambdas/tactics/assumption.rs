@@ -38,7 +38,7 @@ fn aux_assumtion(term: LambdaTerm) -> LambdaTerm {
 }
 
 impl LambdaTerm {
-    pub fn assu(mut self) -> LambdaTerm {
+    pub fn assumption(mut self) -> LambdaTerm {
         self = update_goals_nb(self.clone(), &mut 1);
         aux_assumtion(self.clone())
     }

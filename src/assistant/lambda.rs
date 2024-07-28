@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use crate::assistant::lambdas as lambdas;
 
-#[derive(Debug, Clone, PartialEq)]
+use lambdas::compute_type::compute_type;
+
+#[derive(Debug, Clone)]
 pub enum LambdaTerm {
     Var(String, usize),
     Goal(Box<LambdaTerm>, usize),
@@ -20,7 +22,12 @@ impl LambdaTerm {
     }
 
     pub fn check(self, goal: LambdaTerm) -> bool {
-        todo!()
+        let computed = compute_type(self, HashMap::new());
+        if goal != computed {
+            println!("Computed : {:?}", computed);
+            println!("Goal : {:?}", goal);
+        }
+        goal == computed
     }
 }
 

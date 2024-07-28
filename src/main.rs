@@ -189,7 +189,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             (new_lambdaterm, hypothesis, operations)
         }
         OP::Assumption => {
-            let new_lambdaterm = lambdaterme.assu();
+            let new_lambdaterm = lambdaterme.assumption();
             (new_lambdaterm, hypothesis, operations)
         }
     }

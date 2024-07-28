@@ -13,7 +13,7 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
         // we match for a goal of the good type
         LambdaTerm::Goal(box LambdaTerm::Pi(name, box term1, box term2), nb) 
         if nb == 1 => {
-            LambdaTerm::func(name, term1, LambdaTerm::goal(term2, 0))
+            LambdaTerm::func(name, term1, LambdaTerm::goal(term2))
         }
         // we propagate
         LambdaTerm::Var(..) 

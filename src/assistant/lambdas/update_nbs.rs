@@ -10,7 +10,7 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
         }
         LambdaTerm::Goal(box typ, _index) => {
             *goal_index += 1;
-            LambdaTerm::goal(
+            LambdaTerm::goalnb(
                 typ,
                 *goal_index - 1
             )

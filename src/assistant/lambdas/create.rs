@@ -19,7 +19,13 @@ impl LambdaTerm {
             nb
         )
     }
-    pub fn goal(lambda: LambdaTerm, nb: usize) -> LambdaTerm {
+    pub fn goal(lambda: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Goal(
+            Box::new(lambda),
+            0
+        )
+    }
+    pub fn goalnb(lambda: LambdaTerm, nb: usize) -> LambdaTerm {
         LambdaTerm::Goal(
             Box::new(lambda),
             nb
