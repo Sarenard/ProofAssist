@@ -51,7 +51,9 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
             constructed
         }
         // we propagate
-        LambdaTerm::Var(..) | LambdaTerm::Goal(..) => {
+        LambdaTerm::Var(..) 
+        | LambdaTerm::Types
+        | LambdaTerm::Goal(..) => {
             root
         },
         LambdaTerm::Func(str, box typ, box lambdaterm) => {
@@ -70,10 +72,30 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(lambdaterm, name, context)
             )
         }
+        LambdaTerm::Sigma(str, box typ, box lambdaterm) => {
+            LambdaTerm::sigma(
+                str, 
+                aux_apply(typ, name.clone(), context.clone()), 
+                aux_apply(lambdaterm, name, context)
+            )
+        }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::app(
                 aux_apply(first, name.clone(), context.clone()),
                 aux_apply(second, name, context)
+            )
+        }
+        LambdaTerm::Proj(box first, box second) => {
+            LambdaTerm::proj(
+                aux_apply(first, name.clone(), context.clone()),
+                aux_apply(second, name, context)
+            )
+        }
+        LambdaTerm::Couple(box first, box second, box third) => {
+            LambdaTerm::couple(
+                aux_apply(first, name.clone(), context.clone()),
+                aux_apply(second, name.clone(), context.clone()),
+                aux_apply(third, name, context)
             )
         }
         LambdaTerm::Error => panic!()

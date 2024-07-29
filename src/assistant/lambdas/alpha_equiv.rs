@@ -20,6 +20,7 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
             true
         }
         (LambdaTerm::Func(name1, box first1, box second1), LambdaTerm::Func(name2, box first2, box second2))
+        | (LambdaTerm::Sigma(name1, box first1, box second1), LambdaTerm::Sigma(name2, box first2, box second2))
         | (LambdaTerm::Pi(name1, box first1, box second1), LambdaTerm::Pi(name2, box first2, box second2)) => {
             let mut free_names: Vec<String> = vec![];
 
@@ -46,6 +47,21 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 
             first && second
         }
+        (
+            LambdaTerm::Couple(box first1, box second1, box third1),
+            LambdaTerm::Couple(box first2, box second2, box third2)
+        ) => {
+            let one = alpha_equiv(first1, first2);
+            let two = alpha_equiv(second1, second2);
+            let three = alpha_equiv(third1, third2);
+
+            if DEBUG {
+                println!("one : {}, two : {}, three : {}", one, two, three);
+            }
+
+            one && two && three
+        }
+        (LambdaTerm::Types, LambdaTerm::Types) => true,
         other => {
             if DEBUG {
                 println!("ALPHA EQUIV FALSE : {:?}", other);
@@ -57,6 +73,7 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 
 fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
+        LambdaTerm::Types => LambdaTerm::Types,
         LambdaTerm::Var(x) => {
             if x == var_name {
                 return new_thing;
@@ -89,10 +106,34 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 )
             }
         }
+        LambdaTerm::Sigma(name, box first, box second) => {
+            if name == var_name {
+                LambdaTerm::sigma(name, replace_free_variable_r(var_name, new_thing, first), second)
+            } else {
+                LambdaTerm::sigma(
+                    name, 
+                    replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                    replace_free_variable_r(var_name, new_thing, second), 
+                )
+            }
+        }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::app(
                 replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
                 replace_free_variable_r(var_name, new_thing, second), 
+            )
+        }
+        LambdaTerm::Proj(box first, box second) => {
+            LambdaTerm::proj(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name, new_thing, second), 
+            )
+        }
+        LambdaTerm::Couple(box first, box second, box third) => {
+            LambdaTerm::couple(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), second), 
+                replace_free_variable_r(var_name, new_thing, third), 
             )
         }
         LambdaTerm::Error => panic!()
@@ -101,6 +142,7 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
 
 fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
+        LambdaTerm::Types => LambdaTerm::Types,
         LambdaTerm::Var(_name) => {
             lambda
         }
@@ -111,6 +153,19 @@ fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
             LambdaTerm::app(
                 alpha_convert(used_names.clone(), first),
                 alpha_convert(used_names, second),
+            )
+        }
+        LambdaTerm::Proj(box first, box second) => {
+            LambdaTerm::proj(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names, second),
+            )
+        }
+        LambdaTerm::Couple(box first, box second, box third) => {
+            LambdaTerm::couple(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names.clone(), second),
+                alpha_convert(used_names, third),
             )
         }
         LambdaTerm::Func(name, box first, box second) => {
@@ -131,11 +186,20 @@ fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
             
             LambdaTerm::pi(new_name, alpha_convert(used_names, first), renamed)
         }
+        LambdaTerm::Sigma(name, box first, box second) => {
+            let new_name = gen_name(used_names.clone());
+            let mut used_names = used_names.clone();
+            used_names.push(new_name.clone());
+            let converted = alpha_convert(used_names.clone(), second);
+            let renamed = replace_free_variable_r(name, LambdaTerm::var(new_name.as_str()), converted);
+            
+            LambdaTerm::sigma(new_name, alpha_convert(used_names, first), renamed)
+        }
         LambdaTerm::Error => panic!()
     }
 }
 
-fn replace_free_variable(name: String, new_term: LambdaTerm, lambda: LambdaTerm) -> LambdaTerm {
+pub fn replace_free_variable(name: String, new_term: LambdaTerm, lambda: LambdaTerm) -> LambdaTerm {
     let mut myfree = free_var(new_term.clone());
     myfree.push(name.clone());
     replace_free_variable_r(name, new_term, alpha_convert(myfree, lambda))

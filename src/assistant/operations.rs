@@ -6,8 +6,12 @@ pub enum OP {
     
     // general
     Intro,
-    Assumption,
     Apply(String),
+    Exists(String),
+    
+    // QOL macros for other things
+    Assumption,
+    Intros,
 
     Nothing
 }

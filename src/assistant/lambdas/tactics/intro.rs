@@ -16,11 +16,9 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
         // we match for a goal of the good type
         LambdaTerm::Goal(box LambdaTerm::Pi(name, box term1, box term2), nb) 
         if nb == 1 => {
-            let total_x = update_counter("x");
-            let new_name = format!("x{}", total_x);
-            let term = LambdaTerm::Var(new_name);
+            let term = LambdaTerm::Var(var_name.clone());
             LambdaTerm::func(
-                name.clone(),
+                var_name.clone(),
                 term1,
                 LambdaTerm::goal(substitute(term2, name, term)),
             )
@@ -28,11 +26,19 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
         // we propagate
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
+        | LambdaTerm::Types
         | LambdaTerm::Error => {
             root
         },
         LambdaTerm::Pi(name, box first, box second) => {
             LambdaTerm::pi(
+                name,
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
+        LambdaTerm::Sigma(name, box first, box second) => {
+            LambdaTerm::sigma(
                 name,
                 aux_intro(first, var_name.clone()),
                 aux_intro(second, var_name)
@@ -51,6 +57,19 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(second, var_name)
             )
         }
+        LambdaTerm::Proj(box first, box second) => {
+            LambdaTerm::proj(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
+        LambdaTerm::Couple(box first, box second, box third) => {
+            LambdaTerm::couple(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name.clone()),
+                aux_intro(third, var_name)
+            )
+        }
     }
 }
 
@@ -61,5 +80,21 @@ impl LambdaTerm {
         let nb = update_counter("hyp");
         let concatenated_name = format!("hyp{}", nb);
         (concatenated_name.clone(), aux_intro(self.clone(), concatenated_name))
+    }
+    pub fn intros(mut self) -> (Vec<String>, LambdaTerm) {
+        self = update_goals_nb(self.clone(), &mut 1);
+        // we find a non used name
+        let mut names: Vec<String> = vec![];
+        let mut name: String; 
+        let mut old_lambdaterm = self.clone();
+        let (name, mut new_lambdaterm) = self.intro();
+        names.push(name);
+        while old_lambdaterm != new_lambdaterm.clone() {
+            let mut name: String; 
+            old_lambdaterm = new_lambdaterm.clone();
+            (name, new_lambdaterm) = new_lambdaterm.intro();
+            names.push(name);
+        }
+        (names.clone(), new_lambdaterm)
     }
 }

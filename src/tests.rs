@@ -12,6 +12,98 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ A:Prop, A -> A
+fn imply_prop_intros() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::pi(
+            "impl".to_string(),
+            LambdaTerm::var("A"),
+            LambdaTerm::var("A")
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
+// ∀ A:Prop, A -> A
+fn imply_prop() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::pi(
+            "impl".to_string(),
+            LambdaTerm::var("A"),
+            LambdaTerm::var("A")
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
+// Pi(x:a, a)
+fn pi_hell() {
+    let goal = LambdaTerm::pi(
+        "n1".to_string(),
+        LambdaTerm::pi(
+            "n2".to_string(),
+            LambdaTerm::var("a"),
+            LambdaTerm::pi(
+                "n3".to_string(),
+                LambdaTerm::var("b"),
+                LambdaTerm::var("c"),
+            ),
+        ),
+        LambdaTerm::pi(
+            "n4".to_string(),
+            LambdaTerm::var("a"),
+            LambdaTerm::pi(
+                "n5".to_string(),
+                LambdaTerm::var("b"),
+                LambdaTerm::var("c"),
+            )
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (name1, lambdaterme) = lambdaterme.intro();
+    println!("lambdaterme : {:?} {}", lambdaterme, name1);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.apply(name1);
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+
+#[test]
 // Pi(x:a, a)
 fn better_apply() {
     let goal = LambdaTerm::pi(

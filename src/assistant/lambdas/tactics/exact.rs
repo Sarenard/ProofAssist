@@ -14,7 +14,6 @@ use crate::DEBUG;
 
 fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     let goal_h = context.get(&name).unwrap_or(&LambdaTerm::Error).clone();
-    println!("goal : {:?} name : {}", goal_h, name);
     match root {
         LambdaTerm::Goal(box goal, nb2) 
         if goal_h == goal && nb2 == 1 => {
@@ -24,11 +23,19 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         // we propagate
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
+        | LambdaTerm::Types
         | LambdaTerm::Error => {
             root
         },
         LambdaTerm::Pi(func_name, box first, box second) => {
             LambdaTerm::pi(
+                func_name.clone(),
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name, context)
+            )
+        }
+        LambdaTerm::Sigma(func_name, box first, box second) => {
+            LambdaTerm::sigma(
                 func_name.clone(),
                 aux_exact(first, name.clone(), context.clone()),
                 aux_exact(second, name, context)
@@ -47,6 +54,19 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
             LambdaTerm::app(
                 aux_exact(first, name.clone(), context.clone()),
                 aux_exact(second, name, context)
+            )
+        }
+        LambdaTerm::Proj(box first, box second) => {
+            LambdaTerm::proj(
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name, context)
+            )
+        }
+        LambdaTerm::Couple(box first, box second, box third) => {
+            LambdaTerm::couple(
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name.clone(), context.clone()),
+                aux_exact(third, name, context)
             )
         }
     }

@@ -7,10 +7,17 @@ use lambdas::compute_type::compute_type;
 #[derive(Debug, Clone)]
 pub enum LambdaTerm {
     Var(String),
+
     Goal(Box<LambdaTerm>, usize),
+    Types, // maybe some problems?
+
     Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Func(String, Box<LambdaTerm>, Box<LambdaTerm>),
     App(Box<LambdaTerm>, Box<LambdaTerm>),
+
+    Sigma(String, Box<LambdaTerm>, Box<LambdaTerm>),
+    Couple(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>),
+    Proj(Box<LambdaTerm>, Box<LambdaTerm>),
 
     Error,
 }
