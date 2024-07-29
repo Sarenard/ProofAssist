@@ -23,7 +23,7 @@ impl std::fmt::Display for LambdaTerm {
                 if !total_vars.contains(name) {
                     write!(f, "({} -> {})", first, second)
                 } else {
-                    write!(f, "∀ {}:{}, {}", name, first, second)
+                    write!(f, "(∀ {}:{}, {})", name, first, second)
                 }
             }
             LambdaTerm::Sigma(name, box first, box second) => {
@@ -36,7 +36,7 @@ impl std::fmt::Display for LambdaTerm {
                 if !total_vars.contains(name) {
                     write!(f, "({} /\\ {})", first, second)
                 } else {
-                    write!(f, "∃ {}:{}, {}", name, first, second)
+                    write!(f, "(∃ {}:{}, {})", name, first, second)
                 }
             }
             LambdaTerm::App(box first, box second) => {

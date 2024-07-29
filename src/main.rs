@@ -29,22 +29,33 @@ static DEBUG: bool = false;
 
 fn main() {
     // let goal = get_goal();
+    /* 
+    let goal = LambdaTerm::pi(
+        "B".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::imp(
+            LambdaTerm::pi(
+                "A".to_string(),
+                LambdaTerm::types(),
+                LambdaTerm::imp(
+                    LambdaTerm::var("A"),
+                    LambdaTerm::var("B"),
+                )
+            ),
+            LambdaTerm::var("B")
+        )
+    );
+    */
     let goal = LambdaTerm::pi(
         "A".to_string(),
         LambdaTerm::types(),
-        LambdaTerm::pi(
-            "B".to_string(),
-            LambdaTerm::types(),
-            LambdaTerm::imp(
-                LambdaTerm::and(
-                    LambdaTerm::var("A"),
-                    LambdaTerm::var("B"),
-                ),
-                LambdaTerm::and(
-                    LambdaTerm::var("B"),
-                    LambdaTerm::var("A"),
-                ),
-            )
+        LambdaTerm::imp(
+            LambdaTerm::pi(
+                "B".to_string(),
+                LambdaTerm::types(),
+                LambdaTerm::var("B")
+            ),
+            LambdaTerm::var("A")
         )
     );
 
