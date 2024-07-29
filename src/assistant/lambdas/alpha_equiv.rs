@@ -12,6 +12,9 @@ use lambdas::{
 use crate::DEBUG;
 
 pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
+    if DEBUG {
+        println!("trying to alpha equiv {:?} {:?}", first, second);
+    }
     match (first, second) {
         (LambdaTerm::Var(name1), LambdaTerm::Var(name2)) => {
             name1 == name2
@@ -60,6 +63,19 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
             }
 
             one && two && three
+        }
+        (
+            LambdaTerm::Proj(box first1, box second1),
+            LambdaTerm::Proj(box first2, box second2)
+        ) => {
+            let one = alpha_equiv(first1, first2);
+            let two = alpha_equiv(second1, second2);
+
+            if DEBUG {
+                println!("one : {}, two : {}", one, two);
+            }
+
+            one && two
         }
         (LambdaTerm::Types, LambdaTerm::Types) => true,
         other => {

@@ -36,14 +36,11 @@ fn main() {
             "B".to_string(),
             LambdaTerm::types(),
             LambdaTerm::imp(
+                LambdaTerm::and(
+                    LambdaTerm::var("A"),
+                    LambdaTerm::var("B")
+                ),
                 LambdaTerm::var("A"),
-                LambdaTerm::imp(
-                    LambdaTerm::var("B"),
-                    LambdaTerm::and(
-                        LambdaTerm::var("A"),
-                        LambdaTerm::var("B")
-                    )
-                )
             )
         )
     );
@@ -181,6 +178,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
                     OP::Use(..)
                     | OP::Load(..)
                     | OP::Intro
+                    | OP::Elim(..)
                     | OP::Split
                     | OP::Intros
                     | OP::Assumption
@@ -225,6 +223,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             let new_lambdaterm = lambdaterme.split();
             (new_lambdaterm, hypothesis, operations)
         }
+        OP::Elim(name) => {
+            let new_lambdaterm = lambdaterme.elim(name);
+            (new_lambdaterm, hypothesis, operations)
+        }
     }
 }
 
@@ -265,6 +267,10 @@ fn get_command(operations: &mut Vec<OP>) {
         "split" => {
             operations.push(OP::Split)
         }
+        "elim" => {
+            let name = splitted.next().unwrap();
+            operations.push(OP::Elim(name.to_string()))
+        }
         _ => {
             println!("Command unknown.");
             operations.push(OP::Nothing)
@@ -290,6 +296,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             }
             OP::Use(name) => {
                 writeln!(theorem_file, "Use(\"{}\")", name).unwrap();
+            }
+            OP::Elim(name) => {
+                writeln!(theorem_file, "Elim(\"{}\")", name).unwrap();
             }
             OP::Load(name) => {
                 writeln!(theorem_file, "Load(\"{}\")", name).unwrap();
