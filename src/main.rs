@@ -25,7 +25,7 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = false;
+static DEBUG: bool = true;
 
 fn main() {
     // let goal = get_goal();
@@ -43,6 +43,18 @@ fn main() {
                 )
             ),
             LambdaTerm::var("B")
+        )
+    );
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::imp(
+            LambdaTerm::pi(
+                "B".to_string(),
+                LambdaTerm::types(),
+                LambdaTerm::var("B")
+            ),
+            LambdaTerm::var("A")
         )
     );
     */
@@ -222,7 +234,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             (new_lambdaterm, hypothesis, operations)
         }
         OP::Apply(name) => {
-            let new_lambdaterm = lambdaterme.apply(name);
+            let new_lambdaterm = lambdaterme.apply(name, HashMap::new());
             (new_lambdaterm, hypothesis, operations)
         }
         OP::Assumption => {

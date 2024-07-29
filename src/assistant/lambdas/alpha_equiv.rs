@@ -32,14 +32,14 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 
             let new_name = gen_name(free_names);
 
-            let replaced_second1 = rename_free_variable(name1, new_name.clone(), second1);
-            let replaced_second2 = rename_free_variable(name2, new_name, second2);
+            let replaced_second1 = rename_free_variable(name1.clone(), new_name.clone(), second1);
+            let replaced_second2 = rename_free_variable(name2.clone(), new_name, second2);
 
             let first = alpha_equiv(replaced_second1, replaced_second2);
             let second = alpha_equiv(first1, first2);
 
             if DEBUG {
-                println!("First : {}, Second : {}", first, second);
+                println!("{}{}First : {}, Second : {}", name1, name2, first, second);
             }
 
             first && second
@@ -77,7 +77,9 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 
             one && two
         }
-        (LambdaTerm::Types, LambdaTerm::Types) => true,
+        (LambdaTerm::Types, LambdaTerm::Types) => {
+            true
+        },
         other => {
             if DEBUG {
                 println!("ALPHA EQUIV FALSE : {:?}", other);

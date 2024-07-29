@@ -8,17 +8,22 @@ use lambda::{
 
 use crate::DEBUG;
 
-use super::{alpha_equiv::{alpha_equiv, replace_free_variable}, beta_reduc::beta_reduce};
+use super::{alpha_equiv::{alpha_equiv, replace_free_variable}, beta_reduc::beta_reduce, free_var::free_var};
 
 pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
+    if DEBUG {
+        println!("compute_type: {:?} {:?}", lambdaterm, context);
+    }
     match lambdaterm.clone() {
         LambdaTerm::Var(name) => {
             if DEBUG {println!("var : {}, context : {:?}", name, context)}
             let res = context.get(&name).unwrap().clone();
             res
         }
-        LambdaTerm::Goal(..) 
-        | LambdaTerm::Error => {
+        LambdaTerm::Goal(box typ, _nb) => {
+            return typ;
+        }
+        LambdaTerm::Error => {
             panic!("Not supposed to happend !")
         }
         // for those two : we verify that first and second are correcly typed and just return Types
@@ -44,6 +49,9 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 panic!()
             }
         }
+        LambdaTerm::Types => {
+            LambdaTerm::Types // maybe a paradox?
+        }
         LambdaTerm::Couple(..) => {
             // same as above
             panic!()
@@ -57,12 +65,14 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
         }
         LambdaTerm::App(box first, box second) => {
             let functype = compute_type(first, context.clone());
-            let bodytype = compute_type(second, context);
+            let bodytype = compute_type(second.clone(), context.clone());
             match functype {
-                LambdaTerm::Func(_name, box type1, box type2) if type1 == bodytype => {
-                    return type2
+                LambdaTerm::Pi(name, box type1, box type2) 
+                if type1 == bodytype && (free_var(type1.clone()).contains(&name) || free_var(type2.clone()).contains(&name)) => {
+                    return replace_free_variable(name, second, type2)
                 }
-                LambdaTerm::Pi(_name, box type1, box type2) if type1 == bodytype => {
+                LambdaTerm::Pi(name, box type1, box type2) 
+                if type1 == bodytype && !free_var(type1.clone()).contains(&name) && !free_var(type2.clone()).contains(&name) => {
                     return type2
                 }
                 other => panic!("Error, unknown : {:?}", other)

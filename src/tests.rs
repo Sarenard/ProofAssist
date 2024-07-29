@@ -1,14 +1,44 @@
+use std::collections::HashMap;
+
 use crate::assistant::lambda::LambdaTerm;
 
 fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
     if lambdaterme.clone().containsgoal() {
         panic!("Pas fini ! {:?}", lambdaterme);
     }
-
-    let ok = lambdaterme.clone().check(goal);
+    println!("Checking...\n\n");
+    let ok = lambdaterme.clone().check(goal.clone());
     if !ok {
-        panic!("Ehh i'm wrong somewhere {:?}", lambdaterme);
+        panic!("Ehh i'm wrong somewhere\n{:?}\n{:?}", lambdaterme, goal);
     }
+}
+
+#[test]
+// ∀ A:Prop, (∀ B:Prop, B ) -> A
+fn apply_forall() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::imp(
+            LambdaTerm::pi(
+                "B".to_string(),
+                LambdaTerm::types(),
+                LambdaTerm::var("B")
+            ),
+            LambdaTerm::var("A")
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let mut hashmap: HashMap<String, LambdaTerm> = HashMap::new();
+    hashmap.insert("B".to_string(), LambdaTerm::var("hyp1"));
+    let lambdaterme = lambdaterme.apply(names[1].clone(), hashmap);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
 }
 
 #[test]
@@ -35,19 +65,19 @@ fn swap_and() {
 
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (names, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.elim(names[2].clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.split();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
@@ -73,15 +103,15 @@ fn elim_sigma_right() {
 
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (names, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.elim(names[2].clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
@@ -107,15 +137,15 @@ fn elim_sigma_left() {
 
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (names, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.elim(names[2].clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
@@ -143,15 +173,15 @@ fn split() {
     );
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.split();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
@@ -179,13 +209,13 @@ fn apply_test() {
     );
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (names, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
-    let lambdaterme = lambdaterme.apply(names[2].clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.apply(names[2].clone(), HashMap::new());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
@@ -204,11 +234,11 @@ fn imply_prop_intros() {
     );
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intros();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
@@ -227,13 +257,13 @@ fn imply_prop() {
     );
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intro();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intro();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
@@ -264,39 +294,38 @@ fn pi_hell() {
     );
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (name1, lambdaterme) = lambdaterme.intro();
-    println!("lambdaterme : {:?} {}", lambdaterme, name1);
+    println!("\nlambdaterme : {:?}\n {}", lambdaterme, name1);
     let (_, lambdaterme) = lambdaterme.intro();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intro();
-    println!("lambdaterme : {:?}", lambdaterme);
-    let lambdaterme = lambdaterme.apply(name1);
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.apply(name1, HashMap::new());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }
 
 
 #[test]
-// Pi(x:a, a)
+// a -> a
 fn better_apply() {
-    let goal = LambdaTerm::pi(
-        "x".to_string(),
+    let goal = LambdaTerm::imp(
         LambdaTerm::var("a"), 
         LambdaTerm::var("a"), 
     );
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (_, lambdaterme) = lambdaterme.intro();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
-    println!("lambdaterme : {:?}", lambdaterme);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
 
     check(goal, lambdaterme);
 }

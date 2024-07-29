@@ -31,11 +31,13 @@ impl LambdaTerm {
 
     pub fn check(self, goal: LambdaTerm) -> bool {
         let computed = compute_type(self, HashMap::new());
-        if goal != computed {
+        println!("calcul de OK");
+        let ok = goal == computed;
+        if !ok {
             println!("Computed : {:?}", computed);
             println!("Goal : {:?}", goal);
         }
-        goal == computed
+        ok
     }
 }
 
