@@ -46,7 +46,13 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
             let free_vars = free_var(what.clone());
             if var_name == name || free_vars.contains(&name) {
                 // we need to rename the var before substituting
-                todo!()
+                let mut var_used: Vec<String> = vec![];
+                var_used.extend(free_var(what.clone()));
+                var_used.extend(free_var(lambda.clone()));
+                var_used.push(name.clone());
+                let new_name = gen_name(var_used);
+                let new_body = rename_free_variable(name, new_name.clone(), body);
+                substitute(LambdaTerm::sigma(new_name, typ, new_body), var_name, what)
             } else {
                 // we just insert
                 LambdaTerm::sigma(

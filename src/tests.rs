@@ -12,6 +12,115 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ A:Prop, ∀ B:Prop A /\ B -> B /\ A
+fn swap_and() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::types(),
+            LambdaTerm::imp(
+                LambdaTerm::and(
+                    LambdaTerm::var("A"),
+                    LambdaTerm::var("B"),
+                ),
+                LambdaTerm::and(
+                    LambdaTerm::var("B"),
+                    LambdaTerm::var("A"),
+                ),
+            )
+        )
+    );
+
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.elim(names[2].clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.split();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
+// ∀ A:Prop, ∀ B:Prop A /\ B -> B
+fn elim_sigma_right() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::types(),
+            LambdaTerm::imp(
+                LambdaTerm::and(
+                    LambdaTerm::var("A"),
+                    LambdaTerm::var("B")
+                ),
+                LambdaTerm::var("B"),
+            )
+        )
+    );
+
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.elim(names[2].clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
+// ∀ A:Prop, ∀ B:Prop A /\ B -> A
+fn elim_sigma_left() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::types(),
+            LambdaTerm::imp(
+                LambdaTerm::and(
+                    LambdaTerm::var("A"),
+                    LambdaTerm::var("B")
+                ),
+                LambdaTerm::var("A"),
+            )
+        )
+    );
+
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.elim(names[2].clone());
+    println!("lambdaterme : {:?}", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("lambdaterme : {:?}", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("lambdaterme : {:?}", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
 // ∀ A:Prop, ∀ B:Prop A -> B -> A /\ B
 fn split() {
     let goal = LambdaTerm::pi(
