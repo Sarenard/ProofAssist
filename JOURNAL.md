@@ -93,3 +93,21 @@ If `Goal(A)` and `A` is in the hypotheses, then we complete the goal
 
 - remake already existing commands
 - make an alpha conversion routine
+
+# 29/07/2024
+
+## main new things
+
+- fix of apply in the case of forall
+- sigma types
+- substitute for sigma
+
+## commands added
+
+### elim (sigma)
+An elim command for sigma
+### elim
+An exists command for sigma
+### split
+If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
+
