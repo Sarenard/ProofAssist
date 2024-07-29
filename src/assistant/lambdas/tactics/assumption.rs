@@ -1,10 +1,7 @@
 use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
-use lambda::{
-    LambdaTerm,
-    update_counter,
-};
+use lambda::LambdaTerm;
 
 use lambdas::update_nbs::update_goals_nb;
 

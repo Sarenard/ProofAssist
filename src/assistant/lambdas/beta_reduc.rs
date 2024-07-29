@@ -1,9 +1,7 @@
-use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
 use lambda::LambdaTerm;
 
-use lambdas::substitute::substitute;
 
 fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaTerm> {
     match lambda {

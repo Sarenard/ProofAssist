@@ -6,7 +6,6 @@ use lambda::LambdaTerm;
 use lambdas::{
     free_var::free_var,
     gen_name::gen_name,
-    substitute::substitute,
 };
 
 use crate::DEBUG;

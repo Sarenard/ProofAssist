@@ -4,10 +4,7 @@ use crate::assistant::lambdas::free_var::free_var;
 use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
-use lambda::{
-    LambdaTerm,
-    update_counter,
-};
+use lambda::LambdaTerm;
 
 use lambdas::{
     update_nbs::update_goals_nb,
@@ -35,7 +32,7 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 )
             }
             // forall name:typ, body
-            LambdaTerm::Pi(pi_name, box typ, box body)
+            LambdaTerm::Pi(pi_name, box _typ, box body)
             if free_var(body.clone()).contains(&pi_name) => {
                 println!("forall : {:?} {}", accu, pi_name);
                 let type_name = instanciation.get(&pi_name).unwrap().clone();

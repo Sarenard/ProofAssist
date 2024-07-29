@@ -2,10 +2,9 @@ use crate::assistant::lambda as lambda;
 
 use lambda::{
     LambdaTerm,
-    update_counter,
 };
 
-use super::{free_var::{self, free_var}, gen_name::gen_name};
+use super::{free_var::free_var, gen_name::gen_name};
 
 impl LambdaTerm {
     pub fn var(name: &str) -> LambdaTerm {

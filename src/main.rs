@@ -25,7 +25,7 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = true;
+static DEBUG: bool = false;
 
 fn main() {
     // let goal = get_goal();
@@ -445,7 +445,7 @@ fn get_goal() -> LambdaTerm {
     }
 }
 
-fn parse_lambdaterm(pair: pest::iterators::Pair<Rule>) -> LambdaTerm {
+fn parse_lambdaterm(_pair: pest::iterators::Pair<Rule>) -> LambdaTerm {
     todo!()
 }
 

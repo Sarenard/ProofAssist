@@ -1,6 +1,4 @@
-use std::collections::HashMap;
 
-use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
 use lambda::LambdaTerm;
@@ -13,7 +11,7 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
         LambdaTerm::Types => {
             vec![]
         }
-        LambdaTerm::Goal(box typ, nb) => {
+        LambdaTerm::Goal(box _typ, _nb) => {
             vec![]
         }
         LambdaTerm::Func(name, box typ, box body)

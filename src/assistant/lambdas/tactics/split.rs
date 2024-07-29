@@ -1,17 +1,12 @@
-use std::collections::HashMap;
 
 use crate::assistant::lambdas::free_var::free_var;
 use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
-use lambda::{
-    LambdaTerm,
-    update_counter,
-};
+use lambda::LambdaTerm;
 
 use lambdas::update_nbs::update_goals_nb;
 
-use crate::DEBUG;
 
 fn aux_split(root: LambdaTerm) -> LambdaTerm {
     match root {

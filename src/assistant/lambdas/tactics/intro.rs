@@ -85,12 +85,11 @@ impl LambdaTerm {
         self = update_goals_nb(self.clone(), &mut 1);
         // we find a non used name
         let mut names: Vec<String> = vec![];
-        let mut name: String; 
         let mut old_lambdaterm = self.clone();
         let (name, mut new_lambdaterm) = self.intro();
         names.push(name);
         while old_lambdaterm != new_lambdaterm.clone() {
-            let mut name: String; 
+            let name: String; 
             old_lambdaterm = new_lambdaterm.clone();
             (name, new_lambdaterm) = new_lambdaterm.intro();
             names.push(name);

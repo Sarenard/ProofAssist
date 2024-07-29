@@ -8,7 +8,7 @@ use lambda::{
 
 use crate::DEBUG;
 
-use super::{alpha_equiv::{alpha_equiv, replace_free_variable}, beta_reduc::beta_reduce, free_var::free_var};
+use super::{alpha_equiv::replace_free_variable, free_var::free_var};
 
 pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     if DEBUG {
@@ -35,9 +35,6 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
         LambdaTerm::Sigma(_name, box first, box second) => {
             let _first_type = compute_type(first.clone(), context.clone());
             let _second_type = compute_type(second, context);
-            LambdaTerm::Types
-        }
-        LambdaTerm::Types => {
             LambdaTerm::Types
         }
         LambdaTerm::Couple(box first, box second, box LambdaTerm::Sigma(a, box b, box c)) => {

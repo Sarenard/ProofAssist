@@ -1,10 +1,6 @@
-use std::collections::HashMap;
 use std::collections::HashSet;
 
-use crate::assistant::lambdas as lambdas;
-use crate::assistant::lambda as lambda;
 
-use lambda::LambdaTerm;
 
 /* 
 pub fn gen_name(already_seen: Vec<String>) -> String {
