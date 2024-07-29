@@ -33,9 +33,18 @@ fn main() {
         "A".to_string(),
         LambdaTerm::types(),
         LambdaTerm::pi(
-            "impl".to_string(),
-            LambdaTerm::var("A"),
-            LambdaTerm::var("A")
+            "B".to_string(),
+            LambdaTerm::types(),
+            LambdaTerm::imp(
+                LambdaTerm::var("A"),
+                LambdaTerm::imp(
+                    LambdaTerm::var("B"),
+                    LambdaTerm::and(
+                        LambdaTerm::var("A"),
+                        LambdaTerm::var("B")
+                    )
+                )
+            )
         )
     );
 
@@ -172,6 +181,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
                     OP::Use(..)
                     | OP::Load(..)
                     | OP::Intro
+                    | OP::Split
                     | OP::Intros
                     | OP::Assumption
                     | OP::Exists(..)
@@ -196,12 +206,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             (new_lambdaterm, hypothesis, operations)
         }
         OP::Intros => {
-            let mut old_lambdaterm = lambdaterme.clone();
-            let (_, mut new_lambdaterm) = lambdaterme.intro();
-            while old_lambdaterm != new_lambdaterm {
-                old_lambdaterm = new_lambdaterm.clone();
-                (_, new_lambdaterm) = new_lambdaterm.intro()
-            }
+            let (_name, new_lambdaterm) = lambdaterme.intros();
             (new_lambdaterm, hypothesis, operations)
         }
         OP::Apply(name) => {
@@ -214,6 +219,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
         }
         OP::Exists(name) => {
             let new_lambdaterm = lambdaterme.exists(name);
+            (new_lambdaterm, hypothesis, operations)
+        }
+        OP::Split => {
+            let new_lambdaterm = lambdaterme.split();
             (new_lambdaterm, hypothesis, operations)
         }
     }
@@ -253,6 +262,9 @@ fn get_command(operations: &mut Vec<OP>) {
             let name = splitted.next().unwrap();
             operations.push(OP::Exists(name.to_string()))
         }
+        "split" => {
+            operations.push(OP::Split)
+        }
         _ => {
             println!("Command unknown.");
             operations.push(OP::Nothing)
@@ -287,6 +299,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             }
             OP::Assumption => {
                 writeln!(theorem_file, "Assumption").unwrap();
+            }
+            OP::Split => {
+                writeln!(theorem_file, "Split").unwrap();
             }
             OP::Apply(name) => {
                 writeln!(theorem_file, "Apply(\"{}\")", name).unwrap();

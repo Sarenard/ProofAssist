@@ -10,6 +10,8 @@ use lambda::{
 
 use lambdas::update_nbs::update_goals_nb;
 
+use crate::DEBUG;
+
 fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     fn get_types(typ: LambdaTerm, vector: &mut Vec<LambdaTerm>) -> LambdaTerm {
         match typ {
@@ -30,8 +32,6 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         let new = types.pop();
         match new.clone() {
             Some(typ) => {
-                let nb = update_counter(&name.clone());
-                let new_name = format!("{}{}", name, nb);
                 return LambdaTerm::app(construct(types, name), LambdaTerm::goalnb(typ, 0));
             }
             None => {
@@ -43,10 +43,10 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         LambdaTerm::Goal(_typeb, nb) if nb == 1 => {
             let type_objective = context.get(&name).unwrap().clone();
             let mut myvec: Vec<LambdaTerm> = vec![];
-            let _types = get_types(type_objective.clone(), &mut myvec);
-            // println!("types : {:?}, vec : {:?}, type_objective : {:?}", types, myvec, type_objective);
+            let types = get_types(type_objective.clone(), &mut myvec);
+            if DEBUG { println!("types : {:?}, vec : {:?}, type_objective : {:?}", types, myvec, type_objective); }
             let constructed = construct(&mut myvec, name);
-            // println!("new_thing {:?}", constructed);
+            if DEBUG { println!("new_thing {:?}", constructed); }
 
             constructed
         }

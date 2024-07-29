@@ -6,6 +6,7 @@ pub enum OP {
     
     // general
     Intro,
+    Split,
     Apply(String),
     Exists(String),
     

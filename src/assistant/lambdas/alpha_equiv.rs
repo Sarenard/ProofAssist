@@ -205,6 +205,6 @@ pub fn replace_free_variable(name: String, new_term: LambdaTerm, lambda: LambdaT
     replace_free_variable_r(name, new_term, alpha_convert(myfree, lambda))
 }
 
-fn rename_free_variable(name: String, new_name: String, lambda: LambdaTerm) -> LambdaTerm { 
+pub fn rename_free_variable(name: String, new_name: String, lambda: LambdaTerm) -> LambdaTerm { 
     replace_free_variable(name, LambdaTerm::Var(new_name), lambda)
 }

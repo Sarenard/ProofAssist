@@ -23,11 +23,21 @@ impl std::fmt::Display for LambdaTerm {
                 if !total_vars.contains(name) {
                     write!(f, "({} -> {})", first, second)
                 } else {
-                    write!(f, "(forall {}:{}, {})", name, first, second)
+                    write!(f, "(∀ {}:{}, {})", name, first, second)
                 }
             }
             LambdaTerm::Sigma(name, box first, box second) => {
-                write!(f, "(exists {}:{}, {})", name, first, second)
+                // we look if name is free in first and second
+                let first_vars = free_var(first.clone());
+                let second_vars = free_var(second.clone());
+                let mut total_vars: Vec<String> = vec![];
+                total_vars.extend(first_vars);
+                total_vars.extend(second_vars);
+                if !total_vars.contains(name) {
+                    write!(f, "({} /\\ {})", first, second)
+                } else {
+                    write!(f, "(“∃ {}:{}, {})", name, first, second)
+                }
             }
             LambdaTerm::App(box first, box second) => {
                 write!(f, "App{}({})", first, second)

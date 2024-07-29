@@ -5,6 +5,8 @@ use lambda::{
     update_counter,
 };
 
+use super::{free_var::{self, free_var}, gen_name::gen_name};
+
 impl LambdaTerm {
     pub fn var(name: &str) -> LambdaTerm {
         LambdaTerm::Var(
@@ -25,6 +27,28 @@ impl LambdaTerm {
     }
     pub fn pi(name: String, term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Pi(
+            name,
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
+    pub fn imp(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        let mut free_vars: Vec<String> = vec![];
+        free_vars.extend(free_var(term1.clone()));
+        free_vars.extend(free_var(term2.clone()));
+        let name = gen_name(free_vars);
+        LambdaTerm::Pi(
+            name,
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
+    pub fn and(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        let mut free_vars: Vec<String> = vec![];
+        free_vars.extend(free_var(term1.clone()));
+        free_vars.extend(free_var(term2.clone()));
+        let name = gen_name(free_vars);
+        LambdaTerm::Sigma(
             name,
             Box::new(term1),
             Box::new(term2),
