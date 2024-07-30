@@ -10,6 +10,8 @@ pub enum OP {
     Elim(String),
     Apply(String),
     Exists(String),
+    Left,
+    Right,
     
     // QOL macros for other things
     Assumption,

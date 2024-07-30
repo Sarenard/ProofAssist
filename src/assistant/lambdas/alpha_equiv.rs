@@ -51,9 +51,9 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
         }
         (LambdaTerm::App(box a1, box b1), LambdaTerm::App(box a2, box b2))
         | (LambdaTerm::ExFalso(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2))
-        | (LambdaTerm::Or(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2))
-        | (LambdaTerm::Left(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2))
-        | (LambdaTerm::Right(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2)) => {
+        | (LambdaTerm::Or(box a1, box b1), LambdaTerm::Or(box a2, box b2))
+        | (LambdaTerm::Left(box a1, box b1), LambdaTerm::Left(box a2, box b2))
+        | (LambdaTerm::Right(box a1, box b1), LambdaTerm::Right(box a2, box b2)) => {
             let first = alpha_equiv(a1, a2);
             let second = alpha_equiv(b1, b2);
 

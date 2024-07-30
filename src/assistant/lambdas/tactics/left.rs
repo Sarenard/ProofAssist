@@ -1,0 +1,104 @@
+use crate::assistant::lambdas as lambdas;
+use crate::assistant::lambda as lambda;
+
+use lambda::{
+    LambdaTerm,
+    update_counter,
+};
+
+use lambdas::{
+    update_nbs::update_goals_nb,
+    substitute::substitute,
+};
+
+fn aux_left(root: LambdaTerm) -> LambdaTerm {
+    match root {
+        // we match for a goal of the good type
+        LambdaTerm::Goal(box LambdaTerm::Or(box first, box second), nb) 
+        if nb == 1 => {
+            LambdaTerm::left(
+                LambdaTerm::goal(first),
+                second
+            )
+        }
+        // we propagate
+        LambdaTerm::Var(..) 
+        | LambdaTerm::Goal(..)
+        | LambdaTerm::Types
+        | LambdaTerm::Bot
+        | LambdaTerm::Top
+        | LambdaTerm::Error => {
+            root
+        },
+        LambdaTerm::Pi(name, box first, box second) => {
+            LambdaTerm::pi(
+                name,
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::Sigma(name, box first, box second) => {
+            LambdaTerm::sigma(
+                name,
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::Func(name, box first, box second) => {
+            LambdaTerm::func(
+                name,
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::App(box first, box second) => {
+            LambdaTerm::app(
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::Proj(box first, box second) => {
+            LambdaTerm::proj(
+                aux_left(first),
+                aux_left(second)
+            )
+        }
+        LambdaTerm::Couple(box first, box second, box third) => {
+            LambdaTerm::couple(
+                aux_left(first),
+                aux_left(second),
+                aux_left(third)
+            )
+        }
+    }
+}
+
+impl LambdaTerm {
+    pub fn run_left(mut self) -> LambdaTerm {
+        aux_left(self.clone())
+    }
+}

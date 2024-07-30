@@ -117,6 +117,7 @@ If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
 
 - bot and top
 - exfalso
+- or, left and right lambda terms added
 
 ## commands added
 

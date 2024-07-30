@@ -14,6 +14,62 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ A:Prop, ∀ B:Prop, B -> A \/ B
+fn right() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::Types,
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::Types,
+            LambdaTerm::imp(
+                LambdaTerm::var("B"),
+                LambdaTerm::or(LambdaTerm::var("A"), LambdaTerm::var("B")),
+            )
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.run_right();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
+// ∀ A:Prop, ∀ B:Prop, A -> A \/ B
+fn left() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::Types,
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::Types,
+            LambdaTerm::imp(
+                LambdaTerm::var("A"),
+                LambdaTerm::or(LambdaTerm::var("A"), LambdaTerm::var("B")),
+            )
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.run_left();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
 // ∀ A:Prop, Bot -> A
 fn absurd() {
     let goal = LambdaTerm::pi(

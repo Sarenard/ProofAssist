@@ -25,7 +25,7 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = true;
+static DEBUG: bool = false;
 
 fn main() {
     // let goal = get_goal();
@@ -45,22 +45,18 @@ fn main() {
             LambdaTerm::var("B")
         )
     );
+    */
     let goal = LambdaTerm::pi(
         "A".to_string(),
-        LambdaTerm::types(),
-        LambdaTerm::imp(
-            LambdaTerm::pi(
-                "B".to_string(),
-                LambdaTerm::types(),
-                LambdaTerm::var("B")
-            ),
-            LambdaTerm::var("A")
+        LambdaTerm::Types,
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::Types,
+            LambdaTerm::imp(
+                LambdaTerm::var("A"),
+                LambdaTerm::or(LambdaTerm::var("A"), LambdaTerm::var("B")),
+            )
         )
-    );
-    */
-    let goal = LambdaTerm::imp(
-        LambdaTerm::var("A"),
-        LambdaTerm::Bot
     );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
@@ -193,15 +189,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
                     OP::Nothing => {
 
                     }
-                    OP::Use(..)
-                    | OP::Load(..)
-                    | OP::Intro
-                    | OP::Elim(..)
-                    | OP::Split
-                    | OP::Intros
-                    | OP::Assumption
-                    | OP::Exists(..)
-                    | OP::Apply(..) => {
+                    _ => {
                         new_operations.push(op)
                     }
                 }
@@ -244,6 +232,14 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
         OP::Elim(name) => {
             let new_lambdaterm = lambdaterme.elim(name);
             (new_lambdaterm, hypothesis, operations)
+        },
+        OP::Left => {
+            let new_lambdaterm = lambdaterme.run_left();
+            (new_lambdaterm, hypothesis, operations)
+        }
+        OP::Right => {
+            let new_lambdaterm = lambdaterme.run_right();
+            (new_lambdaterm, hypothesis, operations)
         }
     }
 }
@@ -270,6 +266,12 @@ fn get_command(operations: &mut Vec<OP>) {
         }
         "intros" => {
             operations.push(OP::Intros)
+        }
+        "left" => {
+            operations.push(OP::Left)
+        }
+        "right" => {
+            operations.push(OP::Right)
         }
         "assu" => {
             operations.push(OP::Assumption)
@@ -323,6 +325,12 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             }
             OP::Intro => {
                 writeln!(theorem_file, "Intro").unwrap();
+            }
+            OP::Left => {
+                writeln!(theorem_file, "Left").unwrap();
+            }
+            OP::Right => {
+                writeln!(theorem_file, "Right").unwrap();
             }
             OP::Assumption => {
                 writeln!(theorem_file, "Assumption").unwrap();
