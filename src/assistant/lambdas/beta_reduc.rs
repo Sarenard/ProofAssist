@@ -58,6 +58,15 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                 }
             }
         }
+        LambdaTerm::Or(box first, box second) => {
+            match betareduc_step(first.clone(), used_names.clone()) {
+                Some(reduced) => Some(LambdaTerm::or(reduced, second)),
+                None => match betareduc_step(second, used_names.clone()) {
+                    Some(reduced) => Some(LambdaTerm::or(first, reduced)),
+                    None => None
+                }   
+            }
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             match betareduc_step(first.clone(), used_names.clone()) {
                 Some(reduced) => Some(LambdaTerm::exfalso(reduced, second)),
@@ -92,6 +101,20 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                     Some(reduced) => Some(LambdaTerm::proj(first, reduced)),
                     None => None
                 }
+            }
+        }
+        LambdaTerm::Left(box first, box second) => {
+            let reduced = betareduc_step(first, used_names);
+            match reduced {
+                Some(reduced) => Some(LambdaTerm::left(reduced, second)),
+                None => None
+            }
+        }
+        LambdaTerm::Right(box first, box second) => {
+            let reduced = betareduc_step(first, used_names);
+            match reduced {
+                Some(reduced) => Some(LambdaTerm::right(reduced, second)),
+                None => None
             }
         }
     }

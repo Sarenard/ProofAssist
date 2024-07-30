@@ -372,6 +372,9 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
             },
             LambdaTerm::Proj(ref left, ref right)
             | LambdaTerm::ExFalso(ref left, ref right)
+            | LambdaTerm::Or(ref left, ref right)
+            | LambdaTerm::Left(ref left, ref right)
+            | LambdaTerm::Right(ref left, ref right)
             | LambdaTerm::App(ref left, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());

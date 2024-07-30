@@ -88,6 +88,24 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
                 substitute(second, var_name, what),
             )
         }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                substitute(first, var_name.clone(), what.clone()),
+                substitute(second, var_name, what),
+            )
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                substitute(first, var_name.clone(), what.clone()),
+                substitute(second, var_name, what),
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                substitute(first, var_name.clone(), what.clone()),
+                substitute(second, var_name, what),
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 substitute(first, var_name.clone(), what.clone()),

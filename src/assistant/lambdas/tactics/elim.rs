@@ -73,6 +73,24 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                 aux_elim(second, name, context)
             )
         }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                aux_elim(first, name.clone(), context.clone()),
+                aux_elim(second, name, context)
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                aux_elim(first, name.clone(), context.clone()),
+                aux_elim(second, name, context)
+            )
+        }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                aux_elim(first, name.clone(), context.clone()),
+                aux_elim(second, name, context)
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 aux_elim(first, name.clone(), context.clone()),

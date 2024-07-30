@@ -84,6 +84,24 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(second, name, context, instanciation)
             )
         }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name, context, instanciation)
+            )
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name, context, instanciation)
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name, context, instanciation)
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 aux_apply(first, name.clone(), context.clone(), instanciation.clone()),

@@ -59,6 +59,24 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(second, var_name)
             )
         }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 aux_intro(first, var_name.clone()),

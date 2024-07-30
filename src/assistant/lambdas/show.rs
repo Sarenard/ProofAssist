@@ -46,6 +46,15 @@ impl std::fmt::Display for LambdaTerm {
             LambdaTerm::App(box first, box second) => {
                 write!(f, "App{}({})", first, second)
             }
+            LambdaTerm::Or(box first, box second) => {
+                write!(f, "({} \\/ {})", first, second)
+            }
+            LambdaTerm::Left(box first, box _second) => {
+                write!(f, "Left({})", first)
+            }
+            LambdaTerm::Right(box first, box _second) => {
+                write!(f, "Right({})", first)
+            }
             LambdaTerm::ExFalso(box first, box second) => {
                 write!(f, "ExFalso({})({})", first, second)
             }

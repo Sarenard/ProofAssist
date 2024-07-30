@@ -56,6 +56,24 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
                 aux_absurd(second, typ, context)
             )
         }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
+            )
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 aux_absurd(first, typ.clone(), context.clone()),

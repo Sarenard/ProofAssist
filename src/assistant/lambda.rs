@@ -14,13 +14,20 @@ pub enum LambdaTerm {
     Top,
     ExFalso(Box<LambdaTerm>, Box<LambdaTerm>),
 
+    // pi type, functions and forall
     Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Func(String, Box<LambdaTerm>, Box<LambdaTerm>),
     App(Box<LambdaTerm>, Box<LambdaTerm>),
 
+    // sigma type, exists and and
     Sigma(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Couple(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>),
     Proj(Box<LambdaTerm>, Box<LambdaTerm>),
+
+    // or
+    Or(Box<LambdaTerm>, Box<LambdaTerm>),
+    Left(Box<LambdaTerm>, Box<LambdaTerm>), // right is for typecheck purposes
+    Right(Box<LambdaTerm>, Box<LambdaTerm>), // right is for typecheck purposes
 
     Error,
 }

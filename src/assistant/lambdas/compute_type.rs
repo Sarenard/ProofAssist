@@ -46,6 +46,21 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 panic!()
             }
         }
+        LambdaTerm::Or(box first, box second) => {
+            todo!()
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::or(
+                compute_type(first, context),
+                second
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::or(
+                first,
+                compute_type(second, context),
+            )
+        }
         LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Types => {

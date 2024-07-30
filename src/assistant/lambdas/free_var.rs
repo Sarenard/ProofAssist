@@ -30,6 +30,9 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
             vec_tot
         }
         LambdaTerm::ExFalso(box first, box second)
+        | LambdaTerm::Or(box first, box second)
+        | LambdaTerm::Left(box first, box second)
+        | LambdaTerm::Right(box first, box second)
         | LambdaTerm::App(box first, box second) => {
             let mut vec_tot: Vec<String> = vec![];
             let variables_typ = free_var(first);

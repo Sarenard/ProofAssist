@@ -53,6 +53,24 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
                 aux_split(second)
             )
         }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                aux_split(first),
+                aux_split(second)
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                aux_split(first),
+                aux_split(second)
+            )
+        }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                aux_split(first),
+                aux_split(second)
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 aux_split(first),

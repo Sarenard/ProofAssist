@@ -49,13 +49,11 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 
             first && second
         }
-        (LambdaTerm::App(box a1, box b1), LambdaTerm::App(box a2, box b2)) => {
-            let first = alpha_equiv(a1, a2);
-            let second = alpha_equiv(b1, b2);
-
-            first && second
-        }
-        (LambdaTerm::ExFalso(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2)) => {
+        (LambdaTerm::App(box a1, box b1), LambdaTerm::App(box a2, box b2))
+        | (LambdaTerm::ExFalso(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2))
+        | (LambdaTerm::Or(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2))
+        | (LambdaTerm::Left(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2))
+        | (LambdaTerm::Right(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2)) => {
             let first = alpha_equiv(a1, a2);
             let second = alpha_equiv(b1, b2);
 
@@ -170,6 +168,24 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 replace_free_variable_r(var_name, new_thing, second), 
             )
         }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name, new_thing, second), 
+            )
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name, new_thing, second), 
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name, new_thing, second), 
+            )
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
                 replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
@@ -194,6 +210,24 @@ fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
         }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::app(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names, second),
+            )
+        }
+        LambdaTerm::Or(box first, box second) => {
+            LambdaTerm::or(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names, second),
+            )
+        }
+        LambdaTerm::Left(box first, box second) => {
+            LambdaTerm::left(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names, second),
+            )
+        }
+        LambdaTerm::Right(box first, box second) => {
+            LambdaTerm::right(
                 alpha_convert(used_names.clone(), first),
                 alpha_convert(used_names, second),
             )

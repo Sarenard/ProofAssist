@@ -67,6 +67,24 @@ impl LambdaTerm {
             Box::new(term2),
         )
     }
+    pub fn or(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Or(
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
+    pub fn left(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Left(
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
+    pub fn right(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Right(
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
     pub fn app(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
         LambdaTerm::App(
             Box::new(term1),
@@ -93,6 +111,12 @@ impl LambdaTerm {
         LambdaTerm::ExFalso(
             Box::new(term1),
             Box::new(term2),
+        )
+    }
+    pub fn not(term1: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::imp(
+            term1, 
+            LambdaTerm::Bot
         )
     }
 }
