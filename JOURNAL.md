@@ -111,3 +111,8 @@ An exists command for sigma
 ### split
 If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
 
+## 30/07/2024
+
+## main new things
+
+- bot and top
