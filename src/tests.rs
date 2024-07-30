@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::assistant::lambda::LambdaTerm;
+use crate::assistant::lambda::{self, LambdaTerm};
 
 fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
     if lambdaterme.clone().containsgoal() {
@@ -11,6 +11,43 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
     if !ok {
         panic!("Ehh i'm wrong somewhere\n{:?}\n{:?}", lambdaterme, goal);
     }
+}
+
+#[test]
+// ∀ A:Prop, ∃ B:Prop, ~(A /\ B)
+fn harder() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::Types,
+        LambdaTerm::sigma(
+            "B".to_string(),
+            LambdaTerm::Types,
+            LambdaTerm::not(
+                LambdaTerm::and(LambdaTerm::var("A"), LambdaTerm::var("B"))
+            )
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (name1, lambdaterme) = lambdaterme.intro();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let terme_magique = LambdaTerm::not(LambdaTerm::Var(name1.clone()));
+    let lambdaterme = lambdaterme.exists(terme_magique);
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {} {:?}\n", lambdaterme, names);
+    let lambdaterme = lambdaterme.elim(names[0].clone());
+    println!("\nlambdaterme : {}\n", lambdaterme);
+    let (names2, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?} {:?}\n", lambdaterme, names2);
+    let hashmap: HashMap<String, LambdaTerm> = HashMap::new();
+    let lambdaterme = lambdaterme.apply(names2[1].to_string(), hashmap);
+    println!("\nlambdaterme : {:?} {:?}\n", lambdaterme, names2);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?} {:?}\n", lambdaterme, names2);
+
+    check(goal, lambdaterme);
 }
 
 #[test]

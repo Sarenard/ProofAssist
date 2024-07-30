@@ -32,7 +32,7 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                         )
                     )
                 }
-                other => panic!("Cant elim for {}", other)
+                other => panic!("Cant elim for {:?}", other)
             }
         }
         // we propagate

@@ -222,8 +222,7 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             (new_lambdaterm, hypothesis, operations)
         }
         OP::Exists(name) => {
-            let new_lambdaterm = lambdaterme.exists(name);
-            (new_lambdaterm, hypothesis, operations)
+            todo!()
         }
         OP::Split => {
             let new_lambdaterm = lambdaterme.split();

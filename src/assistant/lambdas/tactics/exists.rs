@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use crate::assistant::lambdas::compute_type::compute_type;
 use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
@@ -12,18 +13,15 @@ use lambdas::{
 
 use crate::DEBUG;
 
-fn aux_exists(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
-    let goal_h = context.get(&name).unwrap_or(&LambdaTerm::Error).clone();
+fn aux_exists(root: LambdaTerm, obj: LambdaTerm, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     match root.clone() {
         LambdaTerm::Goal(box LambdaTerm::Sigma(sigma_name, box first, box second), nb2) 
-        if nb2 == 1 => {
-            if DEBUG {println!("Exists {:?}", root)}
+        if nb2 == 1 && compute_type(obj.clone(), context.clone()) == first => {
+            if DEBUG {println!("Exists {:?} {:?}", root, obj.clone())}
             LambdaTerm::couple(
-                goal_h.clone(),
-                LambdaTerm::goal(
-                    replace_free_variable(sigma_name, goal_h, second.clone())
-                ), 
-                LambdaTerm::sigma(name, first, second)
+                obj.clone(),
+                LambdaTerm::goal(replace_free_variable(sigma_name.clone(), obj.clone(), second.clone())),
+                LambdaTerm::sigma(sigma_name, first, second)
             )
         }
         // we propagate
@@ -38,15 +36,15 @@ fn aux_exists(root: LambdaTerm, name: String, context: HashMap<String, LambdaTer
         LambdaTerm::Pi(func_name, box first, box second) => {
             LambdaTerm::pi(
                 func_name.clone(),
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::Sigma(func_name, box first, box second) => {
             LambdaTerm::sigma(
                 func_name.clone(),
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::Func(func_name, box first, box second) => {
@@ -54,59 +52,59 @@ fn aux_exists(root: LambdaTerm, name: String, context: HashMap<String, LambdaTer
             new_context.insert(func_name.clone(), first.clone());
             LambdaTerm::func(
                 func_name.clone(),
-                aux_exists(first, name.clone(), new_context.clone()),
-                aux_exists(second, name, new_context)
+                aux_exists(first, obj.clone(), new_context.clone()),
+                aux_exists(second, obj, new_context)
             )
         }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::app(
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::Or(box first, box second) => {
             LambdaTerm::or(
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::Left(box first, box second) => {
             LambdaTerm::left(
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::Right(box first, box second) => {
             LambdaTerm::right(
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
             )
         }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
-                aux_exists(first, name.clone(), context.clone()),
-                aux_exists(second, name.clone(), context.clone()),
-                aux_exists(third, name, context)
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj.clone(), context.clone()),
+                aux_exists(third, obj, context)
             )
         }
     }
 }
 
 impl LambdaTerm {
-    pub fn exists(mut self, name: String) -> LambdaTerm {
+    pub fn exists(mut self, obj: LambdaTerm) -> LambdaTerm {
         self = update_goals_nb(self.clone(), &mut 1);
-        aux_exists(self.clone(), name, HashMap::new())
+        aux_exists(self.clone(), obj, HashMap::new())
     }
 }
