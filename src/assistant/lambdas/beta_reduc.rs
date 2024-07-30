@@ -6,6 +6,8 @@ use lambda::LambdaTerm;
 fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaTerm> {
     match lambda {
         LambdaTerm::Error
+        | LambdaTerm::Bot
+        | LambdaTerm::Top
         | LambdaTerm::Types
         | LambdaTerm::Var(..) => None,
         LambdaTerm::Goal(box typ, nb) => {

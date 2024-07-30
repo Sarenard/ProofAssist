@@ -46,7 +46,9 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 panic!()
             }
         }
-        LambdaTerm::Types => {
+        LambdaTerm::Bot
+        | LambdaTerm::Top
+        | LambdaTerm::Types => {
             LambdaTerm::Types // maybe a paradox?
         }
         LambdaTerm::Couple(..) => {

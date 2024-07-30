@@ -27,6 +27,8 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
+        | LambdaTerm::Bot
+        | LambdaTerm::Top
         | LambdaTerm::Error => {
             root
         },

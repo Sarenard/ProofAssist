@@ -21,7 +21,11 @@ impl std::fmt::Display for LambdaTerm {
                 total_vars.extend(first_vars);
                 total_vars.extend(second_vars);
                 if !total_vars.contains(name) {
-                    write!(f, "({} -> {})", first, second)
+                    if *second == LambdaTerm::Bot {
+                        write!(f, "~({})", first)
+                    } else {
+                        write!(f, "({} -> {})", first, second)
+                    }
                 } else {
                     write!(f, "(∀ {}:{}, {})", name, first, second)
                 }
@@ -44,6 +48,12 @@ impl std::fmt::Display for LambdaTerm {
             }
             LambdaTerm::Types => {
                 write!(f, "Prop")
+            }
+            LambdaTerm::Bot => {
+                write!(f, "Bot")
+            }
+            LambdaTerm::Top => {
+                write!(f, "Top")
             }
             LambdaTerm::Func(name, box first, box second) => {
                 write!(f, "(func {} : {}=>{})", name, first, second)

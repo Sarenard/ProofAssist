@@ -10,6 +10,8 @@ pub enum LambdaTerm {
 
     Goal(Box<LambdaTerm>, usize),
     Types, // maybe some problems?
+    Bot,
+    Top,
 
     Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Func(String, Box<LambdaTerm>, Box<LambdaTerm>),

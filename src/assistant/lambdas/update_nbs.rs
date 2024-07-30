@@ -6,6 +6,8 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
     match term {
         LambdaTerm::Var(..)
         | LambdaTerm::Types
+        | LambdaTerm::Top
+        | LambdaTerm::Bot
         | LambdaTerm::Error => {
             term
         }

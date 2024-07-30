@@ -8,7 +8,9 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
         LambdaTerm::Var(name) => {
             vec![name.clone()]
         }
-        LambdaTerm::Types => {
+        LambdaTerm::Types
+        | LambdaTerm::Top
+        | LambdaTerm::Bot => {
             vec![]
         }
         LambdaTerm::Goal(box _typ, _nb) => {

@@ -58,17 +58,9 @@ fn main() {
         )
     );
     */
-    let goal = LambdaTerm::pi(
-        "A".to_string(),
-        LambdaTerm::types(),
-        LambdaTerm::imp(
-            LambdaTerm::pi(
-                "B".to_string(),
-                LambdaTerm::types(),
-                LambdaTerm::var("B")
-            ),
-            LambdaTerm::var("A")
-        )
+    let goal = LambdaTerm::imp(
+        LambdaTerm::var("a"),
+        LambdaTerm::Bot
     );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
@@ -361,6 +353,8 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
         match current {
             LambdaTerm::Var(..)
             | LambdaTerm::Types
+            | LambdaTerm::Top
+            | LambdaTerm::Bot
             | LambdaTerm::Error => {}
             LambdaTerm::Goal(box ref ty, _nb) => {
                 goals.push((ty.clone(), path.clone()));

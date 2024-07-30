@@ -21,6 +21,12 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
         (LambdaTerm::Goal(..), LambdaTerm::Goal(..)) => {
             true
         }
+        (LambdaTerm::Top, LambdaTerm::Top) => {
+            true
+        }
+        (LambdaTerm::Bot, LambdaTerm::Bot) => {
+            true
+        }
         (LambdaTerm::Func(name1, box first1, box second1), LambdaTerm::Func(name2, box first2, box second2))
         | (LambdaTerm::Sigma(name1, box first1, box second1), LambdaTerm::Sigma(name2, box first2, box second2))
         | (LambdaTerm::Pi(name1, box first1, box second1), LambdaTerm::Pi(name2, box first2, box second2)) => {
@@ -98,6 +104,12 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 return lambda;
             }
         }
+        LambdaTerm::Bot => {
+            LambdaTerm::Bot
+        }
+        LambdaTerm::Top => {
+            LambdaTerm::Top
+        }
         LambdaTerm::Goal(box typ, nb) => {
             LambdaTerm::goalnb(replace_free_variable_r(var_name, new_thing, typ), nb)
         }
@@ -160,6 +172,8 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
 fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
         LambdaTerm::Types => LambdaTerm::Types,
+        LambdaTerm::Top => LambdaTerm::Top,
+        LambdaTerm::Bot => LambdaTerm::Bot,
         LambdaTerm::Var(_name) => {
             lambda
         }

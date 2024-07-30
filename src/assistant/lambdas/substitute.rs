@@ -9,6 +9,12 @@ use lambdas::free_var::free_var;
 
 pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
+        LambdaTerm::Bot => {
+            LambdaTerm::Bot
+        }
+        LambdaTerm::Top => {
+            LambdaTerm::Top
+        }
         LambdaTerm::Types => {
             LambdaTerm::Types
         }

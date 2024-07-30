@@ -50,6 +50,8 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         // we propagate
         LambdaTerm::Var(..) 
         | LambdaTerm::Types
+        | LambdaTerm::Bot
+        | LambdaTerm::Top
         | LambdaTerm::Goal(..) => {
             root
         },

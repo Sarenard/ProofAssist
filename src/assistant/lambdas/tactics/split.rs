@@ -21,6 +21,8 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
         // we propagate
         LambdaTerm::Var(..) 
         | LambdaTerm::Types
+        | LambdaTerm::Bot
+        | LambdaTerm::Top
         | LambdaTerm::Goal(..) => {
             root
         },

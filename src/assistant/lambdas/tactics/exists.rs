@@ -30,6 +30,8 @@ fn aux_exists(root: LambdaTerm, name: String, context: HashMap<String, LambdaTer
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
+        | LambdaTerm::Bot
+        | LambdaTerm::Top
         | LambdaTerm::Error => {
             root
         },

@@ -39,6 +39,8 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
+        | LambdaTerm::Bot
+        | LambdaTerm::Top
         | LambdaTerm::Error => {
             root
         },
