@@ -46,6 +46,9 @@ impl std::fmt::Display for LambdaTerm {
             LambdaTerm::App(box first, box second) => {
                 write!(f, "App{}({})", first, second)
             }
+            LambdaTerm::ExFalso(box first, box second) => {
+                write!(f, "ExFalso({})({})", first, second)
+            }
             LambdaTerm::Types => {
                 write!(f, "Prop")
             }

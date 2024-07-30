@@ -25,7 +25,7 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = false;
+static DEBUG: bool = true;
 
 fn main() {
     // let goal = get_goal();
@@ -59,7 +59,7 @@ fn main() {
     );
     */
     let goal = LambdaTerm::imp(
-        LambdaTerm::var("a"),
+        LambdaTerm::var("A"),
         LambdaTerm::Bot
     );
 
@@ -371,6 +371,7 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
                 queue.push_back((*right.clone(), right_path));
             },
             LambdaTerm::Proj(ref left, ref right)
+            | LambdaTerm::ExFalso(ref left, ref right)
             | LambdaTerm::App(ref left, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());

@@ -59,6 +59,12 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(second, var_name)
             )
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
                 aux_intro(first, var_name.clone()),

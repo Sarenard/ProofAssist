@@ -9,13 +9,14 @@ use lambdas::update_nbs::update_goals_nb;
 
 use crate::DEBUG;
 
-fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
-    let goal_h = context.get(&name).unwrap_or(&LambdaTerm::Error).clone();
+fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     match root {
-        LambdaTerm::Goal(box goal, nb2) 
-        if goal_h == goal && nb2 == 1 => {
-            if DEBUG {println!("Substitution {} {:?} {:?}", name, goal_h, goal)}
-            LambdaTerm::var(&name)
+        LambdaTerm::Goal(_goal, nb2) 
+        if nb2 == 1 => {
+            LambdaTerm::exfalso(
+                typ,
+                LambdaTerm::goal(LambdaTerm::Bot)
+            )
         }
         // we propagate
         LambdaTerm::Var(..) 
@@ -29,15 +30,15 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         LambdaTerm::Pi(func_name, box first, box second) => {
             LambdaTerm::pi(
                 func_name.clone(),
-                aux_exact(first, name.clone(), context.clone()),
-                aux_exact(second, name, context)
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
             )
         }
         LambdaTerm::Sigma(func_name, box first, box second) => {
             LambdaTerm::sigma(
                 func_name.clone(),
-                aux_exact(first, name.clone(), context.clone()),
-                aux_exact(second, name, context)
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
             )
         }
         LambdaTerm::Func(func_name, box first, box second) => {
@@ -45,41 +46,41 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
             new_context.insert(func_name.clone(), first.clone());
             LambdaTerm::func(
                 func_name.clone(),
-                aux_exact(first, name.clone(), new_context.clone()),
-                aux_exact(second, name, new_context)
+                aux_absurd(first, typ.clone(), new_context.clone()),
+                aux_absurd(second, typ, new_context)
             )
         }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::app(
-                aux_exact(first, name.clone(), context.clone()),
-                aux_exact(second, name, context)
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
             )
         }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
-                aux_exact(first, name.clone(), context.clone()),
-                aux_exact(second, name, context)
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
             )
         }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
-                aux_exact(first, name.clone(), context.clone()),
-                aux_exact(second, name, context)
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
             )
         }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
-                aux_exact(first, name.clone(), context.clone()),
-                aux_exact(second, name.clone(), context.clone()),
-                aux_exact(third, name, context)
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ.clone(), context.clone()),
+                aux_absurd(third, typ, context)
             )
         }
     }
 }
 
 impl LambdaTerm {
-    pub fn exact(mut self, name: String) -> LambdaTerm {
+    pub fn absurd(mut self, typ: LambdaTerm) -> LambdaTerm {
         self = update_goals_nb(self.clone(), &mut 1);
-        aux_exact(self.clone(), name, HashMap::new())
+        aux_absurd(self.clone(), typ, HashMap::new())
     }
 }

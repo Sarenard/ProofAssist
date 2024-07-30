@@ -96,5 +96,14 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 _ => panic!("Unreachable")
             }
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            let second_inferred = compute_type(second, context);
+            match second_inferred {
+                LambdaTerm::Bot => {
+                    first
+                },
+                other => panic!("Other : {:?}", other)
+            }
+        }
     }
 }

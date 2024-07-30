@@ -73,6 +73,12 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                 aux_elim(second, name, context)
             )
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(
+                aux_elim(first, name.clone(), context.clone()),
+                aux_elim(second, name, context)
+            )
+        }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
                 aux_elim(first, name.clone(), context.clone()),

@@ -116,3 +116,8 @@ If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
 ## main new things
 
 - bot and top
+- exfalso
+
+## commands added
+
+###

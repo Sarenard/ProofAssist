@@ -12,6 +12,7 @@ pub enum LambdaTerm {
     Types, // maybe some problems?
     Bot,
     Top,
+    ExFalso(Box<LambdaTerm>, Box<LambdaTerm>),
 
     Pi(String, Box<LambdaTerm>, Box<LambdaTerm>),
     Func(String, Box<LambdaTerm>, Box<LambdaTerm>),

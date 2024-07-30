@@ -89,4 +89,10 @@ impl LambdaTerm {
             Box::new(term3),
         )
     }
+    pub fn exfalso(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::ExFalso(
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
 }

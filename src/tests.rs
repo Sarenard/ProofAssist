@@ -14,6 +14,30 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ A:Prop, Bot -> A
+fn absurd() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::Types,
+            LambdaTerm::imp(
+            LambdaTerm::Bot,
+            LambdaTerm::var("A"),
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.absurd(LambdaTerm::var("hyp1"));
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
 // ∀ A:Prop, (∀ B:Prop, B ) -> A
 fn apply_forall() {
     let goal = LambdaTerm::pi(
@@ -29,12 +53,14 @@ fn apply_forall() {
         )
     );
 
+    
+
     let lambdaterme = LambdaTerm::goal(goal.clone());
     println!("\nlambdaterme : {:?}\n", lambdaterme);
     let (names, lambdaterme) = lambdaterme.intros();
     println!("\nlambdaterme : {:?}\n", lambdaterme);
     let mut hashmap: HashMap<String, LambdaTerm> = HashMap::new();
-    hashmap.insert("B".to_string(), LambdaTerm::var("hyp1"));
+    hashmap.insert("B".to_string(), LambdaTerm::var(names[0].as_str()));
     let lambdaterme = lambdaterme.apply(names[1].clone(), hashmap);
     println!("\nlambdaterme : {:?}\n", lambdaterme);
 

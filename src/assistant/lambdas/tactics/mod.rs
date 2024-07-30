@@ -5,3 +5,4 @@ pub mod apply;
 pub mod exists;
 pub mod split;
 pub mod elim;
+pub mod absurd;

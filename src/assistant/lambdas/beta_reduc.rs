@@ -58,6 +58,15 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                 }
             }
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            match betareduc_step(first.clone(), used_names.clone()) {
+                Some(reduced) => Some(LambdaTerm::exfalso(reduced, second)),
+                None => match betareduc_step(second, used_names.clone()) {
+                    Some(reduced) => Some(LambdaTerm::exfalso(first, reduced)),
+                    None => None
+                }
+            }
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             match betareduc_step(first.clone(), used_names.clone()) {
                 Some(reduced) => Some(LambdaTerm::couple(reduced, second, third)),

@@ -53,6 +53,12 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
                 aux_split(second)
             )
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(
+                aux_split(first),
+                aux_split(second)
+            )
+        }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
                 aux_split(first),

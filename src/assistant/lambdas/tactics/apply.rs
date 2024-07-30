@@ -84,6 +84,12 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(second, name, context, instanciation)
             )
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name, context, instanciation)
+            )
+        }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
                 aux_apply(first, name.clone(), context.clone(), instanciation.clone()),

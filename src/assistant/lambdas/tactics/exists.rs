@@ -64,6 +64,12 @@ fn aux_exists(root: LambdaTerm, name: String, context: HashMap<String, LambdaTer
                 aux_exists(second, name, context)
             )
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(
+                aux_exists(first, name.clone(), context.clone()),
+                aux_exists(second, name, context)
+            )
+        }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
                 aux_exists(first, name.clone(), context.clone()),

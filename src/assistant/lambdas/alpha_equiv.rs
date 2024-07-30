@@ -55,6 +55,12 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 
             first && second
         }
+        (LambdaTerm::ExFalso(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2)) => {
+            let first = alpha_equiv(a1, a2);
+            let second = alpha_equiv(b1, b2);
+
+            first && second
+        }
         (
             LambdaTerm::Couple(box first1, box second1, box third1),
             LambdaTerm::Couple(box first2, box second2, box third2)
@@ -152,6 +158,12 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 replace_free_variable_r(var_name, new_thing, second), 
             )
         }
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(
+                first,
+                replace_free_variable_r(var_name, new_thing, second), 
+            )
+        }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
                 replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
@@ -226,7 +238,10 @@ fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
             
             LambdaTerm::sigma(new_name, alpha_convert(used_names, first), renamed)
         }
-        LambdaTerm::Error => panic!()
+        LambdaTerm::Error => panic!(),
+        LambdaTerm::ExFalso(box first, box second) => {
+            LambdaTerm::exfalso(first, alpha_convert(used_names, second))
+        }
     }
 }
 

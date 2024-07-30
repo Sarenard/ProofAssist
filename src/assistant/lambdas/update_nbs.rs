@@ -23,6 +23,11 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
             let part2 = update_goals_nb(lb2, goal_index);
             LambdaTerm::pi(name, part1, part2)
         }
+        LambdaTerm::ExFalso(box lb1, box lb2) => {
+            let part1 = update_goals_nb(lb1, goal_index);
+            let part2 = update_goals_nb(lb2, goal_index);
+            LambdaTerm::exfalso(part1, part2)
+        }
         LambdaTerm::Sigma(name, box lb1, box lb2) => {
             let part1 = update_goals_nb(lb1, goal_index);
             let part2 = update_goals_nb(lb2, goal_index);
