@@ -237,7 +237,7 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
     }
 }
 
-fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
+pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
         LambdaTerm::Types => LambdaTerm::Types,
         LambdaTerm::Top => LambdaTerm::Top,
