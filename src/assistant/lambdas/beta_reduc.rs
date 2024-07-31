@@ -117,8 +117,53 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                 None => None
             }
         }
+        LambdaTerm::Match(
+            box LambdaTerm::Left(box computed, box obj), 
+            box func, 
+            box func2) => {
+            let reduced = betareduc_step(func.clone(), used_names.clone());
+            match reduced {
+                Some(reduced) => {
+                    Some(
+                        LambdaTerm::match_new(
+                            LambdaTerm::left(computed, obj), 
+                            reduced, 
+                            func2
+                        )
+                    )
+                }
+                None => Some(LambdaTerm::app(func, obj))
+            }
+        }
+        LambdaTerm::Match(
+            box LambdaTerm::Right(box computed, box obj), 
+            box func2, 
+            box func) => {
+            let reduced = betareduc_step(func.clone(), used_names.clone());
+            match reduced {
+                Some(reduced) => {
+                    Some(
+                        LambdaTerm::match_new(
+                            LambdaTerm::right(computed, obj), 
+                            func2, 
+                            reduced
+                        )
+                    )
+                }
+                None => Some(LambdaTerm::app(func, obj))
+            }
+        }
         LambdaTerm::Match(box first, box second, box third) => {
-            todo!()
+            match betareduc_step(first.clone(), used_names.clone()) {
+                Some(reduced) => Some(LambdaTerm::match_new(reduced, second, third)),
+                None => match betareduc_step(second.clone(), used_names.clone()) {
+                    Some(reduced) => Some(LambdaTerm::match_new(first, reduced, third)),
+                    None => match betareduc_step(third.clone(), used_names.clone()) {
+                        Some(reduced) => Some(LambdaTerm::match_new(first, second, reduced)),
+                        None => None
+                    }
+                }
+            }
         }
     }
 }
