@@ -132,6 +132,12 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
                 substitute(third, var_name, what),
             )
         }
-        LambdaTerm::Error => unreachable!()
+        LambdaTerm::Error => unreachable!(),
+        LambdaTerm::Eq(box a, box b) => {
+            LambdaTerm::eq(substitute(a, var_name.clone(), what.clone()), substitute(b, var_name, what))
+        }
+        LambdaTerm::Refl(box a) => {
+            LambdaTerm::refl(substitute(a, var_name, what))
+        }
     }
 }

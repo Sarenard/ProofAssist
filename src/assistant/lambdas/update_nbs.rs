@@ -75,5 +75,14 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
             let part3 = update_goals_nb(lb3, goal_index);
             LambdaTerm::match_new(part1, part2, part3)
         }
+        LambdaTerm::Eq(box lb1, box lb2) => {
+            let part1 = update_goals_nb(lb1, goal_index);
+            let part2 = update_goals_nb(lb2, goal_index);
+            LambdaTerm::eq(part1, part2)
+        }
+        LambdaTerm::Refl(box lb) => {
+            let part = update_goals_nb(lb, goal_index);
+            LambdaTerm::refl(part)
+        }
     }
 }

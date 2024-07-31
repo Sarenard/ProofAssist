@@ -16,6 +16,9 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
         LambdaTerm::Goal(box _typ, _nb) => {
             vec![]
         }
+        LambdaTerm::Refl(box typ) => {
+            free_var(typ)
+        }
         LambdaTerm::Func(name, box typ, box body)
         | LambdaTerm::Sigma(name, box typ, box body)
         | LambdaTerm::Pi(name, box typ, box body) => {
@@ -31,6 +34,7 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
         }
         LambdaTerm::ExFalso(box first, box second)
         | LambdaTerm::Or(box first, box second)
+        | LambdaTerm::Eq(box first, box second)
         | LambdaTerm::Left(box first, box second)
         | LambdaTerm::Right(box first, box second)
         | LambdaTerm::App(box first, box second) => {

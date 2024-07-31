@@ -89,6 +89,17 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(second, var_name)
             )
         }
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
+        LambdaTerm::Refl(box first) => {
+            LambdaTerm::refl(
+                aux_intro(first, var_name)
+            )
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
                 aux_intro(first, var_name.clone()),

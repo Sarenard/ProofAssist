@@ -21,6 +21,15 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
         (LambdaTerm::Goal(..), LambdaTerm::Goal(..)) => {
             true
         }
+        (LambdaTerm::Refl(box first), LambdaTerm::Refl(box second)) => {
+            alpha_equiv(first, second)
+        }
+        (LambdaTerm::Eq(box first1, box second1), LambdaTerm::Eq(box first2, box second2)) => {
+            let one = alpha_equiv(first1, first2);
+            let two = alpha_equiv(second1, second2);
+
+            one && two
+        }
         (LambdaTerm::Top, LambdaTerm::Top) => {
             true
         }
@@ -204,7 +213,16 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 replace_free_variable_r(var_name, new_thing, third), 
             )
         }
-        LambdaTerm::Error => panic!()
+        LambdaTerm::Error => panic!(),
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first),
+                replace_free_variable_r(var_name, new_thing, second),
+            )
+        }
+        LambdaTerm::Refl(box thing) => {
+            LambdaTerm::refl(replace_free_variable_r(var_name, new_thing, thing))
+        }
     }
 }
 
@@ -293,6 +311,15 @@ fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Error => panic!(),
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(first, alpha_convert(used_names, second))
+        }
+        LambdaTerm::Eq(box a, box b) => {
+            LambdaTerm::eq(
+                alpha_convert(used_names.clone(), a),
+                alpha_convert(used_names, b),
+            )
+        }
+        LambdaTerm::Refl(box a) => {
+            LambdaTerm::refl(alpha_convert(used_names, a))
         }
     }
 }

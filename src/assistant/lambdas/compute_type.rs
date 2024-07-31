@@ -137,5 +137,18 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 other => panic!("Other : {:?}", other)
             }
         }
+        LambdaTerm::Eq(box a, box b) => {
+            // we check the types
+            let type_a = compute_type(a.clone(), context.clone());
+            let type_b = compute_type(b.clone(), context.clone());
+            if type_a == type_b {
+                LambdaTerm::Types
+            } else {
+                panic!("Error, type mismatch")
+            }
+        }
+        LambdaTerm::Refl(box a) => {
+            LambdaTerm::eq(a.clone(), a)
+        }
     }
 }

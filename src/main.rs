@@ -49,13 +49,9 @@ fn main() {
     let goal = LambdaTerm::pi(
         "A".to_string(),
         LambdaTerm::types(),
-        LambdaTerm::pi(
-            "B".to_string(),
-            LambdaTerm::types(),
-            LambdaTerm::imp(
-                LambdaTerm::or(LambdaTerm::var("A"), LambdaTerm::var("B")),
-                LambdaTerm::or(LambdaTerm::var("B"), LambdaTerm::var("A")),
-            )
+        LambdaTerm::eq(
+            LambdaTerm::var("A"),
+            LambdaTerm::var("A"),
         )
     );
 
@@ -377,8 +373,14 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
                 right_path.push(*right.clone());
                 queue.push_back((*right.clone(), right_path));
             },
+            LambdaTerm::Refl(ref main) => {
+                let mut main_path = path.clone();
+                main_path.push(*main.clone());
+                queue.push_back((*main.clone(), main_path));
+            }
             LambdaTerm::Proj(ref left, ref right)
             | LambdaTerm::ExFalso(ref left, ref right)
+            | LambdaTerm::Eq(ref left, ref right)
             | LambdaTerm::Or(ref left, ref right)
             | LambdaTerm::Left(ref left, ref right)
             | LambdaTerm::Right(ref left, ref right)

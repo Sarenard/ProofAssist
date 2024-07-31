@@ -30,6 +30,10 @@ pub enum LambdaTerm {
     Right(Box<LambdaTerm>, Box<LambdaTerm>), // right is for typecheck purposes
     Match(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>), // right is for typecheck purposes
 
+    // equality
+    Eq(Box<LambdaTerm>, Box<LambdaTerm>), 
+    Refl(Box<LambdaTerm>),
+
     Error,
 }
 

@@ -85,11 +85,22 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_exact(second, name, context)
             )
         }
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name, context)
+            )
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
                 aux_exact(first, name.clone(), context.clone()),
                 aux_exact(second, name.clone(), context.clone()),
                 aux_exact(third, name, context)
+            )
+        }
+        LambdaTerm::Refl(box first) => {
+            LambdaTerm::refl(
+                aux_exact(first, name, context)
             )
         }
         LambdaTerm::Match(box first, box second, box third) => {

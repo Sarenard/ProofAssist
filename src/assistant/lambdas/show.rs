@@ -81,7 +81,12 @@ impl std::fmt::Display for LambdaTerm {
             }
             LambdaTerm::Proj(box first, box second) => {
                 write!(f, "Proj({}, {})", first, second)
-
+            }
+            LambdaTerm::Eq(box first, box second) => {
+                write!(f, "Eq({}, {})", first, second)
+            }
+            LambdaTerm::Refl(box first) => {
+                write!(f, "Refl({})", first)
             }
         }
     }

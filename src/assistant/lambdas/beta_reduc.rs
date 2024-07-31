@@ -165,6 +165,21 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                 }
             }
         }
+        LambdaTerm::Eq(box a, box b) => {
+            match betareduc_step(a.clone(), used_names.clone()) {
+                Some(reduced) => Some(LambdaTerm::eq(reduced, b)),
+                None => match betareduc_step(b, used_names.clone()) {
+                    Some(reduced) => Some(LambdaTerm::eq(a, reduced)),
+                    None => None
+                }
+            }
+        }
+        LambdaTerm::Refl(box a) => {
+            match betareduc_step(a, used_names) {
+                Some(reduced) => Some(LambdaTerm::refl(reduced)),
+                None => None
+            }
+        }
     }
 }
 

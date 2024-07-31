@@ -86,6 +86,17 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
                 aux_absurd(second, typ, context)
             )
         }
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
+            )
+        }
+        LambdaTerm::Refl(box first) => {
+            LambdaTerm::refl(
+                aux_absurd(first, typ, context)
+            )
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
                 aux_absurd(first, typ.clone(), context.clone()),

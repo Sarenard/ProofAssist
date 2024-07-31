@@ -92,6 +92,17 @@ fn aux_exists(root: LambdaTerm, obj: LambdaTerm, context: HashMap<String, Lambda
                 aux_exists(second, obj, context)
             )
         }
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
+            )
+        }
+        LambdaTerm::Refl(box first) => {
+            LambdaTerm::refl(
+                aux_exists(first, obj, context)
+            )
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
                 aux_exists(first, obj.clone(), context.clone()),

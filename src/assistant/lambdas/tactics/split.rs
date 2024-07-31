@@ -26,6 +26,9 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
         | LambdaTerm::Goal(..) => {
             root
         },
+        LambdaTerm::Refl(box first) => {
+            LambdaTerm::refl(aux_split(first))
+        }
         LambdaTerm::Func(str, box typ, box lambdaterm) => {
             LambdaTerm::func(
                 str, 
@@ -79,6 +82,12 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
         }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
+                aux_split(first),
+                aux_split(second)
+            )
+        }
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
                 aux_split(first),
                 aux_split(second)
             )

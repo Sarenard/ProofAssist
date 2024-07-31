@@ -114,6 +114,17 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(second, name, context, instanciation)
             )
         }
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name, context, instanciation)
+            )
+        }
+        LambdaTerm::Refl(box first) => {
+            LambdaTerm::refl(
+                aux_apply(first, name, context, instanciation)
+            )
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
                 aux_apply(first, name.clone(), context.clone(), instanciation.clone()),

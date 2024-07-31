@@ -126,4 +126,15 @@ impl LambdaTerm {
             LambdaTerm::Bot
         )
     }
+    pub fn eq(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Eq(
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
+    pub fn refl(term1: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Refl(
+            Box::new(term1),
+        )
+    }
 }

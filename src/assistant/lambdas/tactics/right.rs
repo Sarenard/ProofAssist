@@ -87,6 +87,17 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
                 aux_right(second)
             )
         }
+        LambdaTerm::Eq(box first, box second) => {
+            LambdaTerm::eq(
+                aux_right(first),
+                aux_right(second)
+            )
+        }
+        LambdaTerm::Refl(box first) => {
+            LambdaTerm::refl(
+                aux_right(first)
+            )
+        }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
                 aux_right(first),
