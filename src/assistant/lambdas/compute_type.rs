@@ -62,7 +62,9 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
             }
         }
         LambdaTerm::Or(box first, box second) => {
-            todo!() 
+            let _first_type = compute_type(first.clone(), context.clone());
+            let _second_type = compute_type(second, context);
+            LambdaTerm::Types
         }
         LambdaTerm::Left(box first, box second) => {
             LambdaTerm::or(

@@ -118,7 +118,18 @@ If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
 - bot and top
 - exfalso
 - or, left and right lambda terms added
+- match for or
 
 ## commands added
 
-###
+### absurd B
+If `Goal(A)` then transforms it to `ExFalso(B, Goal(Bottom))`
+### Left
+If `Goal(A \/ B)` transforms it into a `Left(Goal(A), B)`
+### Right
+If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
+
+### TODO
+
+- a lambdaterm parser
+- make the saving theorems work again
