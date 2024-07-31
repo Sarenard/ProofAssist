@@ -106,7 +106,14 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
                 aux_split(third)
             )
         }
-        LambdaTerm::Error => panic!()
+        LambdaTerm::Error => panic!(),
+        LambdaTerm::Rewrite(box first, box second, box third) => {
+            LambdaTerm::rewrite(
+                aux_split(first),
+                aux_split(second),
+                aux_split(third)
+            )
+        }
     }
 }
 

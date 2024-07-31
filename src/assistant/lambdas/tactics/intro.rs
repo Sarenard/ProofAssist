@@ -114,6 +114,13 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(third, var_name)
             )
         }
+        LambdaTerm::Rewrite(box first, box second, box third) => {
+            LambdaTerm::rewrite(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name.clone()),
+                aux_intro(third, var_name)
+            )
+        }
     }
 }
 

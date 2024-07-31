@@ -111,6 +111,13 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
                 aux_absurd(third, typ, context)
             )
         }
+        LambdaTerm::Rewrite(box first, box second, box third) => {
+            LambdaTerm::rewrite(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ.clone(), context.clone()),
+                aux_absurd(third, typ, context)
+            )
+        }
     }
 }
 

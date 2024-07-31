@@ -139,7 +139,14 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(third, name, context, instanciation)
             )
         }
-        LambdaTerm::Error => panic!()
+        LambdaTerm::Error => panic!(),
+        LambdaTerm::Rewrite(box first, box second, box third) => {
+            LambdaTerm::rewrite(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(third, name, context, instanciation)
+            )
+        }
     }
 }
 

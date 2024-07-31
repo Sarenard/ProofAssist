@@ -33,6 +33,9 @@ pub enum LambdaTerm {
     // equality
     Eq(Box<LambdaTerm>, Box<LambdaTerm>), 
     Refl(Box<LambdaTerm>),
+    // rewrite(lambda, new_type, old_type)
+    // Goal(C) + lambda: A = B => (rewrite lambda) => rewrite(lambda, Goal(C[A <- B]), C)
+    Rewrite(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>),
 
     Error,
 }

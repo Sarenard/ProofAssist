@@ -125,6 +125,13 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
                 substitute(third, var_name, what),
             )
         }
+        LambdaTerm::Rewrite(box first, box second, box third) => {
+            LambdaTerm::rewrite(
+                substitute(first, var_name.clone(), what.clone()),
+                substitute(second, var_name.clone(), what.clone()),
+                substitute(third, var_name, what),
+            )
+        }
         LambdaTerm::Match(box first, box second, box third) => {
             LambdaTerm::match_new(
                 substitute(first, var_name.clone(), what.clone()),

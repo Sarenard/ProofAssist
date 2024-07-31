@@ -8,7 +8,7 @@ use lambda::{
 
 use crate::DEBUG;
 
-use super::{alpha_equiv::replace_free_variable, free_var::free_var};
+use super::{alpha_equiv::replace_free_variable, free_var::free_var, replace::replace};
 
 pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     if DEBUG {
@@ -150,5 +150,20 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
         LambdaTerm::Refl(box a) => {
             LambdaTerm::eq(a.clone(), a)
         }
+        LambdaTerm::Rewrite(box lambda, box obj, box witness) => {
+            let lambda_type = compute_type(lambda, context.clone());
+            match lambda_type {
+                LambdaTerm::Eq(box A, box B) => {
+                    let replaced = replace(witness.clone(), A.clone(), B.clone());
+                    if replaced == obj {
+                        witness
+                    } else {
+                        panic!("Error, not the same")
+                    }
+                }
+                other => panic!("impossible {:?}", other)
+            }
+        }
     }
 }
+

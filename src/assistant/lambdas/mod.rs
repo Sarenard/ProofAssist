@@ -9,3 +9,4 @@ pub mod alpha_equiv;
 pub mod free_var;
 pub mod gen_name;
 pub mod substitute;
+pub mod replace;

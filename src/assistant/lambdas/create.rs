@@ -137,4 +137,11 @@ impl LambdaTerm {
             Box::new(term1),
         )
     }
+    pub fn rewrite(var: LambdaTerm, goal: LambdaTerm, witness: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Rewrite(
+            Box::new(var),
+            Box::new(goal),
+            Box::new(witness),
+        )
+    }
 }

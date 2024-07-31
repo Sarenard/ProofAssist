@@ -88,6 +88,8 @@ impl std::fmt::Display for LambdaTerm {
             LambdaTerm::Refl(box first) => {
                 write!(f, "Refl({})", first)
             }
+            LambdaTerm::Rewrite(box first, box second, box third) => 
+                write!(f, "Rewrite({}, {}, {})", first, second, third)
         }
     }
 }

@@ -112,6 +112,13 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
                 aux_left(third)
             )
         }
+        LambdaTerm::Rewrite(box first, box second, box third) => {
+            LambdaTerm::rewrite(
+                aux_left(first),
+                aux_left(second),
+                aux_left(third)
+            )
+        }
     }
 }
 

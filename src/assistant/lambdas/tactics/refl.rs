@@ -109,6 +109,13 @@ fn aux_refl(root: LambdaTerm) -> LambdaTerm {
                 aux_refl(third)
             )
         }
+        LambdaTerm::Rewrite(box first, box second, box third) => {
+            LambdaTerm::rewrite(
+                aux_refl(first),
+                aux_refl(second),
+                aux_refl(third)
+            )
+        }
     }
 }
 
