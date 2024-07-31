@@ -117,6 +117,9 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                 None => None
             }
         }
+        LambdaTerm::Match(box first, box second, box third) => {
+            todo!()
+        }
     }
 }
 

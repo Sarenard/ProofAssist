@@ -96,6 +96,13 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(third, var_name)
             )
         }
+        LambdaTerm::Match(box first, box second, box third) => {
+            LambdaTerm::match_new(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name.clone()),
+                aux_intro(third, var_name)
+            )
+        }
     }
 }
 

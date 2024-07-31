@@ -110,6 +110,13 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                 aux_elim(third, name, context)
             )
         }
+        LambdaTerm::Match(box first, box second, box third) => {
+            LambdaTerm::match_new(
+                aux_elim(first, name.clone(), context.clone()),
+                aux_elim(second, name.clone(), context.clone()),
+                aux_elim(third, name, context)
+            )
+        }
     }
 }
 

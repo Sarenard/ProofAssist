@@ -46,8 +46,23 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 panic!()
             }
         }
+        LambdaTerm::Match(box first, box second, box third) => {
+            let type_first = compute_type(first, context.clone());
+            let type_second = compute_type(second, context.clone());
+            let type_third = compute_type(third, context.clone());
+            match (type_first, type_second, type_third) {
+                (
+                    LambdaTerm::Or(box first_a, box first_b), 
+                    LambdaTerm::Pi(_name1, box impl1_premice, box impl1_body),
+                    LambdaTerm::Pi(_name2, box impl2_premice, box impl2_body),
+                ) if first_a == impl1_premice && first_b == impl2_premice && impl1_body == impl2_body => {
+                    impl1_body
+                },
+                other => panic!("other: {:?}", other)
+            }
+        }
         LambdaTerm::Or(box first, box second) => {
-            todo!()
+            todo!() 
         }
         LambdaTerm::Left(box first, box second) => {
             LambdaTerm::or(

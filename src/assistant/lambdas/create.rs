@@ -107,6 +107,13 @@ impl LambdaTerm {
             Box::new(term3),
         )
     }
+    pub fn match_new(term1: LambdaTerm, term2: LambdaTerm, term3: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Match(
+            Box::new(term1),
+            Box::new(term2),
+            Box::new(term3),
+        )
+    }
     pub fn exfalso(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
         LambdaTerm::ExFalso(
             Box::new(term1),

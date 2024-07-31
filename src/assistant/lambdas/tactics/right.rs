@@ -94,6 +94,13 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
                 aux_right(third)
             )
         }
+        LambdaTerm::Match(box first, box second, box third) => {
+            LambdaTerm::match_new(
+                aux_right(first),
+                aux_right(second),
+                aux_right(third)
+            )
+        }
     }
 }
 

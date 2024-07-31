@@ -53,7 +53,8 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
 
             vec_tot
         }
-        LambdaTerm::Couple(box first, box second, box third) => {
+        LambdaTerm::Match(box first, box second, box third)
+        | LambdaTerm::Couple(box first, box second, box third) => {
             let mut vec_tot: Vec<String> = vec![];
             let variables_first = free_var(first);
             let variables_second: Vec<String> = free_var(second);

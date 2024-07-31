@@ -391,7 +391,8 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
                 right_path.push(*right.clone());
                 queue.push_back((*right.clone(), right_path));
             },
-            LambdaTerm::Couple(ref left, ref center, ref right) => {
+            LambdaTerm::Match(ref left, ref center, ref right)
+            | LambdaTerm::Couple(ref left, ref center, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());
                 queue.push_back((*left.clone(), left_path));

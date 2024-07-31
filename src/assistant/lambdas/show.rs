@@ -73,6 +73,9 @@ impl std::fmt::Display for LambdaTerm {
             LambdaTerm::Couple(box first, box second, _typecheck) => {
                 write!(f, "({}, {})", first, second)
             }
+            LambdaTerm::Match(box first, box second, box third) => {
+                write!(f, "Match({}, {}, {})", first, second, third)
+            }
             LambdaTerm::Error => {
                 write!(f, "ERROR")
             }

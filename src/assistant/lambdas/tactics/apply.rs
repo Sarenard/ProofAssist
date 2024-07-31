@@ -121,6 +121,13 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(third, name, context, instanciation)
             )
         }
+        LambdaTerm::Match(box first, box second, box third) => {
+            LambdaTerm::match_new(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(third, name, context, instanciation)
+            )
+        }
         LambdaTerm::Error => panic!()
     }
 }

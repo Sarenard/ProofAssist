@@ -28,6 +28,7 @@ pub enum LambdaTerm {
     Or(Box<LambdaTerm>, Box<LambdaTerm>),
     Left(Box<LambdaTerm>, Box<LambdaTerm>), // right is for typecheck purposes
     Right(Box<LambdaTerm>, Box<LambdaTerm>), // right is for typecheck purposes
+    Match(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>), // right is for typecheck purposes
 
     Error,
 }
