@@ -12,6 +12,7 @@ pub enum OP {
     Exists(String),
     Left,
     Right,
+    Refl,
     
     // QOL macros for other things
     Assumption,

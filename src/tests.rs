@@ -14,6 +14,28 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ A:Prop, A = A
+fn refl_test() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::eq(
+            LambdaTerm::var("A"),
+            LambdaTerm::var("A"),
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.refl_run();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+#[test]
 // ∀ A:Prop, ∀ B:Prop, (A or B) -> (B or A)
 fn or_swap() {
     let goal = LambdaTerm::pi(

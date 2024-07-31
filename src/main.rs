@@ -236,6 +236,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             let new_lambdaterm = lambdaterme.run_right();
             (new_lambdaterm, hypothesis, operations)
         }
+        OP::Refl => {
+            let new_lambdaterm = lambdaterme.refl_run();
+            (new_lambdaterm, hypothesis, operations)
+        }
     }
 }
 
@@ -270,6 +274,9 @@ fn get_command(operations: &mut Vec<OP>) {
         }
         "assu" => {
             operations.push(OP::Assumption)
+        }
+        "refl" => {
+            operations.push(OP::Refl)
         }
         "apply" => {
             let name = splitted.next().unwrap();
@@ -323,6 +330,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             }
             OP::Left => {
                 writeln!(theorem_file, "Left").unwrap();
+            }
+            OP::Refl => {
+                writeln!(theorem_file, "Refl").unwrap();
             }
             OP::Right => {
                 writeln!(theorem_file, "Right").unwrap();
