@@ -106,6 +106,7 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
 
 impl LambdaTerm {
     pub fn run_left(mut self) -> LambdaTerm {
+        self = update_goals_nb(self.clone(), &mut 1);
         aux_left(self.clone())
     }
 }

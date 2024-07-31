@@ -14,6 +14,45 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ A:Prop, ∀ B:Prop, (A or B) -> (B or A)
+fn or_swap() {
+    let goal = LambdaTerm::pi(
+        "A".to_string(),
+        LambdaTerm::types(),
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::types(),
+            LambdaTerm::imp(
+                LambdaTerm::or(LambdaTerm::var("A"), LambdaTerm::var("B")),
+                LambdaTerm::or(LambdaTerm::var("B"), LambdaTerm::var("A")),
+            )
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let lambdaterme = lambdaterme.elim(names[2].clone());
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let lambdaterme = lambdaterme.run_right();
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let lambdaterme = lambdaterme.run_left();
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?}\n{}\n", lambdaterme, lambdaterme);
+    
+
+    check(goal, lambdaterme);
+}
+
+#[test]
 // ∀ A:Prop, ∃ B:Prop, ~(A /\ B)
 fn harder() {
     let goal = LambdaTerm::pi(

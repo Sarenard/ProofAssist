@@ -48,13 +48,13 @@ fn main() {
     */
     let goal = LambdaTerm::pi(
         "A".to_string(),
-        LambdaTerm::Types,
+        LambdaTerm::types(),
         LambdaTerm::pi(
             "B".to_string(),
-            LambdaTerm::Types,
+            LambdaTerm::types(),
             LambdaTerm::imp(
-                LambdaTerm::var("A"),
                 LambdaTerm::or(LambdaTerm::var("A"), LambdaTerm::var("B")),
+                LambdaTerm::or(LambdaTerm::var("B"), LambdaTerm::var("A")),
             )
         )
     );

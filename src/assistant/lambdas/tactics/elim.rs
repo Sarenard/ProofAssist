@@ -32,6 +32,13 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                         )
                     )
                 }
+                LambdaTerm::Or(box type1, box type2) => {
+                    LambdaTerm::match_new(
+                        LambdaTerm::Var(name),
+                        LambdaTerm::goal(LambdaTerm::imp(type1, typ.clone())),
+                        LambdaTerm::goal(LambdaTerm::imp(type2, typ))
+                    )
+                }
                 other => panic!("Cant elim for {:?}", other)
             }
         }
