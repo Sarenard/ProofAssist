@@ -120,9 +120,9 @@ fn absurd() {
 
     let lambdaterme = LambdaTerm::goal(goal.clone());
     println!("\nlambdaterme : {:?}\n", lambdaterme);
-    let (_, lambdaterme) = lambdaterme.intros();
+    let (names, lambdaterme) = lambdaterme.intros();
     println!("\nlambdaterme : {:?}\n", lambdaterme);
-    let lambdaterme = lambdaterme.absurd(LambdaTerm::var("hyp1"));
+    let lambdaterme = lambdaterme.absurd(LambdaTerm::var(names[0].as_str()));
     println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.assumption();
     println!("\nlambdaterme : {:?}\n", lambdaterme);
