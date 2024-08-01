@@ -4,7 +4,7 @@ use lambda::{
     LambdaTerm,
 };
 
-use super::{free_var::free_var, gen_name::gen_name};
+use super::{beta_reduc::beta_reduce, free_var::free_var, gen_name::gen_name};
 
 impl LambdaTerm {
     pub fn var(name: &str) -> LambdaTerm {
@@ -13,16 +13,18 @@ impl LambdaTerm {
         )
     }
     pub fn goal(lambda: LambdaTerm) -> LambdaTerm {
-        LambdaTerm::Goal(
+        let temp = LambdaTerm::Goal(
             Box::new(lambda),
             0
-        )
+        );
+        beta_reduce(temp)
     }
     pub fn goalnb(lambda: LambdaTerm, nb: usize) -> LambdaTerm {
-        LambdaTerm::Goal(
+        let temp = LambdaTerm::Goal(
             Box::new(lambda),
             nb
-        )
+        );
+        beta_reduce(temp)
     }
     pub fn pi(name: String, term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Pi(

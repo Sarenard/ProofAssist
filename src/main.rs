@@ -30,33 +30,13 @@ static DEBUG: bool = false;
 fn main() {
     // let goal = get_goal();
     // Goal forall A B C:Set, A = B -> B = C -> A = C. intros A B C h1 h2. rewrite h1. exact h2.
-    let goal = LambdaTerm::pi(
-        "A".to_string(),
-        LambdaTerm::types(),
-        LambdaTerm::pi(
-            "B".to_string(),
-            LambdaTerm::types(),
-            LambdaTerm::pi(
-                "C".to_string(),
-                LambdaTerm::types(),
-                LambdaTerm::imp(
-                    LambdaTerm::eq(
-                        LambdaTerm::var("A"),
-                        LambdaTerm::var("B")
-                    ),
-                    LambdaTerm::imp(
-                        LambdaTerm::eq(
-                            LambdaTerm::var("B"),
-                            LambdaTerm::var("C")
-                        ),
-                        LambdaTerm::eq(
-                            LambdaTerm::var("A"),
-                            LambdaTerm::var("C")
-                        )
-                    )
-                )
+    let goal = LambdaTerm::bif(
+            LambdaTerm::FBool,
+            LambdaTerm::FBool,
+            LambdaTerm::eq(
+                LambdaTerm::TBool,
+                LambdaTerm::TBool,
             )
-        )
     );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);

@@ -14,6 +14,26 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// if false then false else true = true end
+fn test_eq() {
+    let goal = LambdaTerm::bif(
+        LambdaTerm::FBool,
+        LambdaTerm::FBool,
+        LambdaTerm::eq(
+            LambdaTerm::TBool,
+            LambdaTerm::TBool,
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.refl_run();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    
+    check(goal, lambdaterme);
+}
+
+#[test]
 // ∀ A, B, C:Prop, A = B -> B = C -> A = C 
 fn rewrite_test() {
     let goal = LambdaTerm::pi(

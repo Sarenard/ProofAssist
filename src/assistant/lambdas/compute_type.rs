@@ -171,7 +171,16 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
             }
         }
         LambdaTerm::Bif(box first, box second, box third) => {
-            todo!()
+            // maybe ?
+            match first {
+                LambdaTerm::TBool => {
+                    compute_type(second, context)
+                }
+                LambdaTerm::FBool => {
+                    compute_type(third, context)
+                }
+                _ => panic!("Error, not a boolean")
+            }
         }
     }
 }

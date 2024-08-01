@@ -180,6 +180,8 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                 }
             }
         }
+        LambdaTerm::Bif(box LambdaTerm::TBool, box first, box _second) => Some(first),
+        LambdaTerm::Bif(box LambdaTerm::FBool, box _first, box second) => Some(second),
         LambdaTerm::Bif(box first, box second, box third) => {
             match betareduc_step(first.clone(), used_names.clone()) {
                 Some(reduced) => Some(LambdaTerm::bif(reduced, second, third)),
