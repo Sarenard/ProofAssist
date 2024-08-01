@@ -25,33 +25,37 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = false;
+static DEBUG: bool = true;
 
 fn main() {
     // let goal = get_goal();
-    /* 
-    let goal = LambdaTerm::pi(
-        "B".to_string(),
-        LambdaTerm::types(),
-        LambdaTerm::imp(
-            LambdaTerm::pi(
-                "A".to_string(),
-                LambdaTerm::types(),
-                LambdaTerm::imp(
-                    LambdaTerm::var("A"),
-                    LambdaTerm::var("B"),
-                )
-            ),
-            LambdaTerm::var("B")
-        )
-    );
-    */
+    // Goal forall A B C:Set, A = B -> B = C -> A = C. intros A B C h1 h2. rewrite h1. exact h2.
     let goal = LambdaTerm::pi(
         "A".to_string(),
         LambdaTerm::types(),
-        LambdaTerm::eq(
-            LambdaTerm::var("A"),
-            LambdaTerm::var("A"),
+        LambdaTerm::pi(
+            "B".to_string(),
+            LambdaTerm::types(),
+            LambdaTerm::pi(
+                "C".to_string(),
+                LambdaTerm::types(),
+                LambdaTerm::imp(
+                    LambdaTerm::eq(
+                        LambdaTerm::var("A"),
+                        LambdaTerm::var("B")
+                    ),
+                    LambdaTerm::imp(
+                        LambdaTerm::eq(
+                            LambdaTerm::var("B"),
+                            LambdaTerm::var("C")
+                        ),
+                        LambdaTerm::eq(
+                            LambdaTerm::var("A"),
+                            LambdaTerm::var("C")
+                        )
+                    )
+                )
+            )
         )
     );
 
@@ -240,6 +244,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             let new_lambdaterm = lambdaterme.refl_run();
             (new_lambdaterm, hypothesis, operations)
         }
+        OP::Rewrite(name) => {
+            let new_lambdaterm = lambdaterme.rewrite_run(name);
+            (new_lambdaterm, hypothesis, operations)
+        }
     }
 }
 
@@ -281,6 +289,10 @@ fn get_command(operations: &mut Vec<OP>) {
         "apply" => {
             let name = splitted.next().unwrap();
             operations.push(OP::Apply(name.to_string()))
+        }
+        "rewrite" => {
+            let name = splitted.next().unwrap();
+            operations.push(OP::Rewrite(name.to_string()))
         }
         "exists" => {
             let name = splitted.next().unwrap();
@@ -327,6 +339,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             }
             OP::Intro => {
                 writeln!(theorem_file, "Intro").unwrap();
+            }
+            OP::Rewrite(name) => {
+                writeln!(theorem_file, "Rewrite(\"{}\")", name).unwrap();
             }
             OP::Left => {
                 writeln!(theorem_file, "Left").unwrap();

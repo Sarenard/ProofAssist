@@ -133,3 +133,16 @@ If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
 
 - a lambdaterm parser
 - make the saving theorems work again
+
+# 31/07/2024
+
+# 01/08/2024
+
+## main new things
+
+- added rewrite lambdaterm and tactic
+
+## commands added
+
+### rewrite h
+If `h` is of type `A = B` and `Goal(C)` then we transform the goal into `Goal(C with A replaced by B)`

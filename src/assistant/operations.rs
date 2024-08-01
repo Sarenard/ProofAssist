@@ -10,6 +10,7 @@ pub enum OP {
     Elim(String),
     Apply(String),
     Exists(String),
+    Rewrite(String),
     Left,
     Right,
     Refl,

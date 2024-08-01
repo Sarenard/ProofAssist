@@ -13,7 +13,7 @@ impl PartialEq for LambdaTerm {
         let beta_self = beta_reduce(self.clone());
         let beta_other = beta_reduce(other.clone());
         if DEBUG {
-            println!("{:?} =?= {:?}", beta_self, beta_other);
+            println!("{:?} =?= {:?} : {}", beta_self, beta_other, alpha_equiv(beta_other.clone(), beta_self.clone()));
         }
         alpha_equiv(beta_other, beta_self)
     }

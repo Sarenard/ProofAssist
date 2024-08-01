@@ -5,6 +5,7 @@ use lambda::LambdaTerm;
 use super::{alpha_equiv::{alpha_convert, alpha_equiv}, free_var::free_var};
 
 fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: LambdaTerm) -> LambdaTerm {
+    // println!("{}, {}, equiv: {}, {}", lambdaterm, to_replace, alpha_equiv(lambdaterm.clone(), to_replace.clone()), lambdaterm == to_replace);
     if alpha_equiv(lambdaterm.clone(), to_replace.clone()) {
         return replacement;
     }
@@ -122,14 +123,19 @@ fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: L
     }
 }
 
+// thx coda for thinking bout alpha conversion
 pub fn replace(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: LambdaTerm) -> LambdaTerm {
     let mut usedvariables: Vec<String> = vec![];
 
     usedvariables.extend(free_var(to_replace.clone()));
     usedvariables.extend(free_var(replacement.clone()));
 
+    let converted = alpha_convert(usedvariables, lambdaterm.clone());
+
+    println!("{:?}, replace({:?}, {:?}, {:?})", lambdaterm, converted, to_replace, replacement);
+
     replace_intern(
-        alpha_convert(usedvariables, lambdaterm),
+        converted,
         to_replace,
         replacement
     )

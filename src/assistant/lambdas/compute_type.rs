@@ -153,12 +153,12 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
         LambdaTerm::Rewrite(box lambda, box obj, box witness) => {
             let lambda_type = compute_type(lambda, context.clone());
             match lambda_type {
-                LambdaTerm::Eq(box A, box B) => {
-                    let replaced = replace(witness.clone(), A.clone(), B.clone());
-                    if replaced == obj {
+                LambdaTerm::Eq(box a, box b) => {
+                    let replaced = replace(witness.clone(), a.clone(), b.clone());
+                    if replaced == compute_type(obj.clone(), context) {
                         witness
                     } else {
-                        panic!("Error, not the same")
+                        panic!("Error, not the same {:?} {:?}", replaced, obj)
                     }
                 }
                 other => panic!("impossible {:?}", other)

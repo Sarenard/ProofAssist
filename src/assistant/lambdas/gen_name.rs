@@ -19,14 +19,6 @@ pub fn gen_name(vec: Vec<String>) -> String {
     // Convert the Vec to a HashSet for O(1) lookup times
     let existing_strings: HashSet<_> = vec.into_iter().collect();
 
-    // Generate single character strings first (shortest possible strings)
-    for c in 'a'..='z' {
-        let s = c.to_string();
-        if !existing_strings.contains(&s) {
-            return s;
-        }
-    }
-    
     // If all single character strings are taken, generate longer strings
     for len in 2.. {
         for s in generate_strings_of_length(len) {

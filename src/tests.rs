@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::assistant::{lambda::{self, LambdaTerm}, lambdas::replace::replace};
+use crate::assistant::{lambda::{self, LambdaTerm}, lambdas::{alpha_equiv::alpha_equiv, compute_type::compute_type, replace::replace}};
 
 fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
     if lambdaterme.clone().containsgoal() {
@@ -9,41 +9,54 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
     println!("Checking...\n\n");
     let ok = lambdaterme.clone().check(goal.clone());
     if !ok {
-        panic!("Ehh i'm wrong somewhere\n{:?}\n{:?}", lambdaterme, goal);
+        panic!("Ehh i'm wrong somewhere\n{:?}\n{:?}", goal, compute_type(lambdaterme, HashMap::new()));
     }
 }
 
 #[test]
-fn replacetest_1() {
-    let lambdaterm = LambdaTerm::pi(
-        "A".to_string(),
-        LambdaTerm::types(),
-        LambdaTerm::pi(
-            "B".to_string(),
-            LambdaTerm::types(),
-            LambdaTerm::eq(
-                LambdaTerm::var("A"),
-                LambdaTerm::var("B"),
-            )
-        )
-    );
-
-    let res = replace(lambdaterm, LambdaTerm::var("A"), LambdaTerm::var("C"));
-
+// ∀ A:Prop, A = A
+fn rewrite_test() {
     let goal = LambdaTerm::pi(
         "A".to_string(),
         LambdaTerm::types(),
         LambdaTerm::pi(
             "B".to_string(),
             LambdaTerm::types(),
-            LambdaTerm::eq(
-                LambdaTerm::var("A"),
-                LambdaTerm::var("B"),
+            LambdaTerm::pi(
+                "C".to_string(),
+                LambdaTerm::types(),
+                LambdaTerm::pi(
+                    "free_name".to_string(), // TODO : fix this
+                    LambdaTerm::eq(
+                        LambdaTerm::var("A"),
+                        LambdaTerm::var("B")
+                    ),
+                    LambdaTerm::pi(
+                    "free_name2".to_string(),
+                    LambdaTerm::eq(
+                            LambdaTerm::var("B"),
+                            LambdaTerm::var("C")
+                        ),
+                        LambdaTerm::eq(
+                            LambdaTerm::var("A"),
+                            LambdaTerm::var("C")
+                        )
+                    )
+                )
             )
         )
     );
 
-    check(goal, res);
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?} {:?}\n", lambdaterme, names);
+    let lambdaterme = lambdaterme.rewrite_run(names[3].clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
 }
 
 #[test]

@@ -52,8 +52,8 @@ impl LambdaTerm {
         println!("calcul de OK");
         let ok = goal == computed;
         if !ok {
-            println!("Computed : {:?}", computed);
-            println!("Goal : {:?}", goal);
+            println!("Computed : {:?}\n{}", computed, computed);
+            println!("Goal : {:?}\n{}", goal, goal);
         }
         ok
     }
