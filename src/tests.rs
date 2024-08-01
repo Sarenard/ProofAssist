@@ -14,7 +14,7 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
-// ∀ A:Prop, A = A
+// ∀ A, B, C:Prop, A = B -> B = C -> A = C 
 fn rewrite_test() {
     let goal = LambdaTerm::pi(
         "A".to_string(),
@@ -25,14 +25,12 @@ fn rewrite_test() {
             LambdaTerm::pi(
                 "C".to_string(),
                 LambdaTerm::types(),
-                LambdaTerm::pi(
-                    "free_name".to_string(), // TODO : fix this
+                LambdaTerm::imp(
                     LambdaTerm::eq(
                         LambdaTerm::var("A"),
                         LambdaTerm::var("B")
                     ),
-                    LambdaTerm::pi(
-                    "free_name2".to_string(),
+                    LambdaTerm::imp(
                     LambdaTerm::eq(
                             LambdaTerm::var("B"),
                             LambdaTerm::var("C")

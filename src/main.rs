@@ -25,7 +25,7 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = true;
+static DEBUG: bool = false;
 
 fn main() {
     // let goal = get_goal();

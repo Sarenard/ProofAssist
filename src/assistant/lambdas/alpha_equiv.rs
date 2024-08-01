@@ -245,24 +245,6 @@ pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm 
         LambdaTerm::Var(_name) => {
             lambda
         }
-        LambdaTerm::Pi(piname, box first, box second)
-        if !used_names.contains(&piname) => {
-            let mut new_names = used_names.clone();
-            new_names.push(piname.clone());
-            LambdaTerm::pi(piname, first, alpha_convert(new_names, second))
-        }
-        LambdaTerm::Sigma(piname, box first, box second)
-        if !used_names.contains(&piname) => {
-            let mut new_names = used_names.clone();
-            new_names.push(piname.clone());
-            LambdaTerm::sigma(piname, first, alpha_convert(new_names, second))
-        }
-        LambdaTerm::Func(piname, box first, box second)
-        if !used_names.contains(&piname) => {
-            let mut new_names = used_names.clone();
-            new_names.push(piname.clone());
-            LambdaTerm::func(piname, first, alpha_convert(new_names, second))
-        }
         LambdaTerm::Goal(box typ, nb) => {
             LambdaTerm::goalnb(alpha_convert(used_names, typ), nb)
         }
