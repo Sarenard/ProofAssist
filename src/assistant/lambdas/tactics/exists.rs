@@ -30,6 +30,9 @@ fn aux_exists(root: LambdaTerm, obj: LambdaTerm, context: HashMap<String, Lambda
         | LambdaTerm::Types
         | LambdaTerm::Bot
         | LambdaTerm::Top
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Error => {
             root
         },
@@ -119,6 +122,13 @@ fn aux_exists(root: LambdaTerm, obj: LambdaTerm, context: HashMap<String, Lambda
         }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj.clone(), context.clone()),
+                aux_exists(third, obj, context)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_exists(first, obj.clone(), context.clone()),
                 aux_exists(second, obj.clone(), context.clone()),
                 aux_exists(third, obj, context)

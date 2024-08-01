@@ -51,6 +51,9 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         LambdaTerm::Var(..) 
         | LambdaTerm::Types
         | LambdaTerm::Bot
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Top
         | LambdaTerm::Goal(..) => {
             root
@@ -142,6 +145,13 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         LambdaTerm::Error => panic!(),
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(third, name, context, instanciation)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
                 aux_apply(second, name.clone(), context.clone(), instanciation.clone()),
                 aux_apply(third, name, context, instanciation)

@@ -383,6 +383,9 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
             | LambdaTerm::Types
             | LambdaTerm::Top
             | LambdaTerm::Bot
+            | LambdaTerm::Bool
+            | LambdaTerm::TBool
+            | LambdaTerm::FBool
             | LambdaTerm::Error => {}
             LambdaTerm::Goal(box ref ty, _nb) => {
                 goals.push((ty.clone(), path.clone()));
@@ -420,6 +423,7 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
             },
             LambdaTerm::Match(ref left, ref center, ref right)
             | LambdaTerm::Rewrite(ref left, ref center, ref right)
+            | LambdaTerm::Bif(ref left, ref center, ref right)
             | LambdaTerm::Couple(ref left, ref center, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());

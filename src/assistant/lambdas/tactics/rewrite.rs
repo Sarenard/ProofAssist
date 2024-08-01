@@ -31,6 +31,9 @@ fn aux_rewrite(root: LambdaTerm, name: String, context: HashMap<String, LambdaTe
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Error => {
@@ -122,6 +125,13 @@ fn aux_rewrite(root: LambdaTerm, name: String, context: HashMap<String, LambdaTe
         }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_rewrite(first, name.clone(), context.clone()),
+                aux_rewrite(second, name.clone(), context.clone()),
+                aux_rewrite(third, name, context)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_rewrite(first, name.clone(), context.clone()),
                 aux_rewrite(second, name.clone(), context.clone()),
                 aux_rewrite(third, name, context)

@@ -8,6 +8,9 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
         | LambdaTerm::Types
         | LambdaTerm::Top
         | LambdaTerm::Bot
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Error => {
             term
         }
@@ -68,6 +71,12 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
             let part2 = update_goals_nb(lb2, goal_index);
             let part3 = update_goals_nb(lb3, goal_index);
             LambdaTerm::couple(part1, part2, part3)
+        }
+        LambdaTerm::Bif(box lb1, box lb2, box lb3) => {
+            let part1 = update_goals_nb(lb1, goal_index);
+            let part2 = update_goals_nb(lb2, goal_index);
+            let part3 = update_goals_nb(lb3, goal_index);
+            LambdaTerm::bif(part1, part2, part3)
         }
         LambdaTerm::Rewrite(box lb1, box lb2, box lb3) => {
             let part1 = update_goals_nb(lb1, goal_index);

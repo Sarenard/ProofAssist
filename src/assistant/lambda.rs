@@ -37,6 +37,14 @@ pub enum LambdaTerm {
     // Goal(C) + lambda: A = B => (rewrite lambda) => rewrite(lambda, Goal(C[A <- B]), C)
     Rewrite(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>),
 
+    // booleans
+    Bool,
+    TBool,
+    FBool,
+    // if first then second else third end
+    Bif(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>),
+
+
     Error,
 }
 

@@ -141,6 +141,7 @@ If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
 ## main new things
 
 - added rewrite lambdaterm and tactic
+- added true, false, bool and if lambdaterms
 
 ## commands added
 

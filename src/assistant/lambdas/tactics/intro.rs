@@ -29,6 +29,9 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
         | LambdaTerm::Types
         | LambdaTerm::Bot
         | LambdaTerm::Top
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Error => {
             root
         },
@@ -116,6 +119,13 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
         }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name.clone()),
+                aux_intro(third, var_name)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_intro(first, var_name.clone()),
                 aux_intro(second, var_name.clone()),
                 aux_intro(third, var_name)

@@ -14,6 +14,9 @@ fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: L
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
+        | LambdaTerm::Bool
+        | LambdaTerm::FBool
+        | LambdaTerm::TBool
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Error => {
@@ -101,6 +104,13 @@ fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: L
         }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
+                replace_intern(first, to_replace.clone(), replacement.clone()),
+                replace_intern(second, to_replace.clone(), replacement.clone()),
+                replace_intern(third, to_replace.clone(), replacement.clone()),
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 replace_intern(first, to_replace.clone(), replacement.clone()),
                 replace_intern(second, to_replace.clone(), replacement.clone()),
                 replace_intern(third, to_replace.clone(), replacement.clone()),

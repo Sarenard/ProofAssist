@@ -22,6 +22,9 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
         | LambdaTerm::Bot
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Top
         | LambdaTerm::Error => {
             root
@@ -112,6 +115,13 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name.clone(), context.clone()),
+                aux_exact(third, name, context)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_exact(first, name.clone(), context.clone()),
                 aux_exact(second, name.clone(), context.clone()),
                 aux_exact(third, name, context)

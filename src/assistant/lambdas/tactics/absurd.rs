@@ -23,6 +23,9 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
         | LambdaTerm::Bot
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Top
         | LambdaTerm::Error => {
             root
@@ -113,6 +116,13 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
         }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ.clone(), context.clone()),
+                aux_absurd(third, typ, context)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_absurd(first, typ.clone(), context.clone()),
                 aux_absurd(second, typ.clone(), context.clone()),
                 aux_absurd(third, typ, context)

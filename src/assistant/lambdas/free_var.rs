@@ -9,6 +9,9 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
             vec![name.clone()]
         }
         LambdaTerm::Types
+        | LambdaTerm::Bool
+        | LambdaTerm::FBool
+        | LambdaTerm::TBool
         | LambdaTerm::Top
         | LambdaTerm::Bot => {
             vec![]
@@ -58,6 +61,7 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
             vec_tot
         }
         LambdaTerm::Match(box first, box second, box third)
+        | LambdaTerm::Bif(box first, box second, box third)
         | LambdaTerm::Rewrite(box first, box second, box third)
         | LambdaTerm::Couple(box first, box second, box third) => {
             let mut vec_tot: Vec<String> = vec![];

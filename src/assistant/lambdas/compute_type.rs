@@ -20,6 +20,12 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
             let res = context.get(&name).unwrap().clone();
             res
         }
+        LambdaTerm::FBool | LambdaTerm::TBool => {
+            LambdaTerm::Bool
+        }
+        LambdaTerm::Bool => {
+            LambdaTerm::Types
+        }
         LambdaTerm::Goal(box typ, _nb) => {
             return typ;
         }
@@ -163,6 +169,9 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 }
                 other => panic!("impossible {:?}", other)
             }
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            todo!()
         }
     }
 }

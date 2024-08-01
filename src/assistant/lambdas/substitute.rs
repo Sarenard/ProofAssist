@@ -18,6 +18,15 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
         LambdaTerm::Types => {
             LambdaTerm::Types
         }
+        LambdaTerm::Bool => {
+            LambdaTerm::Bool
+        }
+        LambdaTerm::FBool => {
+            LambdaTerm::FBool
+        }
+        LambdaTerm::TBool => {
+            LambdaTerm::TBool
+        }
         LambdaTerm::Var(name) => {
             if name == var_name {
                 what
@@ -134,6 +143,13 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
         }
         LambdaTerm::Match(box first, box second, box third) => {
             LambdaTerm::match_new(
+                substitute(first, var_name.clone(), what.clone()),
+                substitute(second, var_name.clone(), what.clone()),
+                substitute(third, var_name, what),
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 substitute(first, var_name.clone(), what.clone()),
                 substitute(second, var_name.clone(), what.clone()),
                 substitute(third, var_name, what),

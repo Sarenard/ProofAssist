@@ -25,6 +25,9 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Error => {
@@ -114,6 +117,13 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
         }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_right(first),
+                aux_right(second),
+                aux_right(third)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_right(first),
                 aux_right(second),
                 aux_right(third)

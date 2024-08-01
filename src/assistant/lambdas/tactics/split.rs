@@ -23,6 +23,9 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
         | LambdaTerm::Types
         | LambdaTerm::Bot
         | LambdaTerm::Top
+        | LambdaTerm::Bool
+        | LambdaTerm::TBool
+        | LambdaTerm::FBool
         | LambdaTerm::Goal(..) => {
             root
         },
@@ -109,6 +112,13 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Error => panic!(),
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
+                aux_split(first),
+                aux_split(second),
+                aux_split(third)
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 aux_split(first),
                 aux_split(second),
                 aux_split(third)

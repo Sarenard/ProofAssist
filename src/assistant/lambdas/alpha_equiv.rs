@@ -15,6 +15,15 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
         println!("trying to alpha equiv {:?} {:?}", first, second);
     }
     match (first, second) {
+        (LambdaTerm::Bool, LambdaTerm::Bool) => {
+            true
+        }
+        (LambdaTerm::FBool, LambdaTerm::FBool) => {
+            true
+        }
+        (LambdaTerm::TBool, LambdaTerm::TBool) => {
+            true
+        }
         (LambdaTerm::Var(name1), LambdaTerm::Var(name2)) => {
             name1 == name2
         }
@@ -77,6 +86,10 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
             LambdaTerm::Couple(box first2, box second2, box third2)
         )
         | (
+            LambdaTerm::Bif(box first1, box second1, box third1),
+            LambdaTerm::Bif(box first2, box second2, box third2)
+        )
+        | (
             LambdaTerm::Match(box first1, box second1, box third1),
             LambdaTerm::Match(box first2, box second2, box third2)
         ) => {
@@ -127,6 +140,15 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
         }
         LambdaTerm::Bot => {
             LambdaTerm::Bot
+        }
+        LambdaTerm::Bool => {
+            LambdaTerm::Bool
+        }
+        LambdaTerm::FBool => {
+            LambdaTerm::FBool
+        }
+        LambdaTerm::TBool => {
+            LambdaTerm::TBool
         }
         LambdaTerm::Top => {
             LambdaTerm::Top
@@ -210,6 +232,13 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 replace_free_variable_r(var_name, new_thing, third), 
             )
         }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), second), 
+                replace_free_variable_r(var_name, new_thing, third), 
+            )
+        }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
                 replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
@@ -241,7 +270,10 @@ pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm 
     match lambda.clone() {
         LambdaTerm::Types => LambdaTerm::Types,
         LambdaTerm::Top => LambdaTerm::Top,
+        LambdaTerm::Bool => LambdaTerm::Bool,
         LambdaTerm::Bot => LambdaTerm::Bot,
+        LambdaTerm::FBool => LambdaTerm::FBool,
+        LambdaTerm::TBool => LambdaTerm::TBool,
         LambdaTerm::Var(_name) => {
             lambda
         }
@@ -280,6 +312,13 @@ pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm 
         }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names.clone(), second),
+                alpha_convert(used_names, third),
+            )
+        }
+        LambdaTerm::Bif(box first, box second, box third) => {
+            LambdaTerm::bif(
                 alpha_convert(used_names.clone(), first),
                 alpha_convert(used_names.clone(), second),
                 alpha_convert(used_names, third),
