@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::assistant::{lambda::{self, LambdaTerm}, lambdas::{alpha_equiv::alpha_equiv, compute_type::compute_type, replace::replace}};
+use crate::assistant::{lambda::LambdaTerm, lambdas::compute_type::compute_type};
 
 fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
     if lambdaterme.clone().containsgoal() {
@@ -29,7 +29,7 @@ fn test_eq() {
     println!("\nlambdaterme : {:?}\n", lambdaterme);
     let lambdaterme = lambdaterme.refl_run();
     println!("\nlambdaterme : {:?}\n", lambdaterme);
-    
+
     check(goal, lambdaterme);
 }
 

@@ -1,15 +1,12 @@
 use std::collections::HashMap;
 
-use crate::assistant::lambdas::compute_type::compute_type;
 use crate::assistant::lambdas::replace::replace;
 use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
 use lambda::LambdaTerm;
 
-use lambdas::{
-    update_nbs::update_goals_nb,
-};
+use lambdas::update_nbs::update_goals_nb;
 
 fn aux_rewrite(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     let goal_h = context.get(&name).unwrap_or(&LambdaTerm::Error).clone();

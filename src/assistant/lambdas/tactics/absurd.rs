@@ -7,7 +7,6 @@ use lambda::LambdaTerm;
 
 use lambdas::update_nbs::update_goals_nb;
 
-use crate::DEBUG;
 
 fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     match root {

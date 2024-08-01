@@ -2,9 +2,7 @@ use std::collections::HashMap;
 
 use crate::assistant::lambda as lambda;
 
-use lambda::{
-    LambdaTerm,
-};
+use lambda::LambdaTerm;
 
 use crate::DEBUG;
 

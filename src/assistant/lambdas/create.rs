@@ -1,8 +1,6 @@
 use crate::assistant::lambda as lambda;
 
-use lambda::{
-    LambdaTerm,
-};
+use lambda::LambdaTerm;
 
 use super::{beta_reduc::beta_reduce, free_var::free_var, gen_name::gen_name};
 
