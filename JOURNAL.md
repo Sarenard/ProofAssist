@@ -12,12 +12,19 @@
 ## commands added
 
 ### intro h
+
 If the Goal is of the form `Goal(A -> B)`, make it `Abs(h,A,Goal(B))`
+
 ### exact h
+
 If the goal is `Goal(T)` and `h` is a variable of type `T` (in the context), transformes the goal in `Var(h)` (and finishes !)
+
 ### cut A
+
 If the goal is `Goal(B)`, transforms it in `App(Goal(A -> B), Goal(A))` (creates a lemma)
+
 ### apply h
+
 If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `App(h,Goal(A))`
 
 ## proven things today
@@ -42,10 +49,15 @@ If the goal is `Goal(B)` and `h` is of type `A -> B`, transforms the goal into `
 ## commands added
 
 ### elim h (h is an and)
+
 If `h` is of type `A ^ B` and `Goal(A)` then we transform the goal into `App(App(Goal(a->b->a),Fst(h1)),Snd(h1))`
+
 ### split
+
 If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
+
 ### absurd B
+
 If `Goal(A)` then transforms it to `ExFalso(B, Goal(Bottom))`
 
 # 27/07/2024
@@ -59,12 +71,19 @@ If `Goal(A)` then transforms it to `ExFalso(B, Goal(Bottom))`
 ## commands added
 
 ### Assumption
+
 If `Goal(A)` and `A` is in the hypotheses, then we complete the goal
+
 ### Left
+
 If `Goal(A \/ B)` transforms it into a `Left(Goal(A), B)`
+
 ### Right
+
 If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
+
 ### Elim h (h is an or)
+
 If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(h,Goal(A -> C),Goal(B -> C))`
 
 ## TODO
@@ -85,8 +104,11 @@ If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(
 ## commands added
 
 ### intro
+
 If the Goal is of the form `Pi(x, A, B)`, make it `Func(x, A, C)`, with `C` being `B` with maybe some renaming of free variables
+
 ### assu
+
 If `Goal(A)` and `A` is in the hypotheses, then we complete the goal
 
 ## TODO
@@ -105,10 +127,15 @@ If `Goal(A)` and `A` is in the hypotheses, then we complete the goal
 ## commands added
 
 ### elim (sigma)
+
 An elim command for sigma
+
 ### elim
+
 An exists command for sigma
+
 ### split
+
 If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
 
 ## 30/07/2024
@@ -123,10 +150,15 @@ If `Goal(A ^ B)` then transforms it to `Couple(Goal(A), Goal(B))`
 ## commands added
 
 ### absurd B
+
 If `Goal(A)` then transforms it to `ExFalso(B, Goal(Bottom))`
+
 ### Left
+
 If `Goal(A \/ B)` transforms it into a `Left(Goal(A), B)`
+
 ### Right
+
 If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
 
 ### TODO
@@ -146,4 +178,5 @@ If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
 ## commands added
 
 ### rewrite h
+
 If `h` is of type `A = B` and `Goal(C)` then we transform the goal into `Goal(C with A replaced by B)`
