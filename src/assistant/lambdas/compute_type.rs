@@ -196,7 +196,17 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
             }
         }
         LambdaTerm::Inversion(box first, box second) => {
-            todo!()
+            let infer_first = compute_type(first, context.clone());
+            let infer_second = compute_type(second, context);
+            match (infer_first, infer_second) {
+                (
+                    LambdaTerm::Eq(box LambdaTerm::Succ(box a), box LambdaTerm::Succ(box b)),
+                    LambdaTerm::Pi(_, box LambdaTerm::Eq(box c, box d), box lambdatype)
+                ) if a == c && b == d => {
+                    lambdatype
+                }
+                other => panic!("Other : {:?}", other)
+            }
         }
     }
 }
