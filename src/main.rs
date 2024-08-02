@@ -365,10 +365,13 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
             | LambdaTerm::Bot
             | LambdaTerm::Bool
             | LambdaTerm::TBool
+            | LambdaTerm::Naturals
+            | LambdaTerm::Zero
             | LambdaTerm::FBool
             | LambdaTerm::Error => {}
-            LambdaTerm::Goal(box ref ty, _nb) => {
-                goals.push((ty.clone(), path.clone()));
+            LambdaTerm::Goal(box ref term, _)
+            | LambdaTerm::Succ(box ref term) => {
+                goals.push((term.clone(), path.clone()));
             },
             LambdaTerm::Func(_name, ref left, ref right)
             | LambdaTerm::Sigma(_name, ref left, ref right)

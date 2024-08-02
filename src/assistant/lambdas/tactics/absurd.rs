@@ -22,6 +22,8 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
         | LambdaTerm::Bot
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Bool
         | LambdaTerm::TBool
         | LambdaTerm::FBool
@@ -125,6 +127,11 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
                 aux_absurd(first, typ.clone(), context.clone()),
                 aux_absurd(second, typ.clone(), context.clone()),
                 aux_absurd(third, typ, context)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_absurd(first, typ, context)
             )
         }
     }

@@ -22,6 +22,8 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
         | LambdaTerm::Bool
         | LambdaTerm::TBool
         | LambdaTerm::FBool
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Error => {
@@ -121,6 +123,11 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
                 aux_left(first),
                 aux_left(second),
                 aux_left(third)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_left(first)
             )
         }
     }

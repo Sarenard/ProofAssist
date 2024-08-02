@@ -44,6 +44,11 @@ pub enum LambdaTerm {
     // if first then second else third end
     Bif(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>),
 
+    // naturals
+    Naturals,
+    Zero,
+    Succ(Box<LambdaTerm>),
+    
 
     Error,
 }

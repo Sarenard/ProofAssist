@@ -15,6 +15,15 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
         println!("trying to alpha equiv {:?} {:?}", first, second);
     }
     match (first, second) {
+        (LambdaTerm::Naturals, LambdaTerm::Naturals) => {
+            true
+        }
+        (LambdaTerm::Zero, LambdaTerm::Zero) => {
+            true
+        }
+        (LambdaTerm::Succ(box first), LambdaTerm::Succ(box second)) => {
+            alpha_equiv(first, second)
+        }
         (LambdaTerm::Bool, LambdaTerm::Bool) => {
             true
         }
@@ -131,6 +140,8 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
 fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: LambdaTerm) -> LambdaTerm {
     match lambda.clone() {
         LambdaTerm::Types => LambdaTerm::Types,
+        LambdaTerm::Naturals => LambdaTerm::Naturals,
+        LambdaTerm::Zero => LambdaTerm::Zero,
         LambdaTerm::Var(x) => {
             if x == var_name {
                 return new_thing;
@@ -263,6 +274,9 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
         LambdaTerm::Refl(box thing) => {
             LambdaTerm::refl(replace_free_variable_r(var_name, new_thing, thing))
         }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(replace_free_variable_r(var_name, new_thing, first))
+        }
     }
 }
 
@@ -272,6 +286,8 @@ pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm 
         LambdaTerm::Top => LambdaTerm::Top,
         LambdaTerm::Bool => LambdaTerm::Bool,
         LambdaTerm::Bot => LambdaTerm::Bot,
+        LambdaTerm::Naturals => LambdaTerm::Naturals,
+        LambdaTerm::Zero => LambdaTerm::Zero,
         LambdaTerm::FBool => LambdaTerm::FBool,
         LambdaTerm::TBool => LambdaTerm::TBool,
         LambdaTerm::Var(_name) => {
@@ -377,6 +393,9 @@ pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm 
         }
         LambdaTerm::Refl(box a) => {
             LambdaTerm::refl(alpha_convert(used_names, a))
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(alpha_convert(used_names, first))
         }
     }
 }

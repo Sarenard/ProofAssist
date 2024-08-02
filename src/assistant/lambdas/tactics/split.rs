@@ -24,6 +24,8 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Bool
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::TBool
         | LambdaTerm::FBool
         | LambdaTerm::Goal(..) => {
@@ -122,6 +124,11 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
                 aux_split(first),
                 aux_split(second),
                 aux_split(third)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_split(first)
             )
         }
     }

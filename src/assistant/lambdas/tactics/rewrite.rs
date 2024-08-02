@@ -29,6 +29,8 @@ fn aux_rewrite(root: LambdaTerm, name: String, context: HashMap<String, LambdaTe
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
         | LambdaTerm::Bool
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::TBool
         | LambdaTerm::FBool
         | LambdaTerm::Bot
@@ -132,6 +134,11 @@ fn aux_rewrite(root: LambdaTerm, name: String, context: HashMap<String, LambdaTe
                 aux_rewrite(first, name.clone(), context.clone()),
                 aux_rewrite(second, name.clone(), context.clone()),
                 aux_rewrite(third, name, context)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_rewrite(first, name, context)
             )
         }
     }

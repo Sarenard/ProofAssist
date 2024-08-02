@@ -11,6 +11,8 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
         | LambdaTerm::TBool
         | LambdaTerm::FBool
         | LambdaTerm::Top
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Types
         | LambdaTerm::Var(..) => None,
         LambdaTerm::Goal(box typ, nb) => {
@@ -206,6 +208,12 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
         LambdaTerm::Refl(box a) => {
             match betareduc_step(a, used_names) {
                 Some(reduced) => Some(LambdaTerm::refl(reduced)),
+                None => None
+            }
+        }
+        LambdaTerm::Succ(box first) => {
+            match betareduc_step(first, used_names) {
+                Some(reduced) => Some(LambdaTerm::succ(reduced)),
                 None => None
             }
         }

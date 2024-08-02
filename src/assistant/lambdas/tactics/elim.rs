@@ -50,6 +50,8 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
         | LambdaTerm::Bool
         | LambdaTerm::TBool
         | LambdaTerm::FBool
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Top
         | LambdaTerm::Error => {
             root
@@ -150,6 +152,11 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                 aux_elim(first, name.clone(), context.clone()),
                 aux_elim(second, name.clone(), context.clone()),
                 aux_elim(third, name, context)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_elim(first, name, context)
             )
         }
     }

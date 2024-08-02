@@ -103,6 +103,15 @@ impl std::fmt::Display for LambdaTerm {
             LambdaTerm::Bif(box first, box second, box third) => {
                 write!(f, "Bif({}, {}, {})", first, second, third)
             }
+            LambdaTerm::Naturals => {
+                write!(f, "Nat")
+            }
+            LambdaTerm::Zero => {
+                write!(f, "0")
+            }
+            LambdaTerm::Succ(box first) => {
+                write!(f, "S({})", first)
+            }
         }
     }
 }

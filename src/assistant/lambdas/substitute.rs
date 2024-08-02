@@ -27,6 +27,12 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
         LambdaTerm::TBool => {
             LambdaTerm::TBool
         }
+        LambdaTerm::Naturals => {
+            LambdaTerm::Naturals
+        }
+        LambdaTerm::Zero => {
+            LambdaTerm::Zero
+        }
         LambdaTerm::Var(name) => {
             if name == var_name {
                 what
@@ -161,6 +167,9 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
         }
         LambdaTerm::Refl(box a) => {
             LambdaTerm::refl(substitute(a, var_name, what))
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(substitute(first, var_name, what))
         }
     }
 }

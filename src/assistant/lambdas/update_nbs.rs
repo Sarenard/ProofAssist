@@ -11,6 +11,8 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
         | LambdaTerm::Bool
         | LambdaTerm::TBool
         | LambdaTerm::FBool
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Error => {
             term
         }
@@ -98,6 +100,10 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
         LambdaTerm::Refl(box lb) => {
             let part = update_goals_nb(lb, goal_index);
             LambdaTerm::refl(part)
+        }
+        LambdaTerm::Succ(box first) => {
+            let part = update_goals_nb(first, goal_index);
+            LambdaTerm::succ(part)
         }
     }
 }

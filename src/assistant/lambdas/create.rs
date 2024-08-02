@@ -151,4 +151,9 @@ impl LambdaTerm {
             Box::new(witness),
         )
     }
+    pub fn succ(term1: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Succ(
+            Box::new(term1),
+        )
+    }
 }

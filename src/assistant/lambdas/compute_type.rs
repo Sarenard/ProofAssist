@@ -24,6 +24,12 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
         LambdaTerm::Bool => {
             LambdaTerm::Types
         }
+        LambdaTerm::Naturals => {
+            LambdaTerm::Types
+        }
+        LambdaTerm::Zero => {
+            LambdaTerm::Naturals
+        }
         LambdaTerm::Goal(box typ, _nb) => {
             return typ;
         }
@@ -179,6 +185,9 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 }
                 _ => panic!("Error, not a boolean")
             }
+        }
+        LambdaTerm::Succ(box typ) => {
+            todo!()
         }
     }
 }

@@ -17,6 +17,8 @@ fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: L
         | LambdaTerm::Bool
         | LambdaTerm::FBool
         | LambdaTerm::TBool
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Error => {
@@ -128,6 +130,11 @@ fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: L
                 replace_intern(first, to_replace.clone(), replacement.clone()),
                 replace_intern(second, to_replace.clone(), replacement.clone()),
                 replace_intern(third, to_replace.clone(), replacement.clone()),
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                replace_intern(first, to_replace.clone(), replacement.clone()),
             )
         }
     }

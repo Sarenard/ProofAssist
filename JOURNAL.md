@@ -180,3 +180,9 @@ If `Goal(A \/ B)` transforms it into a `Left(Goal(B), A)`
 ### rewrite h
 
 If `h` is of type `A = B` and `Goal(C)` then we transform the goal into `Goal(C with A replaced by B)`
+
+# 02/08/2024
+
+## main new things
+
+- Naturals, zero and succ lambda terms

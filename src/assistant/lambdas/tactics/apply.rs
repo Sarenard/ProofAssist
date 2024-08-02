@@ -51,6 +51,8 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
         LambdaTerm::Var(..) 
         | LambdaTerm::Types
         | LambdaTerm::Bot
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Bool
         | LambdaTerm::TBool
         | LambdaTerm::FBool
@@ -155,6 +157,11 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
                 aux_apply(second, name.clone(), context.clone(), instanciation.clone()),
                 aux_apply(third, name, context, instanciation)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_apply(first, name, context, instanciation)
             )
         }
     }

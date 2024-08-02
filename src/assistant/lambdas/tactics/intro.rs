@@ -27,6 +27,8 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
         LambdaTerm::Var(..) 
         | LambdaTerm::Goal(..)
         | LambdaTerm::Types
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Bool
@@ -129,6 +131,11 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(first, var_name.clone()),
                 aux_intro(second, var_name.clone()),
                 aux_intro(third, var_name)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_intro(first, var_name)
             )
         }
     }

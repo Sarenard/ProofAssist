@@ -18,6 +18,8 @@ fn aux_refl(root: LambdaTerm) -> LambdaTerm {
         | LambdaTerm::Types
         | LambdaTerm::Bool
         | LambdaTerm::TBool
+        | LambdaTerm::Naturals
+        | LambdaTerm::Zero
         | LambdaTerm::FBool
         | LambdaTerm::Bot
         | LambdaTerm::Top
@@ -118,6 +120,11 @@ fn aux_refl(root: LambdaTerm) -> LambdaTerm {
                 aux_refl(first),
                 aux_refl(second),
                 aux_refl(third)
+            )
+        }
+        LambdaTerm::Succ(box first) => {
+            LambdaTerm::succ(
+                aux_refl(first)
             )
         }
     }
