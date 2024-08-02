@@ -187,7 +187,13 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
             }
         }
         LambdaTerm::Succ(box typ) => {
-            todo!()
+            let type_int = compute_type(typ, context);
+            match type_int {
+                LambdaTerm::Naturals => {
+                    LambdaTerm::Naturals
+                }
+                other => panic!("Error, not a natural {:?}", other)
+            }
         }
     }
 }
