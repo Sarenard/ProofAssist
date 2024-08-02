@@ -195,6 +195,9 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 other => panic!("Error, not a natural {:?}", other)
             }
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            todo!()
+        }
     }
 }
 

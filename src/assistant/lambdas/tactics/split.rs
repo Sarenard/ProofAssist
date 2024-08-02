@@ -131,6 +131,12 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
                 aux_split(first)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_split(first),
+                aux_split(second)
+            )
+        }
     }
 }
 

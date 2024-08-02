@@ -78,6 +78,7 @@ pub fn alpha_equiv(first: LambdaTerm, second: LambdaTerm) -> bool {
         }
         (LambdaTerm::App(box a1, box b1), LambdaTerm::App(box a2, box b2))
         | (LambdaTerm::ExFalso(box a1, box b1), LambdaTerm::ExFalso(box a2, box b2))
+        | (LambdaTerm::Inversion(box a1, box b1), LambdaTerm::Inversion(box a2, box b2))
         | (LambdaTerm::Or(box a1, box b1), LambdaTerm::Or(box a2, box b2))
         | (LambdaTerm::Left(box a1, box b1), LambdaTerm::Left(box a2, box b2))
         | (LambdaTerm::Right(box a1, box b1), LambdaTerm::Right(box a2, box b2)) => {
@@ -206,6 +207,12 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 replace_free_variable_r(var_name, new_thing, second), 
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first),
+                replace_free_variable_r(var_name, new_thing, second),
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 first,
@@ -311,6 +318,12 @@ pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm 
         LambdaTerm::Left(box first, box second) => {
             LambdaTerm::left(
                 alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names, second),
+            )
+        }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                first,
                 alpha_convert(used_names, second),
             )
         }

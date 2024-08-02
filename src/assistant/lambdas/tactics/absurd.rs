@@ -45,6 +45,12 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
                 aux_absurd(second, typ, context)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ, context)
+            )
+        }
         LambdaTerm::Func(func_name, box first, box second) => {
             let mut new_context = context.clone();
             new_context.insert(func_name.clone(), first.clone());

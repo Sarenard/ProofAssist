@@ -159,6 +159,12 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(third, name, context, instanciation)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name, context, instanciation)
+            )
+        }
         LambdaTerm::Succ(box first) => {
             LambdaTerm::succ(
                 aux_apply(first, name, context, instanciation)

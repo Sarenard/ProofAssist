@@ -78,6 +78,16 @@ pub fn free_var(lambda: LambdaTerm) -> Vec<String> {
 
             vec_tot
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            let mut vec_tot: Vec<String> = vec![];
+            let variables_first = free_var(first);
+            let variables_second: Vec<String> = free_var(second);
+
+            vec_tot.extend(variables_first);
+            vec_tot.extend(variables_second);
+
+            vec_tot
+        }
         LambdaTerm::Error => unreachable!()
     }
 }

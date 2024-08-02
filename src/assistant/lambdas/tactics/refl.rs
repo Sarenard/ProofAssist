@@ -127,6 +127,12 @@ fn aux_refl(root: LambdaTerm) -> LambdaTerm {
                 aux_refl(first)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_refl(first),
+                aux_refl(second)
+            )
+        }
     }
 }
 

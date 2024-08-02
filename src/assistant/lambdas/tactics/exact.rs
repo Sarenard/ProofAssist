@@ -134,6 +134,12 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_exact(first, name, context)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name, context)
+            )
+        }
     }
 }
 

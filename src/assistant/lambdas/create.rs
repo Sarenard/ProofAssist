@@ -156,4 +156,10 @@ impl LambdaTerm {
             Box::new(term1),
         )
     }
+    pub fn inversion(term1: LambdaTerm, term2: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Inversion(
+            Box::new(term1),
+            Box::new(term2),
+        )
+    }
 }

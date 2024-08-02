@@ -39,6 +39,26 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                         LambdaTerm::goal(LambdaTerm::imp(type2, typ))
                     )
                 }
+                LambdaTerm::Bot => {
+                    LambdaTerm::exfalso(
+                        LambdaTerm::Var(name),
+                        typ
+                    )
+                }
+                LambdaTerm::Eq(box LambdaTerm::FBool, box LambdaTerm::TBool)
+                | LambdaTerm::Eq(box LambdaTerm::TBool, box LambdaTerm::FBool) => {
+                    LambdaTerm::exfalso(
+                        LambdaTerm::Var(name),
+                        typ
+                    )
+                }
+                LambdaTerm::Eq(box LambdaTerm::Zero, box LambdaTerm::Succ(_))
+                | LambdaTerm::Eq(box LambdaTerm::Succ(_), box LambdaTerm::Zero) => {
+                    LambdaTerm::exfalso(
+                        LambdaTerm::Var(name),
+                        typ
+                    )
+                }
                 other => panic!("Cant elim for {:?}", other)
             }
         }
@@ -87,6 +107,12 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
         }
         LambdaTerm::Left(box first, box second) => {
             LambdaTerm::left(
+                aux_elim(first, name.clone(), context.clone()),
+                aux_elim(second, name, context)
+            )
+        }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
                 aux_elim(first, name.clone(), context.clone()),
                 aux_elim(second, name, context)
             )

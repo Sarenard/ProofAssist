@@ -137,6 +137,12 @@ fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: L
                 replace_intern(first, to_replace.clone(), replacement.clone()),
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                replace_intern(first, to_replace.clone(), replacement.clone()),
+                replace_intern(second, to_replace.clone(), replacement.clone()),
+            )
+        }
     }
 }
 

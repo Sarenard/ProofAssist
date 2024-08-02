@@ -138,6 +138,12 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(first, var_name)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name)
+            )
+        }
     }
 }
 

@@ -171,5 +171,8 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
         LambdaTerm::Succ(box first) => {
             LambdaTerm::succ(substitute(first, var_name, what))
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(substitute(first, var_name.clone(), what.clone()), substitute(second, var_name, what))
+        }
     }
 }

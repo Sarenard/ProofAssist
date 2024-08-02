@@ -141,6 +141,12 @@ fn aux_exists(root: LambdaTerm, obj: LambdaTerm, context: HashMap<String, Lambda
                 aux_exists(first, obj, context)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj, context)
+            )
+        }
     }
 }
 

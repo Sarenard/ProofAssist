@@ -141,6 +141,12 @@ fn aux_rewrite(root: LambdaTerm, name: String, context: HashMap<String, LambdaTe
                 aux_rewrite(first, name, context)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_rewrite(first, name.clone(), context.clone()),
+                aux_rewrite(second, name, context)
+            )
+        }
     }
 }
 

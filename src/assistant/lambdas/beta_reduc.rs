@@ -217,6 +217,15 @@ fn betareduc_step(lambda: LambdaTerm, used_names: Vec<String>) -> Option<LambdaT
                 None => None
             }
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            match betareduc_step(first.clone(), used_names.clone()) {
+                Some(reduced) => Some(LambdaTerm::inversion(reduced, second)),
+                None => match betareduc_step(second, used_names.clone()) {
+                    Some(reduced) => Some(LambdaTerm::inversion(first, reduced)),
+                    None => None
+                }
+            }
+        }
     }
 }
 

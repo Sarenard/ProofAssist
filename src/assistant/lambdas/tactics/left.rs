@@ -130,6 +130,12 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
                 aux_left(first)
             )
         }
+        LambdaTerm::Inversion(box first, box second) => {
+            LambdaTerm::inversion(
+                aux_left(first),
+                aux_left(second)
+            )
+        }
     }
 }
 

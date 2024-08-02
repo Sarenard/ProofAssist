@@ -112,6 +112,9 @@ impl std::fmt::Display for LambdaTerm {
             LambdaTerm::Succ(box first) => {
                 write!(f, "S({})", first)
             }
+            LambdaTerm::Inversion(box first, box second) => {
+                write!(f, "Inversion({}, {})", first, second)
+            }
         }
     }
 }

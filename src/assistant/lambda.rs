@@ -48,7 +48,8 @@ pub enum LambdaTerm {
     Naturals,
     Zero,
     Succ(Box<LambdaTerm>),
-    
+    // first : S(a) = S(b), second : a = b => goal
+    Inversion(Box<LambdaTerm>, Box<LambdaTerm>),
 
     Error,
 }

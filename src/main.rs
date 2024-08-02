@@ -390,6 +390,7 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
                 queue.push_back((*main.clone(), main_path));
             }
             LambdaTerm::Proj(ref left, ref right)
+            | LambdaTerm::Inversion(ref left, ref right)
             | LambdaTerm::ExFalso(ref left, ref right)
             | LambdaTerm::Eq(ref left, ref right)
             | LambdaTerm::Or(ref left, ref right)
