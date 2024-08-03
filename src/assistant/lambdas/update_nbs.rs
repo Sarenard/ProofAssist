@@ -106,9 +106,8 @@ pub fn update_goals_nb(term: LambdaTerm, goal_index: &mut usize) -> LambdaTerm {
             LambdaTerm::succ(part)
         }
         LambdaTerm::Inversion(box first, box second) => {
-            let part1 = update_goals_nb(first, goal_index);
             let part2 = update_goals_nb(second, goal_index);
-            LambdaTerm::inversion(part1, part2)
+            LambdaTerm::inversion(first, part2)
         }
     }
 }

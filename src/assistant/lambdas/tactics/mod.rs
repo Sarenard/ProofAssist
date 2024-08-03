@@ -8,5 +8,6 @@ pub mod elim;
 pub mod absurd;
 pub mod left;
 pub mod right;
+pub mod inversion;
 pub mod refl;
 pub mod rewrite;

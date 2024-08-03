@@ -12,6 +12,7 @@ pub enum OP {
     Exists(String),
     Rewrite(String),
     Left,
+    Inversion(String),
     Right,
     Refl,
     

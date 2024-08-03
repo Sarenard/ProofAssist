@@ -25,18 +25,27 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = false;
+static DEBUG: bool = true;
 
 fn main() {
     // let goal = get_goal();
-    // Goal forall A B C:Set, A = B -> B = C -> A = C. intros A B C h1 h2. rewrite h1. exact h2.
-    let goal = LambdaTerm::bif(
-            LambdaTerm::FBool,
-            LambdaTerm::FBool,
-            LambdaTerm::eq(
-                LambdaTerm::TBool,
-                LambdaTerm::TBool,
+    let goal = LambdaTerm::pi(
+        "a".to_string(),
+        LambdaTerm::Naturals,
+        LambdaTerm::pi(
+            "b".to_string(),
+            LambdaTerm::Naturals,
+            LambdaTerm::imp(
+                LambdaTerm::eq(
+                    LambdaTerm::succ(LambdaTerm::Var("a".to_string())),
+                    LambdaTerm::succ(LambdaTerm::Var("b".to_string())),
+                ),
+                LambdaTerm::eq(
+                    LambdaTerm::Var("a".to_string()),
+                    LambdaTerm::Var("b".to_string()),
+                )
             )
+        )
     );
 
     let (lambdaterme, operations) = emulate(goal.clone(), true);
@@ -216,6 +225,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             let new_lambdaterm = lambdaterme.run_left();
             (new_lambdaterm, hypothesis, operations)
         }
+        OP::Inversion(name) => {
+            let new_lambdaterm = lambdaterme.inversion_run(name);
+            (new_lambdaterm, hypothesis, operations)
+        }
         OP::Right => {
             let new_lambdaterm = lambdaterme.run_right();
             (new_lambdaterm, hypothesis, operations)
@@ -281,6 +294,10 @@ fn get_command(operations: &mut Vec<OP>) {
         "split" => {
             operations.push(OP::Split)
         }
+        "inversion" => {
+            let name = splitted.next().unwrap();
+            operations.push(OP::Inversion(name.to_string()))
+        }
         "elim" => {
             let name = splitted.next().unwrap();
             operations.push(OP::Elim(name.to_string()))
@@ -307,6 +324,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
         match op {
             OP::Nothing => {
 
+            }
+            OP::Inversion(name) => {
+                writeln!(theorem_file, "Inversion(\"{}\")", name).unwrap();
             }
             OP::Use(name) => {
                 writeln!(theorem_file, "Use(\"{}\")", name).unwrap();
@@ -369,13 +389,17 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
             | LambdaTerm::Zero
             | LambdaTerm::FBool
             | LambdaTerm::Error => {}
-            LambdaTerm::Goal(box ref term, _)
-            | LambdaTerm::Succ(box ref term) => {
+            LambdaTerm::Goal(box ref term, _) => {
                 goals.push((term.clone(), path.clone()));
+            },
+            LambdaTerm::Succ(ref term) => {
+                let mut term_path = path.clone();
+                term_path.push(*term.clone());
+                queue.push_back((*term.clone(), term_path));
             },
             LambdaTerm::Func(_name, ref left, ref right)
             | LambdaTerm::Sigma(_name, ref left, ref right)
-                | LambdaTerm::Pi(_name, ref left, ref right) => {
+            | LambdaTerm::Pi(_name, ref left, ref right) => {
                 let mut left_path = path.clone();
                 left_path.push(*left.clone());
                 queue.push_back((*left.clone(), left_path));
@@ -389,8 +413,12 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
                 main_path.push(*main.clone());
                 queue.push_back((*main.clone(), main_path));
             }
+            LambdaTerm::Inversion(ref _left, ref right) => {
+                let mut right_path = path.clone();
+                right_path.push(*right.clone());
+                queue.push_back((*right.clone(), right_path));
+            }
             LambdaTerm::Proj(ref left, ref right)
-            | LambdaTerm::Inversion(ref left, ref right)
             | LambdaTerm::ExFalso(ref left, ref right)
             | LambdaTerm::Eq(ref left, ref right)
             | LambdaTerm::Or(ref left, ref right)
