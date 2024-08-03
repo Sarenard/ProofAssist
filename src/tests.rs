@@ -14,6 +14,43 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ A, B:Nat, S(A) = S(B) -> A = B 
+fn nat1() {
+    let goal = LambdaTerm::pi(
+        "a".to_string(),
+        LambdaTerm::Naturals,
+        LambdaTerm::pi(
+            "b".to_string(),
+            LambdaTerm::Naturals,
+            LambdaTerm::imp(
+                LambdaTerm::eq(
+                    LambdaTerm::succ(LambdaTerm::Var("a".to_string())),
+                    LambdaTerm::succ(LambdaTerm::Var("b".to_string())),
+                ),
+                LambdaTerm::eq(
+                    LambdaTerm::Var("a".to_string()),
+                    LambdaTerm::Var("b".to_string()),
+                )
+            )
+        )
+    );
+
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (names, lambdaterme) = lambdaterme.intros();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.inversion_run(names[2].clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.assumption();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
+}
+
+
+#[test]
 // if false then false else true = true end
 fn test_eq() {
     let goal = LambdaTerm::bif(
