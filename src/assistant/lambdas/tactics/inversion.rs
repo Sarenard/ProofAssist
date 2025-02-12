@@ -1,17 +1,11 @@
 use std::collections::HashMap;
-use std::hash::Hash;
 
 use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
-use lambda::{
-    LambdaTerm,
-};
+use lambda::LambdaTerm;
 
-use lambdas::{
-    update_nbs::update_goals_nb,
-    substitute::substitute,
-};
+use lambdas::update_nbs::update_goals_nb;
 
 fn aux_inversion(root: LambdaTerm, var_name: String, context: HashMap<String, LambdaTerm>) -> LambdaTerm {
     let goal_h = context.get(&var_name).unwrap_or(&LambdaTerm::Error).clone();
