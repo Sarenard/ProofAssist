@@ -18,7 +18,7 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
     // with the help of Coda    
     fn construct(goal: LambdaTerm, instanciation: HashMap<String, LambdaTerm>, context: HashMap<String, LambdaTerm>, accu: LambdaTerm) -> LambdaTerm {
         let accu_inferred = compute_type(accu.clone(), context.clone());
-        println!("construct accu:{:?}, accu_inf:{:?}, context:{:?}", accu, accu_inferred, context);
+        if DEBUG {println!("construct accu:{:?}, accu_inf:{:?}, context:{:?}", accu, accu_inferred, context);}
         if accu_inferred == goal {
             return accu;
         }
@@ -26,7 +26,7 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
             // first -> second
             LambdaTerm::Pi(name, box first, box second)
             if !free_var(second.clone()).contains(&name) => {
-                println!("impl : {:?}", accu);
+                if DEBUG {println!("impl : {:?}", accu);}
                 construct(goal, instanciation, context,
                     LambdaTerm::app(accu, LambdaTerm::goal(first))
                 )
@@ -34,7 +34,7 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
             // forall name:typ, body
             LambdaTerm::Pi(pi_name, box _typ, box body)
             if free_var(body.clone()).contains(&pi_name) => {
-                println!("forall : {:?} {}", accu, pi_name);
+                if DEBUG {println!("forall : {:?} {}", accu, pi_name);}
                 let type_name = instanciation.get(&pi_name).unwrap().clone();
                 construct(goal, instanciation, context, 
                     LambdaTerm::app(accu, type_name)

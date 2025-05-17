@@ -25,24 +25,24 @@ use assistant::{
     lambdas::update_nbs::update_goals_nb as update_goals_nb,
 };
 
-static DEBUG: bool = true;
+static DEBUG: bool = false;
 
 fn main() {
     // let goal = get_goal();
     let goal = LambdaTerm::pi(
-        "a".to_string(),
-        LambdaTerm::Naturals,
+        "A".to_string(),
+        LambdaTerm::types(),
         LambdaTerm::pi(
-            "b".to_string(),
-            LambdaTerm::Naturals,
+            "B".to_string(),
+            LambdaTerm::types(),
             LambdaTerm::imp(
-                LambdaTerm::eq(
-                    LambdaTerm::succ(LambdaTerm::Var("a".to_string())),
-                    LambdaTerm::succ(LambdaTerm::Var("b".to_string())),
+                LambdaTerm::imp(
+                    LambdaTerm::var("A"),
+                    LambdaTerm::var("B"),
                 ),
-                LambdaTerm::eq(
-                    LambdaTerm::Var("a".to_string()),
-                    LambdaTerm::Var("b".to_string()),
+                LambdaTerm::imp(
+                    LambdaTerm::var("A"),
+                    LambdaTerm::var("B"),
                 )
             )
         )
