@@ -137,6 +137,13 @@ fn aux_split(root: LambdaTerm) -> LambdaTerm {
                 aux_split(second)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_split(first),
+                aux_split(second),
+                aux_split(third),
+            )
+        }
     }
 }
 

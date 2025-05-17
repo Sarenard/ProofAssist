@@ -15,6 +15,7 @@ pub enum OP {
     Inversion(String),
     Right,
     Refl,
+    Rec,
     
     // QOL macros for other things
     Assumption,

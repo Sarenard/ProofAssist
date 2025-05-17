@@ -127,6 +127,13 @@ pub fn substitute(lambda: LambdaTerm, var_name: String, what: LambdaTerm) -> Lam
                 substitute(second, var_name, what),
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                substitute(first, var_name.clone(), what.clone()),
+                substitute(second, var_name.clone(), what.clone()),
+                substitute(third, var_name, what),
+            )
+        }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
                 substitute(first, var_name.clone(), what.clone()),

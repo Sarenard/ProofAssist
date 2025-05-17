@@ -140,6 +140,13 @@ fn aux_absurd(root: LambdaTerm, typ: LambdaTerm, context: HashMap<String, Lambda
                 aux_absurd(first, typ, context)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_absurd(first, typ.clone(), context.clone()),
+                aux_absurd(second, typ.clone(), context.clone()),
+                aux_absurd(third, typ.clone(), context.clone()),
+            )
+        }
     }
 }
 

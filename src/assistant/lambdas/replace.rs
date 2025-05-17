@@ -4,6 +4,8 @@ use lambda::LambdaTerm;
 
 use super::{alpha_equiv::{alpha_convert, alpha_equiv}, free_var::free_var};
 
+use crate::DEBUG;
+
 fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: LambdaTerm) -> LambdaTerm {
     // println!("{}, {}, equiv: {}, {}", lambdaterm, to_replace, alpha_equiv(lambdaterm.clone(), to_replace.clone()), lambdaterm == to_replace);
     if alpha_equiv(lambdaterm.clone(), to_replace.clone()) {
@@ -81,6 +83,13 @@ fn replace_intern(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: L
                 replace_intern(second, to_replace.clone(), replacement.clone()),
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                replace_intern(first, to_replace.clone(), replacement.clone()),
+                replace_intern(second, to_replace.clone(), replacement.clone()),
+                replace_intern(third, to_replace.clone(), replacement.clone()),
+            )
+        }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
                 replace_intern(first, to_replace.clone(), replacement.clone()),
@@ -155,7 +164,7 @@ pub fn replace(lambdaterm: LambdaTerm, to_replace: LambdaTerm, replacement: Lamb
 
     let converted = alpha_convert(usedvariables, lambdaterm.clone());
 
-    println!("{:?}, replace({:?}, {:?}, {:?})", lambdaterm, converted, to_replace, replacement);
+    if DEBUG {println!("{:?}, replace({:?}, {:?}, {:?})", lambdaterm, converted, to_replace, replacement);}
 
     replace_intern(
         converted,

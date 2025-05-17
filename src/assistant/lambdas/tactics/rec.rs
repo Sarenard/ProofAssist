@@ -1,3 +1,4 @@
+use crate::assistant::lambda::update_counter;
 use crate::assistant::lambdas as lambdas;
 use crate::assistant::lambda as lambda;
 
@@ -5,14 +6,39 @@ use lambda::LambdaTerm;
 
 use lambdas::update_nbs::update_goals_nb;
 
-fn aux_left(root: LambdaTerm) -> LambdaTerm {
+use crate::assistant::lambdas::replace::replace;
+
+use crate::DEBUG;
+
+fn aux_rec(root: LambdaTerm) -> LambdaTerm {
     match root {
         // we match for a goal of the good type
-        LambdaTerm::Goal(box LambdaTerm::Or(box first, box second), nb) 
+        LambdaTerm::Goal(box LambdaTerm::Pi(name, box LambdaTerm::Naturals, box prop), nb) 
         if nb == 1 => {
-            LambdaTerm::left(
-                LambdaTerm::goal(first),
-                second
+            if DEBUG {println!("REC {} {}", name, prop);}
+            // we need to be able to talk about prop(n) prop(s(n)) and prop(0)
+
+            // we find a non used name
+            let nb = update_counter("hyp");
+            let concatenated_name = format!("hyp{}", nb);
+
+            LambdaTerm::rec(
+                LambdaTerm::goal(
+                    replace(prop.clone(), LambdaTerm::Var(name.clone()), LambdaTerm::Zero)
+                ),
+                LambdaTerm::goal(LambdaTerm::imp(
+                    replace(
+                        prop.clone(), 
+                        LambdaTerm::Var(name.clone()), 
+                        LambdaTerm::Var(concatenated_name.clone())
+                    ),
+                    replace(
+                        prop.clone(), 
+                        LambdaTerm::Var(name.clone()), 
+                        LambdaTerm::succ(LambdaTerm::Var(concatenated_name))
+                    )
+                )),
+                LambdaTerm::pi(name, LambdaTerm::Naturals, prop)
             )
         }
         // we propagate
@@ -21,9 +47,9 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
         | LambdaTerm::Types
         | LambdaTerm::Bool
         | LambdaTerm::TBool
-        | LambdaTerm::FBool
         | LambdaTerm::Naturals
         | LambdaTerm::Zero
+        | LambdaTerm::FBool
         | LambdaTerm::Bot
         | LambdaTerm::Top
         | LambdaTerm::Error => {
@@ -32,123 +58,123 @@ fn aux_left(root: LambdaTerm) -> LambdaTerm {
         LambdaTerm::Pi(name, box first, box second) => {
             LambdaTerm::pi(
                 name,
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Sigma(name, box first, box second) => {
             LambdaTerm::sigma(
                 name,
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Func(name, box first, box second) => {
             LambdaTerm::func(
                 name,
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::App(box first, box second) => {
             LambdaTerm::app(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Or(box first, box second) => {
             LambdaTerm::or(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Left(box first, box second) => {
             LambdaTerm::left(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Right(box first, box second) => {
             LambdaTerm::right(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::ExFalso(box first, box second) => {
             LambdaTerm::exfalso(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Proj(box first, box second) => {
             LambdaTerm::proj(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Eq(box first, box second) => {
             LambdaTerm::eq(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Refl(box first) => {
             LambdaTerm::refl(
-                aux_left(first)
+                aux_rec(first)
             )
         }
         LambdaTerm::Couple(box first, box second, box third) => {
             LambdaTerm::couple(
-                aux_left(first),
-                aux_left(second),
-                aux_left(third)
+                aux_rec(first),
+                aux_rec(second),
+                aux_rec(third)
             )
         }
         LambdaTerm::Match(box first, box second, box third) => {
             LambdaTerm::match_new(
-                aux_left(first),
-                aux_left(second),
-                aux_left(third)
+                aux_rec(first),
+                aux_rec(second),
+                aux_rec(third)
             )
         }
         LambdaTerm::Rewrite(box first, box second, box third) => {
             LambdaTerm::rewrite(
-                aux_left(first),
-                aux_left(second),
-                aux_left(third)
+                aux_rec(first),
+                aux_rec(second),
+                aux_rec(third)
             )
         }
         LambdaTerm::Bif(box first, box second, box third) => {
             LambdaTerm::bif(
-                aux_left(first),
-                aux_left(second),
-                aux_left(third)
+                aux_rec(first),
+                aux_rec(second),
+                aux_rec(third)
             )
         }
         LambdaTerm::Succ(box first) => {
             LambdaTerm::succ(
-                aux_left(first)
+                aux_rec(first)
             )
         }
         LambdaTerm::Inversion(box first, box second) => {
             LambdaTerm::inversion(
-                aux_left(first),
-                aux_left(second)
+                aux_rec(first),
+                aux_rec(second)
             )
         }
         LambdaTerm::Rec(box first, box second, box third) => {
             LambdaTerm::rec(
-                aux_left(first),
-                aux_left(second),
-                aux_left(third),
+                aux_rec(first),
+                aux_rec(second),
+                aux_rec(third),
             )
         }
     }
 }
 
 impl LambdaTerm {
-    pub fn run_left(mut self) -> LambdaTerm {
+    pub fn run_rec(mut self) -> LambdaTerm {
         self = update_goals_nb(self.clone(), &mut 1);
-        aux_left(self.clone())
+        aux_rec(self.clone())
     }
 }

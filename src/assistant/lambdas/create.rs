@@ -162,4 +162,11 @@ impl LambdaTerm {
             Box::new(term2),
         )
     }
+    pub fn rec(term1: LambdaTerm, term2: LambdaTerm, term3: LambdaTerm) -> LambdaTerm {
+        LambdaTerm::Rec(
+            Box::new(term1), 
+            Box::new(term2),
+            Box::new(term3),
+        )
+    }
 }

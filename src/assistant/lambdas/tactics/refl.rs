@@ -133,6 +133,13 @@ fn aux_refl(root: LambdaTerm) -> LambdaTerm {
                 aux_refl(second)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_refl(first),
+                aux_refl(second),
+                aux_refl(third),
+            )
+        }
     }
 }
 

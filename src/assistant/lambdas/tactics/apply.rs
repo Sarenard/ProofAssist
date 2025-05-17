@@ -170,6 +170,13 @@ fn aux_apply(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_apply(first, name, context, instanciation)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_apply(first, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(second, name.clone(), context.clone(), instanciation.clone()),
+                aux_apply(third, name.clone(), context.clone(), instanciation.clone()),
+            )
+        }
     }
 }
 

@@ -140,6 +140,13 @@ fn aux_exact(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm
                 aux_exact(second, name, context)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_exact(first, name.clone(), context.clone()),
+                aux_exact(second, name.clone(), context.clone()),
+                aux_exact(third, name.clone(), context.clone()),
+            )
+        }
     }
 }
 

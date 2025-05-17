@@ -14,6 +14,32 @@ fn check(goal: LambdaTerm, lambdaterme: LambdaTerm) {
 }
 
 #[test]
+// ∀ n:Nat, n = n
+fn rec1() {
+    let goal = LambdaTerm::pi(
+        "n".to_string(),
+        LambdaTerm::Naturals,
+        LambdaTerm::eq(
+            LambdaTerm::Var("n".to_string()),
+            LambdaTerm::Var("n".to_string()),
+        )
+    );
+    let lambdaterme = LambdaTerm::goal(goal.clone());
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.run_rec();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.refl_run();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let (_, lambdaterme) = lambdaterme.intro();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+    let lambdaterme = lambdaterme.refl_run();
+    println!("\nlambdaterme : {:?}\n", lambdaterme);
+
+    check(goal, lambdaterme);
+
+}
+
+#[test]
 // ∀ A, B:Nat, S(A) = S(B) -> A = B 
 fn nat1() {
     let goal = LambdaTerm::pi(

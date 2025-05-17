@@ -11,3 +11,4 @@ pub mod right;
 pub mod inversion;
 pub mod refl;
 pub mod rewrite;
+pub mod rec;

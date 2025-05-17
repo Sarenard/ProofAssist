@@ -115,6 +115,9 @@ impl std::fmt::Display for LambdaTerm {
             LambdaTerm::Inversion(box first, box second) => {
                 write!(f, "Inversion({}, {})", first, second)
             }
+            LambdaTerm::Rec(box first, box second, box _third) => {
+                write!(f, "Rec({}, {})", first, second)
+            }
         }
     }
 }

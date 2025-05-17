@@ -147,6 +147,13 @@ fn aux_exists(root: LambdaTerm, obj: LambdaTerm, context: HashMap<String, Lambda
                 aux_exists(second, obj, context)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_exists(first, obj.clone(), context.clone()),
+                aux_exists(second, obj.clone(), context.clone()),
+                aux_exists(third, obj.clone(), context.clone()),
+            )
+        }
     }
 }
 

@@ -154,6 +154,13 @@ fn aux_inversion(root: LambdaTerm, var_name: String, context: HashMap<String, La
                 aux_inversion(second, var_name, context)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_inversion(first, var_name.clone(), context.clone()),
+                aux_inversion(second, var_name.clone(), context.clone()),
+                aux_inversion(third, var_name, context.clone()),
+            )
+        }
     }
 }
 

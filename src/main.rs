@@ -30,21 +30,11 @@ static DEBUG: bool = false;
 fn main() {
     // let goal = get_goal();
     let goal = LambdaTerm::pi(
-        "A".to_string(),
-        LambdaTerm::types(),
-        LambdaTerm::pi(
-            "B".to_string(),
-            LambdaTerm::types(),
-            LambdaTerm::imp(
-                LambdaTerm::imp(
-                    LambdaTerm::var("A"),
-                    LambdaTerm::var("B"),
-                ),
-                LambdaTerm::imp(
-                    LambdaTerm::var("A"),
-                    LambdaTerm::var("B"),
-                )
-            )
+        "n".to_string(),
+        LambdaTerm::Naturals,
+        LambdaTerm::eq(
+            LambdaTerm::Var("n".to_string()),
+            LambdaTerm::Var("n".to_string()),
         )
     );
 
@@ -225,6 +215,10 @@ fn run_command(op: OP, lambdaterme: LambdaTerm, hypothesis: HashMap<String, (Lam
             let new_lambdaterm = lambdaterme.run_left();
             (new_lambdaterm, hypothesis, operations)
         }
+        OP::Rec => {
+            let new_lambdaterm = lambdaterme.run_rec();
+            (new_lambdaterm, hypothesis, operations)
+        }
         OP::Inversion(name) => {
             let new_lambdaterm = lambdaterme.inversion_run(name);
             (new_lambdaterm, hypothesis, operations)
@@ -269,6 +263,9 @@ fn get_command(operations: &mut Vec<OP>) {
         }
         "left" => {
             operations.push(OP::Left)
+        }
+        "rec" => {
+            operations.push(OP::Rec)
         }
         "right" => {
             operations.push(OP::Right)
@@ -367,6 +364,9 @@ fn save(goal: LambdaTerm, operations: Vec<OP>) {
             OP::Exists(name) => {
                 writeln!(theorem_file, "Exists(\"{}\")", name).unwrap();
             }
+            OP::Rec => {
+                writeln!(theorem_file, "Rec").unwrap();
+            }
         }
     }
 }
@@ -435,6 +435,7 @@ fn bfs_find_goals(root: LambdaTerm) -> Vec<(LambdaTerm, Vec<LambdaTerm>)> {
             },
             LambdaTerm::Match(ref left, ref center, ref right)
             | LambdaTerm::Rewrite(ref left, ref center, ref right)
+            | LambdaTerm::Rec(ref left, ref center, ref right)
             | LambdaTerm::Bif(ref left, ref center, ref right)
             | LambdaTerm::Couple(ref left, ref center, ref right) => {
                 let mut left_path = path.clone();

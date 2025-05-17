@@ -136,6 +136,13 @@ fn aux_right(root: LambdaTerm) -> LambdaTerm {
                 aux_right(second)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_right(first),
+                aux_right(second),
+                aux_right(third),
+            )
+        }
     }
 }
 

@@ -207,6 +207,13 @@ fn replace_free_variable_r(var_name: String, new_thing: LambdaTerm, lambda: Lamb
                 replace_free_variable_r(var_name, new_thing, second), 
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), first), 
+                replace_free_variable_r(var_name.clone(), new_thing.clone(), second), 
+                replace_free_variable_r(var_name, new_thing, third), 
+            )
+        }
         LambdaTerm::Inversion(box first, box second) => {
             LambdaTerm::inversion(
                 replace_free_variable_r(var_name.clone(), new_thing.clone(), first),
@@ -337,6 +344,13 @@ pub fn alpha_convert(used_names: Vec<String>, lambda: LambdaTerm) -> LambdaTerm 
             LambdaTerm::proj(
                 alpha_convert(used_names.clone(), first),
                 alpha_convert(used_names, second),
+            )
+        }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                alpha_convert(used_names.clone(), first),
+                alpha_convert(used_names.clone(), second),
+                alpha_convert(used_names, third),
             )
         }
         LambdaTerm::Couple(box first, box second, box third) => {

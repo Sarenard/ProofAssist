@@ -207,6 +207,9 @@ pub fn compute_type(lambdaterm: LambdaTerm, context: HashMap<String, LambdaTerm>
                 other => panic!("Other : {:?}", other)
             }
         }
+        LambdaTerm::Rec(box _, box _, box third) => {
+            third
+        }
     }
 }
 

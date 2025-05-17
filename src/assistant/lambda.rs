@@ -50,6 +50,9 @@ pub enum LambdaTerm {
     Succ(Box<LambdaTerm>),
     // first : S(a) = S(b), second : a = b => goal
     Inversion(Box<LambdaTerm>, Box<LambdaTerm>),
+    // Goal(\forall n: Nat, P(n)) => Rec(Goal(P(0)), Goal(P(n) => P(n+1)))
+    // first : P(0), second : P(n) => P(S(n)), third : Forall n: Nat P(n) (for typechecking purposes)
+    Rec(Box<LambdaTerm>, Box<LambdaTerm>, Box<LambdaTerm>),
 
     Error,
 }

@@ -185,6 +185,13 @@ fn aux_elim(root: LambdaTerm, name: String, context: HashMap<String, LambdaTerm>
                 aux_elim(first, name, context)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_elim(first, name.clone(), context.clone()),
+                aux_elim(second, name.clone(), context.clone()),
+                aux_elim(third, name.clone(), context.clone()),
+            )
+        }
     }
 }
 

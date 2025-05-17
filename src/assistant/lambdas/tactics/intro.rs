@@ -144,6 +144,13 @@ fn aux_intro(root: LambdaTerm, var_name: String) -> LambdaTerm {
                 aux_intro(second, var_name)
             )
         }
+        LambdaTerm::Rec(box first, box second, box third) => {
+            LambdaTerm::rec(
+                aux_intro(first, var_name.clone()),
+                aux_intro(second, var_name.clone()),
+                aux_intro(third, var_name),
+            )
+        }
     }
 }
 
