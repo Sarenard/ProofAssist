@@ -186,3 +186,9 @@ If `h` is of type `A = B` and `Goal(C)` then we transform the goal into `Goal(C 
 ## main new things
 
 - Naturals, zero and succ lambda terms
+
+# 19/05/2025
+
+## main new things
+
+- Recursion for N
