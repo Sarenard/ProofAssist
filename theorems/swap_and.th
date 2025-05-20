@@ -1,8 +1,0 @@
-Pi("A", Types, Pi("B", Types, Pi("a", Sigma("a", Var("A"), Var("B")), Sigma("a", Var("B"), Var("A")))))
-Intros
-Elim("hyp3")
-Split
-Intros
-Split
-Assumption
-Assumption

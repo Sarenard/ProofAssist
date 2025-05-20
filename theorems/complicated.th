@@ -1,7 +1,0 @@
-Pi("n1", Pi("n2", Var("a"), Pi("n3", Var("b"), Var("c"))), Pi("n4", Var("a"), Pi("n5", Var("b"), Var("c"))))
-Intro
-Intro
-Intro
-Apply("n1")
-Assumption
-Assumption

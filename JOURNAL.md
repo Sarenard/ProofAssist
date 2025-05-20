@@ -97,7 +97,7 @@ If `h` is of type `A \/ B` and `Goal(C)` then we transform the goal into `match(
 
 ## main new things
 
-- Archiving of the `intuitionist` branch, as i'm going for dependant type theory
+- Archiving of the `Propositional` branch, as i'm going for dependant type theory
 - Removed everything
 - Added back Lambdaterms : Var, Goal and Pi
 
@@ -192,3 +192,5 @@ If `h` is of type `A = B` and `Goal(C)` then we transform the goal into `Goal(C 
 ## main new things
 
 - Recursion for N
+- Archiving of the `Dependant type theory` branch, as i'm going for homotopic type theory
+- Removed everything
