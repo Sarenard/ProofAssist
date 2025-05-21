@@ -1,10 +1,9 @@
-// tactics/ctx.rs
 use std::fmt;
 use crate::{context::Context, inftree::InfTree, judgments::Judgment};
 
 use crate::term;
 
-use super::tactic_trait::Tactic;
+use crate::tactics::tactic_trait::Tactic;
 
 #[derive(Debug, Clone)]
 #[allow(non_camel_case_types)]

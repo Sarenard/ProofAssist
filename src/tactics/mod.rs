@@ -1,14 +1,12 @@
-// tactics/mod.rs
 pub mod tactic_trait;
-pub mod ctx;
-pub mod universe;
 
 #[macro_use]
 mod r#macro;
 
-pub use ctx::CtxTactic;
 use tactic_trait::Tactic;
-pub use universe::UTactic;
+
+use crate::exts::universe::UTactic;
+use crate::exts::ctx::CtxTactic;
 
 #[derive(Debug)]
 pub enum Tactics {

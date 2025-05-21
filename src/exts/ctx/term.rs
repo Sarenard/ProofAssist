@@ -1,6 +1,5 @@
-// universe.rs
 use std::fmt;
-use super::term_trait::TermTrait;
+use crate::terms::term_trait::TermTrait;
 
 #[derive(Debug, Clone)]
 pub struct Universe(pub usize);

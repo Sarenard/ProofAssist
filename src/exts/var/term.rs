@@ -1,6 +1,5 @@
-// var.rs
 use std::fmt;
-use super::term_trait::TermTrait;
+use crate::terms::TermTrait;
 
 #[derive(Debug, Clone)]
 pub struct Var(pub String);

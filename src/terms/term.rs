@@ -1,6 +1,6 @@
-// term.rs
-use super::universe::Universe;
-use super::var::Var;
+use crate::exts::universe::Universe;
+use crate::exts::var::Var;
+
 use super::term_trait::TermTrait;
 use std::fmt;
 
@@ -19,6 +19,7 @@ impl fmt::Display for Term {
     }
 }
 
+// is this nessessary
 impl TermTrait for Term {
     
 }

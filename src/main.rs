@@ -4,6 +4,8 @@ mod inftree;
 mod tactics;
 mod terms;
 
+mod exts;
+
 use judgments::Judgment;
 use context::Context;
 use inftree::InfTree;

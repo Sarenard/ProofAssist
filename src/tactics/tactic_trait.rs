@@ -1,4 +1,3 @@
-// tactics/tactic_trait.rs
 use std::fmt;
 
 use crate::inftree::InfTree;

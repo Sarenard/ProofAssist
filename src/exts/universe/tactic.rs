@@ -1,12 +1,12 @@
-// tactics/u.rs
 use std::fmt;
-use crate::terms::universe::Universe;
 use crate::terms::Term;
 use crate::{inftree::InfTree, judgments::Judgment};
 
 use crate::term;
 
-use super::tactic_trait::Tactic;
+use crate::tactics::tactic_trait::Tactic;
+
+use super::Universe;
 
 #[derive(Debug, Clone)]
 #[allow(non_camel_case_types)]
