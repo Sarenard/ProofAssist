@@ -1,0 +1,16 @@
+// universe.rs
+use std::fmt;
+use super::term_trait::TermTrait;
+
+#[derive(Debug, Clone)]
+pub struct Universe(pub usize);
+
+impl fmt::Display for Universe {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "U({})", self.0)
+    }
+}
+
+impl TermTrait for Universe {
+    
+}
