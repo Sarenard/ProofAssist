@@ -5,12 +5,11 @@ use crate::{inftree::InfTree, judgments::Judgment};
 
 use crate::{tactic, term};
 
-use super::Pi;
+use super::{Lambda, Pi};
 
 use crate::tactics::tactic_trait::Tactic;
 
 // TODO : add :
-// PI_INTRO
 // PI_ELIM
 // PI_COMP
 // PI_UNIQ
@@ -20,6 +19,7 @@ use crate::tactics::tactic_trait::Tactic;
 #[allow(non_camel_case_types)]
 pub enum PiTactic {
     PI_FORM,
+    PI_INTRO,
 }
 
 impl fmt::Display for PiTactic {
@@ -32,6 +32,7 @@ impl Tactic for PiTactic {
     fn name(&self) -> &'static str {
         match self {
             PiTactic::PI_FORM => "PI_FORM",
+            PiTactic::PI_INTRO => "PI_INTRO",
         }
     }
 
@@ -52,6 +53,22 @@ impl Tactic for PiTactic {
                         tree.prouved = true;
                     }
                     _ => panic!("PI_FORM: Cant do that here !"),
+                }
+            }
+            PiTactic::PI_INTRO => {
+                match tree.conclusion.clone() {
+                    Judgment::Typing(
+                        ctx, 
+                        Term::Lambda(Lambda(box x1, box a1, box b1)),
+                        Term::Pi(Pi(box x2, box a2, box b2)), 
+                    ) if x1 == x2 && a1 == a2=> {
+                        tree.hypo = vec![
+                            Judgment::Typing(ctx.add_term((x1, a1)), b1, b2).to_tree(),
+                        ];
+                        tree.tactic = Some(tactic!(PI_INTRO));
+                        tree.prouved = true;
+                    }
+                    _ => panic!("PI_INTRO: Cant do that here !"),
                 }
             }
         }
