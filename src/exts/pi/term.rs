@@ -28,3 +28,18 @@ impl fmt::Display for Lambda {
 impl TermTrait for Lambda {
     
 }
+
+// func apply term
+#[derive(Debug, Clone, PartialEq)]
+// f(a)
+pub struct Apply(pub Box<Term>, pub Box<Term>);
+
+impl fmt::Display for Apply {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({})({})", *self.0, *self.1)
+    }
+}
+
+impl TermTrait for Apply {
+    
+}
