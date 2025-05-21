@@ -6,6 +6,8 @@ mod terms;
 
 mod exts;
 
+mod tests;
+
 use judgments::Judgment;
 use context::Context;
 use inftree::InfTree;
