@@ -29,7 +29,7 @@ impl Tactic for UTactic {
         }
     }
 
-    fn apply(&self, tree: &mut InfTree) {
+    fn apply(&self, tree: &mut InfTree, _args: Vec<Term>) {
         match self {
             UTactic::U_INTRO => {
                 match tree.conclusion.clone() {

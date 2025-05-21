@@ -17,7 +17,7 @@ fn main() {
     let mut tree = Judgment::Ctx(Context {content: vec![
         (term!(Var("x1")), term!(Var("A1")))
     ]}).to_tree();
-    tree.apply_tactic(tactic!(CTX_EXT));
+    apply_tactic!(tree, CTX_EXT);
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
 
@@ -27,7 +27,7 @@ fn main() {
         term!(Var("A")), 
         term!(U(1)),
     ).to_tree();
-    tree.apply_tactic(tactic!(U_CUMUL));
+    apply_tactic!(tree, U_CUMUL);
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
 
@@ -38,7 +38,7 @@ fn main() {
         term!(Var("a")), 
         term!(Var("A")),
     ).to_tree();
-    tree.apply_tactic(tactic!(JUGEQEQUIV_REFL));
+    apply_tactic!(tree, JUGEQEQUIV_REFL);
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
 }

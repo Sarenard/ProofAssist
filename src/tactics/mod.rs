@@ -8,6 +8,7 @@ use tactic_trait::Tactic;
 use crate::exts::universe::UTactic;
 use crate::exts::ctx::CtxTactic;
 use crate::exts::jugeqequiv::JUGEQEQUIVTactic;
+use crate::terms::Term;
 
 #[derive(Debug)]
 pub enum Tactics {
@@ -25,11 +26,11 @@ impl Tactic for Tactics {
         }
     }
 
-    fn apply(&self, tree: &mut crate::InfTree) {
+    fn apply(&self, tree: &mut crate::InfTree, args: Vec<Term>) {
         match self {
-            Tactics::Ctx(t) => t.apply(tree),
-            Tactics::U(t) => t.apply(tree),
-            Tactics::JUGEQEQUIV(t) => t.apply(tree),
+            Tactics::Ctx(t) => t.apply(tree, args),
+            Tactics::U(t) => t.apply(tree, args),
+            Tactics::JUGEQEQUIV(t) => t.apply(tree, args),
         }
     }
 }

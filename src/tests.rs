@@ -5,7 +5,7 @@ mod tests {
     #[test]
     fn ctx_emp_1() {
         let mut tree = Judgment::Ctx(Context {content: vec![]}).to_tree();
-        tree.apply_tactic(tactic!(CTX_EMP));
+        apply_tactic!(tree, CTX_EMP);
         assert!(tree.is_proven());
     }
 
@@ -16,8 +16,8 @@ mod tests {
             term!(U(0)), 
             term!(U(1)),
         ).to_tree();
-        tree.apply_tactic(tactic!(U_INTRO));
-        tree.hypo[0].apply_tactic(tactic!(CTX_EMP));
+        apply_tactic!(tree, U_INTRO);
+        apply_tactic!(tree.hypo[0], CTX_EMP);
         assert!(tree.is_proven());
     }
 

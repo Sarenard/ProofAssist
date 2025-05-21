@@ -1,5 +1,6 @@
 use crate::tactics::tactic_trait::Tactic;
 use crate::tactics::Tactics;
+use crate::terms::Term;
 use crate::Judgment;
 
 use std::fmt;
@@ -43,7 +44,7 @@ impl InfTree {
         }
         ok
     }
-    pub fn apply_tactic(&mut self, tactic: Tactics) {
-        tactic.apply(self);
+    pub fn apply_tactic(&mut self, tactic: Tactics, args: Vec<Term>) {
+        tactic.apply(self, args);
     }
 }

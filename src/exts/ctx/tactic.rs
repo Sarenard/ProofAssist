@@ -1,4 +1,5 @@
 use std::fmt;
+use crate::terms::Term;
 use crate::{context::Context, inftree::InfTree, judgments::Judgment};
 
 use crate::term;
@@ -26,7 +27,7 @@ impl Tactic for CtxTactic {
         }
     }
     
-    fn apply(&self, tree: &mut InfTree) {
+    fn apply(&self, tree: &mut InfTree, _args: Vec<Term>) {
         match self {
             CtxTactic::CTX_EMP => {
                 match tree.conclusion.clone() {
