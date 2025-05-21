@@ -21,4 +21,35 @@ mod tests {
         assert!(tree.is_proven());
     }
 
+    #[test]
+    fn pi_form_1() {
+        let context = Context {content: vec![]};
+        let x = term!(Var("x"));
+        let a = term!(Var("A"));
+        let b = term!(Var("B"));
+        let mut tree = Judgment::Typing(
+            context.clone(),
+            term!(Pi(x.clone(), a.clone(), b.clone())),
+            term!(U(1)),
+        ).to_tree();
+        apply_tactic!(tree, PI_FORM);
+        assert_eq!(
+            tree,
+            InfTree {
+                hypo: vec![
+                    Judgment::Typing(context.clone(), a.clone(), term!(U(1))).to_tree(),
+                    Judgment::Typing(context.add_term((x.clone(), a.clone())), b.clone(), term!(U(1))).to_tree(),
+
+                ],
+                conclusion: Judgment::Typing(
+                    Context {content: vec![]},
+                    term!(Pi(x, a, b)),
+                    term!(U(1)),
+                ),
+                tactic: Some(tactic!(PI_FORM)),
+                prouved: true
+            }
+        )
+    }
+
 }

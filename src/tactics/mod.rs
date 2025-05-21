@@ -5,16 +5,18 @@ mod r#macro;
 
 use tactic_trait::Tactic;
 
+use crate::exts::pi::PiTactic;
 use crate::exts::universe::UTactic;
 use crate::exts::ctx::CtxTactic;
 use crate::exts::jugeqequiv::JUGEQEQUIVTactic;
 use crate::terms::Term;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Tactics {
     Ctx(CtxTactic),
     U(UTactic),
-    JUGEQEQUIV(JUGEQEQUIVTactic)
+    JUGEQEQUIV(JUGEQEQUIVTactic),
+    PI(PiTactic),
 }
 
 impl Tactic for Tactics {
@@ -23,6 +25,7 @@ impl Tactic for Tactics {
             Tactics::Ctx(t) => t.name(),
             Tactics::U(t) => t.name(),
             Tactics::JUGEQEQUIV(t) => t.name(),
+            Tactics::PI(t) => t.name(),
         }
     }
 
@@ -31,6 +34,7 @@ impl Tactic for Tactics {
             Tactics::Ctx(t) => t.apply(tree, args),
             Tactics::U(t) => t.apply(tree, args),
             Tactics::JUGEQEQUIV(t) => t.apply(tree, args),
+            Tactics::PI(t) => t.apply(tree, args),
         }
     }
 }

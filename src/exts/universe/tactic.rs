@@ -8,7 +8,7 @@ use crate::tactics::tactic_trait::Tactic;
 
 use super::Universe;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 #[allow(non_camel_case_types)]
 pub enum UTactic {
     U_INTRO,

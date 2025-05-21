@@ -1,7 +1,7 @@
 use std::fmt;
 use crate::terms::term_trait::TermTrait;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Copy)]
 pub struct Universe(pub usize);
 
 impl fmt::Display for Universe {

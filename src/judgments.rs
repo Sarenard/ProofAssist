@@ -5,7 +5,7 @@ use crate::Context;
 
 use crate::terms::Term;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Judgment {
     // Gamma Ctx.
     Ctx(Context),

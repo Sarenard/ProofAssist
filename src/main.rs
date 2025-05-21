@@ -1,3 +1,5 @@
+#![feature(box_patterns)]
+
 mod judgments;
 mod context;
 mod inftree;
@@ -39,6 +41,16 @@ fn main() {
         term!(Var("A")),
     ).to_tree();
     apply_tactic!(tree, JUGEQEQUIV_REFL);
+    println!("{}", tree);
+    println!("Is proven : {}", tree.is_proven());
+
+    println!("\n=========================================================");
+    let mut tree = Judgment::Typing(
+        Context {content: vec![]},
+        term!(Pi(term!(Var("x")), term!(Var("A")), term!(Var("B")))),
+        term!(U(1)),
+    ).to_tree();
+    apply_tactic!(tree, PI_FORM);
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
 }

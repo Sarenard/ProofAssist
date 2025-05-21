@@ -1,5 +1,6 @@
 use crate::exts::universe::Universe;
 use crate::exts::var::Var;
+use crate::exts::pi::Pi;
 
 use super::term_trait::TermTrait;
 use std::fmt;
@@ -8,6 +9,7 @@ use std::fmt;
 pub enum Term {
     Universe(Universe),
     Var(Var),
+    Pi(Pi),
 }
 
 impl fmt::Display for Term {
@@ -15,6 +17,7 @@ impl fmt::Display for Term {
         match self {
             Term::Universe(u) => write!(f, "{}", u),
             Term::Var(v) => write!(f, "{}", v),
+            Term::Pi(v) => write!(f, "{}", v),
         }
     }
 }
