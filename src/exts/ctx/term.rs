@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::terms::{term_trait::TermTrait, Term};
+use crate::terms::term_trait::TermTrait;
 
 #[derive(Debug, Clone)]
 pub struct Universe(pub usize);
@@ -11,7 +11,5 @@ impl fmt::Display for Universe {
 }
 
 impl TermTrait for Universe {
-    fn replace(&self, to_replace: Term, with: Term) {
-        todo!()
-    }
+    
 }
