@@ -4,7 +4,7 @@ use crate::exts::var::Var;
 use super::term_trait::TermTrait;
 use std::fmt;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Term {
     Universe(Universe),
     Var(Var),
