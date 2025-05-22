@@ -9,12 +9,10 @@ use super::{Apply, Lambda, Pi};
 
 use crate::tactics::tactic_trait::Tactic;
 
-// TODO : add :
-// PI_ELIM
-// PI_COMP
-// PI_UNIQ
+// TODO : add PI_COMP
+// TODO : add PI_UNIQ
 // and the == counterpart for the constructor
-// PI_INTRO_EQ
+// TODO : add PI_INTRO_EQ
 #[derive(Debug, Clone, PartialEq)]
 #[allow(non_camel_case_types)]
 pub enum PiTactic {

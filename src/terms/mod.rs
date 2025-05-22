@@ -8,6 +8,7 @@ pub use term_trait::TermTrait as TermTrait;
 use crate::exts::universe::Universe;
 use crate::exts::var::Var;
 use crate::exts::pi::{Apply, Lambda, Pi};
+use crate::exts::zero::Zero;
 
 use std::fmt;
 
@@ -18,6 +19,7 @@ pub enum Term {
     Pi(Pi),
     Lambda(Lambda),
     Apply(Apply),
+    Zero(Zero),
 }
 
 impl fmt::Display for Term {
@@ -28,6 +30,7 @@ impl fmt::Display for Term {
             Term::Pi(v) => write!(f, "{}", v),
             Term::Lambda(v) => write!(f, "{}", v),
             Term::Apply(v) => write!(f, "{}", v),
+            Term::Zero(v) => write!(f, "{}", v),
         }
     }
 }
@@ -40,6 +43,7 @@ impl TermTrait for Term {
             Term::Pi(t) => t.replace(to_replace, with),
             Term::Lambda(t) => t.replace(to_replace, with),
             Term::Apply(t) => t.replace(to_replace, with),
+            Term::Zero(t) => t.replace(to_replace, with),
         }
     }
 }

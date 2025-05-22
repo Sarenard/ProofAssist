@@ -52,4 +52,16 @@ mod tests {
         )
     }
 
+    #[test]
+    fn zero_form_1() {
+        let mut tree = Judgment::Typing(
+            Context {content: vec![]}, 
+            term!(Zero), 
+            term!(U(4)),
+        ).to_tree();
+        apply_tactic!(tree, ZERO_FORM);
+        apply_tactic!(tree.hypo[0], CTX_EMP);
+        assert!(tree.is_proven());
+    }
+
 }
