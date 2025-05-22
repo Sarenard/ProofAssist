@@ -46,7 +46,7 @@ impl Tactic for CtxTactic {
                         let last = a.content.last().unwrap();
                         tree.hypo = vec![
                             Judgment::Typing(
-                                Context { content: vec![] },
+                                Context { content: a.content[..a.content.len().saturating_sub(1)].to_vec() },
                                 last.1.clone(),
                                 term!(U(0)),
                             )

@@ -20,6 +20,7 @@ pub enum NatTactic {
     NELIM,
     NCOMP1,
     NCOMP2,
+    NINTRO2_EQ,
 }
 
 impl fmt::Display for NatTactic {
@@ -37,6 +38,7 @@ impl Tactic for NatTactic {
             NatTactic::NELIM => "NELIM",
             NatTactic::NCOMP1 => "NCOMP1",
             NatTactic::NCOMP2 => "NCOMP2",
+            NatTactic::NINTRO2_EQ => "NINTRO2_EQ",
         }
     }
 
@@ -209,33 +211,75 @@ impl Tactic for NatTactic {
                         cs_edited,
                         C_2,
                     ) if x1 == x && x2 == x && y1 == y && C_1.clone() == C_2.clone().replace(term!(NSucc(n.clone())), x.clone())
-                    && xtype1 == xtype2 => {
-                        println!("{}", n);
-                        println!("{}", cs);
-                        println!("{}", cs.clone().replace(x.clone(), n.clone()).replace(
-                            y.clone(),
-                            term!(IndN(
+                    && xtype1 == xtype2 && cs_edited == cs.clone().replace(x.clone(), n.clone()).replace(
+                        y.clone(),
+                        term!(IndN(
+                            term!(Lambda(
+                                x.clone(),
+                                xtype1.clone(),
+                                C_1.clone()
+                            )), 
+                            c_0.clone(), 
+                            term!(Lambda(
+                                x.clone(),
+                                xtype1.clone(),
                                 term!(Lambda(
-                                    x.clone(),
-                                    xtype1.clone(),
-                                    C_1.clone()
-                                )), 
-                                c_0.clone(), 
-                                term!(Lambda(
-                                    x.clone(),
-                                    xtype1.clone(),
-                                    term!(Lambda(
-                                        y.clone(),
-                                        ytype.clone(),
-                                        cs.clone()
-                                    ))
-                                )),
-                                n.clone()
+                                    y.clone(),
+                                    ytype.clone(),
+                                    cs.clone()
+                                ))
                             )),
-                        ) );
-                        println!("{}", cs_edited);
+                            n.clone()
+                        )),
+                    ) => {
+                        tree.hypo = vec![
+                            Judgment::Typing(
+                                ctx.clone().add_term((x.clone(), term!(Nat))), 
+                                C_1.clone(),
+                                term!(U(0))
+                            ).to_tree(),
+                            Judgment::Typing(
+                                ctx.clone(), 
+                                c_0,
+                                C_1.clone().replace(x.clone(), term!(NZero))
+                            ).to_tree(),
+                            Judgment::Typing(
+                                ctx.clone().add_term((x.clone(), term!(Nat))).add_term((y.clone(), C_1.clone())),
+                                cs.clone(),
+                                C_1.clone().replace(x.clone(), term!(NSucc(x))),
+                            ).to_tree(),
+                            Judgment::Typing(
+                                ctx.clone(), 
+                                n.clone(), 
+                                term!(Nat)
+                            ).to_tree(),
+                        ];
+                        tree.tactic = Some(tactic!(NCOMP2));
+                        tree.prouved = true;
                     }
                     _ => panic!("NCOMP2: Cant do that here !"),
+                }
+            }
+            NatTactic::NINTRO2_EQ => {
+                match tree.conclusion.clone() {
+                    Judgment::JudgEq(
+                        ctx, 
+                        Term::NSucc(NSucc(box n)),
+                        Term::NSucc(NSucc(box m)),
+                        Term::Nat(Nat)
+                    ) => {
+                        tree.hypo = vec![
+                            Judgment::JudgEq(
+                                ctx, 
+                                n,
+                                m,
+                                term!(Nat)
+                            ).to_tree(),
+                        ];
+                        tree.tactic = Some(tactic!(NINTRO2_EQ));
+                        tree.prouved = true;
+                    }
+                    _ => panic!("NINTRO2_EQ: Cant do that here !"),
                 }
             }
         }

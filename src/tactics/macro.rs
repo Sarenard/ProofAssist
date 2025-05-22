@@ -20,6 +20,7 @@ macro_rules! tactic {
     (NELIM) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NELIM) };
     (NCOMP1) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NCOMP1) };
     (NCOMP2) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NCOMP2) };
+    (NINTRO2_EQ) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NINTRO2_EQ) };
     (VBLE) => { $crate::tactics::Tactics::VAR($crate::exts::var::VarTactic::VBLE) };
 }
 
