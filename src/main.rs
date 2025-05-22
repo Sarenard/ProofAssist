@@ -7,6 +7,8 @@ mod inftree;
 mod tactics;
 mod terms;
 
+mod utils;
+
 mod exts;
 
 mod tests;
@@ -114,47 +116,13 @@ fn main() {
     }
 
     println!("\n=========================================================");
-    let mut tree = Judgment::JudgEq(
+    let mut tree = Judgment::Typing(
         Context {content: vec![]},
-        double(term!(NSucc(term!(NZero)))),
-        term!(NSucc(term!(NSucc(term!(NZero))))),
         term!(Nat),
+        term!(U(0)),
     ).to_tree();
-    apply_tactic!(tree, JUGEQEQUIV_TRANS, vec![term!(NSucc(term!(NSucc(double(term!(NZero))))))]);
-    apply_tactic!(tree.hypo[0], NCOMP2, vec![term!(Var("x")), term!(Var("y"))]);
-    apply_tactic!(tree.hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[0].hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[0].hypo[1], NINTRO1);
-    apply_tactic!(tree.hypo[0].hypo[1].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[0].hypo[3], NINTRO1);
-    apply_tactic!(tree.hypo[0].hypo[3].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[0].hypo[2], NINTRO2);
-    apply_tactic!(tree.hypo[0].hypo[2].hypo[0], NINTRO2);
-    apply_tactic!(tree.hypo[0].hypo[2].hypo[0].hypo[0], VBLE);
-    apply_tactic!(tree.hypo[0].hypo[2].hypo[0].hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[1], NINTRO2_EQ);
-    apply_tactic!(tree.hypo[1].hypo[0], NINTRO2_EQ);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0], NCOMP1, vec![term!(Var("x")), term!(Var("y"))]);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[1], NINTRO1);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[1].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2], NINTRO2);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2].hypo[0], NINTRO2);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2].hypo[0].hypo[0], VBLE);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2].hypo[0].hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+    apply_tactic!(tree, NFORM);
+    apply_tactic!(tree.hypo[0], CTX_EMP);
     
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());

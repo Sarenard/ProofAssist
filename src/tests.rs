@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::*;
+    use crate::{utils::church, *};
 
     #[test]
     fn ctx_emp_1() {
@@ -127,8 +127,8 @@ mod tests {
         }
         let mut tree = Judgment::JudgEq(
             Context {content: vec![]},
-            double(term!(NZero)),
-            term!(NZero),
+            double(church(0)),
+            church(0),
             term!(Nat),
         ).to_tree();
         apply_tactic!(tree, NCOMP1, vec![term!(Var("n")), term!(Var("y"))]);
@@ -174,8 +174,8 @@ mod tests {
         }
         let mut tree = Judgment::JudgEq(
             Context {content: vec![]},
-            double(term!(NSucc(term!(NZero)))),
-            term!(NSucc(term!(NSucc(term!(NZero))))),
+            double(church(1)),
+            church(2),
             term!(Nat),
         ).to_tree();
         apply_tactic!(tree, JUGEQEQUIV_TRANS, vec![term!(NSucc(term!(NSucc(double(term!(NZero))))))]);
