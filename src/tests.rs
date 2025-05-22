@@ -64,4 +64,42 @@ mod tests {
         assert!(tree.is_proven());
     }
 
+    #[test]
+    fn nat_intro_1_1() {
+        let mut tree = Judgment::Typing(
+            Context {content: vec![]},
+            term!(NZero),
+            term!(Nat),
+        ).to_tree();
+        apply_tactic!(tree, NINTRO1);
+        apply_tactic!(tree.hypo[0], CTX_EMP);
+        assert!(tree.is_proven());
+    }
+
+    #[test]
+    fn nat_form_1() {
+        let mut tree = Judgment::Typing(
+            Context {content: vec![]},
+            term!(Nat),
+            term!(U(0)),
+        ).to_tree();
+        apply_tactic!(tree, NFORM);
+        apply_tactic!(tree.hypo[0], CTX_EMP);
+        assert!(tree.is_proven());
+    }
+
+    #[test]
+    // 1 in N
+    fn nat_1() {
+        let mut tree = Judgment::Typing(
+            Context {content: vec![]},
+            term!(NSucc(term!(NZero))),
+            term!(Nat),
+        ).to_tree();
+        apply_tactic!(tree, NINTRO2);
+        apply_tactic!(tree.hypo[0], NINTRO1);
+        apply_tactic!(tree.hypo[0].hypo[0], CTX_EMP);
+        assert!(tree.is_proven());
+    }
+
 }

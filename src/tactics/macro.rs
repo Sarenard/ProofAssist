@@ -13,7 +13,13 @@ macro_rules! tactic {
     (PI_INTRO) => { $crate::tactics::Tactics::PI($crate::exts::pi::PiTactic::PI_INTRO) };
     (PI_ELIM) => { $crate::tactics::Tactics::PI($crate::exts::pi::PiTactic::PI_ELIM) };
     (ZERO_FORM) => { $crate::tactics::Tactics::ZERO($crate::exts::zero::ZeroTactic::ZERO_FORM) };
-    (ZERO_ELIM) => { $crate::tactics::Tactics::ZERO($crate::exts::zero::ZeroTactic::ZERO_FORM) };
+    (ZERO_ELIM) => { $crate::tactics::Tactics::ZERO($crate::exts::zero::ZeroTactic::ZERO_ELIM) };
+    (NFORM) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NFORM) };
+    (NINTRO1) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NINTRO1) };
+    (NINTRO2) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NINTRO2) };
+    (NELIM) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NELIM) };
+    (NCOMP1) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NCOMP1) };
+    (NCOMP2) => { $crate::tactics::Tactics::NAT($crate::exts::nat::NatTactic::NCOMP2) };
 }
 
 #[macro_export]

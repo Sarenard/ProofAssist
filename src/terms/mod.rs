@@ -5,6 +5,7 @@ mod r#macro;
 
 pub use term_trait::TermTrait as TermTrait;
 
+use crate::exts::nat::{IndN, NSucc, NZero, Nat};
 use crate::exts::universe::Universe;
 use crate::exts::var::Var;
 use crate::exts::pi::{Apply, Lambda, Pi};
@@ -22,6 +23,10 @@ pub enum Term {
     Apply(Apply),
     Zero(Zero),
     Ind0(Ind0),
+    NZero(NZero),
+    NSucc(NSucc),
+    IndN(IndN),
+    Nat(Nat),
 }
 
 impl fmt::Display for Term {
@@ -34,6 +39,10 @@ impl fmt::Display for Term {
             Term::Apply(v) => write!(f, "{}", v),
             Term::Zero(v) => write!(f, "{}", v),
             Term::Ind0(v) => write!(f, "{}", v),
+            Term::NZero(v) => write!(f, "{}", v),
+            Term::NSucc(v) => write!(f, "{}", v),
+            Term::IndN(v) => write!(f, "{}", v),
+            Term::Nat(v) => write!(f, "{}", v),
         }
     }
 }
@@ -48,6 +57,10 @@ impl TermTrait for Term {
             Term::Apply(t) => t.replace(to_replace, with),
             Term::Zero(t) => t.replace(to_replace, with),
             Term::Ind0(t) => t.replace(to_replace, with),
+            Term::NZero(t) => t.replace(to_replace, with),
+            Term::NSucc(t) => t.replace(to_replace, with),
+            Term::IndN(t) => t.replace(to_replace, with),
+            Term::Nat(t) => t.replace(to_replace, with),
         }
     }
 }

@@ -50,7 +50,7 @@ impl Tactic for ZeroTactic {
                     _ => panic!("PI_FORM: Cant do that here !"),
                 }
             }
-            ZeroTactic::ZERO_ELIM => {
+            ZeroTactic::ZERO_ELIM => { // TODO : FIX BINDINGS
                 match tree.conclusion.clone() {
                     Judgment::Typing(
                         ctx,

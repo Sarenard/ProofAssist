@@ -23,7 +23,7 @@ impl InfTree {
 
         for (i, hypo) in self.hypo.iter().enumerate() {
             writeln!(f, "{}Hypothesis [{}]:", indent_str, i)?;
-            hypo.fmt_with_indent(f, indent + 1)?;
+            hypo.fmt_with_indent(f, indent + 2)?;
         }
         Ok(())
     }

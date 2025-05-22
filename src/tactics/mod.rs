@@ -5,6 +5,7 @@ mod r#macro;
 
 use tactic_trait::Tactic;
 
+use crate::exts::nat::NatTactic;
 use crate::exts::pi::PiTactic;
 use crate::exts::universe::UTactic;
 use crate::exts::ctx::CtxTactic;
@@ -19,6 +20,7 @@ pub enum Tactics {
     JUGEQEQUIV(JUGEQEQUIVTactic),
     PI(PiTactic),
     ZERO(ZeroTactic),
+    NAT(NatTactic)
 }
 
 impl Tactic for Tactics {
@@ -29,6 +31,7 @@ impl Tactic for Tactics {
             Tactics::JUGEQEQUIV(t) => t.name(),
             Tactics::PI(t) => t.name(),
             Tactics::ZERO(t) => t.name(),
+            Tactics::NAT(t) => t.name(),
         }
     }
 
@@ -39,6 +42,7 @@ impl Tactic for Tactics {
             Tactics::JUGEQEQUIV(t) => t.apply(tree, args),
             Tactics::PI(t) => t.apply(tree, args),
             Tactics::ZERO(t) => t.apply(tree, args),
+            Tactics::NAT(t) => t.apply(tree, args),
         }
     }
 }

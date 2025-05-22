@@ -11,7 +11,11 @@ impl fmt::Display for Var {
 }
 
 impl TermTrait for Var {
-    fn replace(self, _to_replace: Term, _with: Term) -> Term {
-        todo!()
+    fn replace(self, to_replace: Term, with: Term) -> Term {
+        if Term::Var(self.clone()) == to_replace {
+            with
+        } else {
+            Term::Var(self)
+        }
     }
 }
