@@ -13,6 +13,7 @@ macro_rules! tactic {
     (PI_INTRO) => { $crate::tactics::Tactics::PI($crate::exts::pi::PiTactic::PI_INTRO) };
     (PI_ELIM) => { $crate::tactics::Tactics::PI($crate::exts::pi::PiTactic::PI_ELIM) };
     (ZERO_FORM) => { $crate::tactics::Tactics::ZERO($crate::exts::zero::ZeroTactic::ZERO_FORM) };
+    (ZERO_ELIM) => { $crate::tactics::Tactics::ZERO($crate::exts::zero::ZeroTactic::ZERO_FORM) };
 }
 
 #[macro_export]

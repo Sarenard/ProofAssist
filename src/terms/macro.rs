@@ -6,4 +6,5 @@ macro_rules! term {
     (Lambda($x:expr, $a:expr, $b:expr)) => { $crate::terms::Term::Lambda($crate::exts::pi::Lambda(Box::new($x), Box::new($a), Box::new($b))) };
     (Apply($f:expr, $a:expr)) => { $crate::terms::Term::Lambda($crate::exts::pi::Lambda(Box::new($f), Box::new($a))) };
     (Zero) => { $crate::terms::Term::Zero($crate::exts::zero::Zero) };
+    (Ind0($C:expr, $a:expr)) => { $crate::terms::Term::Ind0($crate::exts::zero::Ind0($C, $a)) };
 }

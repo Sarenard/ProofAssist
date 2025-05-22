@@ -18,7 +18,7 @@ pub enum Tactics {
     U(UTactic),
     JUGEQEQUIV(JUGEQEQUIVTactic),
     PI(PiTactic),
-    ZERO(ZeroTactic)
+    ZERO(ZeroTactic),
 }
 
 impl Tactic for Tactics {
