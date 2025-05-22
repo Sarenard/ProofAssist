@@ -105,8 +105,7 @@ mod tests {
     #[test]
     // double(0) == 0
     fn double_zero() {
-        let mut tree = Judgment::JudgEq(
-            Context {content: vec![]},
+        fn double(term: Term) -> Term {
             term!(IndN(
                 term!(Lambda(
                     term!(Var("n")),
@@ -123,8 +122,12 @@ mod tests {
                         term!(NSucc(term!(NSucc(term!(Var("y"))))))
                     ))
                 )),
-                term!(NZero)
-            )),
+                term
+            ))
+        }
+        let mut tree = Judgment::JudgEq(
+            Context {content: vec![]},
+            double(term!(NZero)),
             term!(NZero),
             term!(Nat),
         ).to_tree();

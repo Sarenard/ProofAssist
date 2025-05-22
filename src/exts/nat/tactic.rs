@@ -79,6 +79,9 @@ impl Tactic for NatTactic {
                 }
             }
             NatTactic::NELIM => {
+                assert_eq!(args.len(), 2);
+                let x = args[0].clone();
+                let y = args[1].clone();
                 match tree.conclusion.clone() { // TODO : FIX BINDINGS
                     Judgment::Typing(
                         ctx, 
@@ -89,11 +92,7 @@ impl Tactic for NatTactic {
                             box n
                         )), 
                         C2
-                    ) if C1 == C2 => {
-                        assert_eq!(args.len(), 2);
-                        let x = args[0].clone();
-                        let y = args[1].clone();
-
+                    ) if C1.clone().replace(x.clone(), n.clone()) == C2 => {
                         tree.hypo = vec![
                             Judgment::Typing(
                                 ctx.clone().add_term((x.clone(), term!(Nat))), 
@@ -103,16 +102,16 @@ impl Tactic for NatTactic {
                             Judgment::Typing(
                                 ctx.clone(), 
                                 c0.clone(), 
-                                C1.clone().replace(x.clone(), n.clone()).replace(term!(NZero), x.clone())
+                                C1.clone().replace(x.clone(), term!(NZero))
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx.clone().add_term(
                                     (x.clone(), term!(Nat))
                                 ).add_term(
-                                    (y, C1.clone().replace(x.clone(), n.clone()))
+                                    (y, C1.clone())
                                 ),
                                 cs,
-                                C1.clone().replace(x.clone(), n.clone()).replace(term!(NSucc(n.clone())), n.clone())
+                                C1.clone().replace(x.clone(), term!(NSucc(x.clone())))
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx, 
@@ -153,27 +152,27 @@ impl Tactic for NatTactic {
                         )), 
                         c0_1, 
                         C_2
-                    ) if C_1 == C_2.clone().replace(x.clone(), term!(NZero)) && c0_1 == c0_2 
+                    ) if C_1.clone().replace(x.clone(), term!(NZero)) == C_2.clone() && c0_1 == c0_2 
                          && x1 == x.clone() && x2 == x.clone() && y1 == y.clone() => {
                         tree.hypo = vec![
                             Judgment::Typing(
                                 ctx.clone().add_term((x.clone(), term!(Nat))), 
-                                C_1.clone().replace(x.clone(), term!(NZero)), 
+                                C_1.clone(), 
                                 term!(U(0)) // todo : handle
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx.clone(), 
                                 c0_1.clone(), 
-                                C_1.clone() // C1[x/0][0/x]
+                                C_2.clone()
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx.clone().add_term(
                                     (x.clone(), term!(Nat))
                                 ).add_term(
-                                    (y, C_1.clone().replace(x.clone(), term!(NZero)))
+                                    (y, C_2.clone())
                                 ),
                                 cs,
-                                C_1.clone().replace(x.clone(), term!(NZero)).replace(term!(NSucc(x.clone())), x.clone())
+                                C_2.clone().replace(x.clone(), term!(NSucc(x.clone())))
                             ).to_tree(),
                         ];
                         tree.tactic = Some(tactic!(NCOMP1));
@@ -183,7 +182,61 @@ impl Tactic for NatTactic {
                 }
             }
             NatTactic::NCOMP2 => {
-                todo!()
+                assert_eq!(args.len(), 2);
+                let x = args[0].clone();
+                let y = args[1].clone();
+                match tree.conclusion.clone() {
+                    Judgment::JudgEq(
+                        ctx, 
+                        Term::IndN(IndN(
+                            box Term::Lambda(Lambda(
+                                box x1,
+                                box xtype1,
+                                box C_1,
+                            )),
+                            box c_0,
+                            box Term::Lambda(Lambda(
+                                box x2,
+                                box xtype2,
+                                box Term::Lambda(Lambda(
+                                    box y1,
+                                    box ytype,
+                                    box cs,
+                                )),
+                            )),
+                            box Term::NSucc(NSucc(box n))
+                        )),
+                        cs_edited,
+                        C_2,
+                    ) if x1 == x && x2 == x && y1 == y && C_1.clone() == C_2.clone().replace(term!(NSucc(n.clone())), x.clone())
+                    && xtype1 == xtype2 => {
+                        println!("{}", n);
+                        println!("{}", cs);
+                        println!("{}", cs.clone().replace(x.clone(), n.clone()).replace(
+                            y.clone(),
+                            term!(IndN(
+                                term!(Lambda(
+                                    x.clone(),
+                                    xtype1.clone(),
+                                    C_1.clone()
+                                )), 
+                                c_0.clone(), 
+                                term!(Lambda(
+                                    x.clone(),
+                                    xtype1.clone(),
+                                    term!(Lambda(
+                                        y.clone(),
+                                        ytype.clone(),
+                                        cs.clone()
+                                    ))
+                                )),
+                                n.clone()
+                            )),
+                        ) );
+                        println!("{}", cs_edited);
+                    }
+                    _ => panic!("NCOMP2: Cant do that here !"),
+                }
             }
         }
     }

@@ -41,8 +41,8 @@ impl fmt::Display for NSucc {
 }
 
 impl TermTrait for NSucc {
-    fn replace(self, _to_replace: Term, _with: Term) -> Term {
-        todo!()
+    fn replace(self, to_replace: Term, with: Term) -> Term {
+        term!(NSucc(self.0.replace(to_replace, with)))
     }
 }
 

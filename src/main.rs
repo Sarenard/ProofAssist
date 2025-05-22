@@ -14,6 +14,7 @@ mod tests;
 use judgments::Judgment;
 use context::Context;
 use inftree::InfTree;
+use terms::Term;
 
 fn main() {
     /*
@@ -91,18 +92,16 @@ fn main() {
     println!("Is proven : {}", tree.is_proven());
     */
 
-    println!("\n=========================================================");
-    let mut tree = Judgment::JudgEq(
-        Context {content: vec![]},
+    fn double(term: Term) -> Term {
         term!(IndN(
             term!(Lambda(
-                term!(Var("n")),
+                term!(Var("x")),
                 term!(Nat),
                 term!(Nat)
             )),
             term!(NZero),
             term!(Lambda(
-                term!(Var("n")),
+                term!(Var("x")),
                 term!(Nat),
                 term!(Lambda(
                     term!(Var("y")),
@@ -110,25 +109,19 @@ fn main() {
                     term!(NSucc(term!(NSucc(term!(Var("y"))))))
                 ))
             )),
-            term!(NZero)
-        )),
-        term!(NZero),
+            term
+        ))
+    }
+
+    println!("\n=========================================================");
+    let mut tree = Judgment::JudgEq(
+        Context {content: vec![]},
+        double(term!(NSucc(term!(NZero)))),
+        term!(NSucc(term!(NSucc(term!(NZero))))),
         term!(Nat),
     ).to_tree();
-    apply_tactic!(tree, NCOMP1, vec![term!(Var("n")), term!(Var("y"))]);
-    apply_tactic!(tree.hypo[0], NFORM);
-    apply_tactic!(tree.hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[1], NINTRO1);
-    apply_tactic!(tree.hypo[1].hypo[0], CTX_EMP);
-    apply_tactic!(tree.hypo[2], NINTRO2);
-    apply_tactic!(tree.hypo[2].hypo[0], NINTRO2);
-    apply_tactic!(tree.hypo[2].hypo[0].hypo[0], VBLE);
-    apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0], CTX_EXT);
-    apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
-    apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
-    
+    apply_tactic!(tree, NCOMP2, vec![term!(Var("x")), term!(Var("y"))]);
+
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
 }
