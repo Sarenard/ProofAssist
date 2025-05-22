@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::terms::TermTrait;
+use crate::terms::{Term, TermTrait};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Var(pub String);
@@ -11,5 +11,7 @@ impl fmt::Display for Var {
 }
 
 impl TermTrait for Var {
-    
+    fn replace(self, to_replace: Term, with: Term) -> Term {
+        todo!()
+    }
 }

@@ -11,6 +11,7 @@ macro_rules! tactic {
     (JUGEQEQUIV_CONV_EQ) => { $crate::tactics::Tactics::JUGEQEQUIV($crate::exts::jugeqequiv::JUGEQEQUIVTactic::JUGEQEQUIV_CONV_EQ) };
     (PI_FORM) => { $crate::tactics::Tactics::PI($crate::exts::pi::PiTactic::PI_FORM) };
     (PI_INTRO) => { $crate::tactics::Tactics::PI($crate::exts::pi::PiTactic::PI_INTRO) };
+    (PI_ELIM) => { $crate::tactics::Tactics::PI($crate::exts::pi::PiTactic::PI_ELIM) };
 }
 
 #[macro_export]

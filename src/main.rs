@@ -1,4 +1,5 @@
 #![feature(box_patterns)]
+#![allow(non_snake_case)]
 
 mod judgments;
 mod context;

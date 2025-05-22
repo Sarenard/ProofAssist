@@ -61,8 +61,8 @@ impl Tactic for JUGEQEQUIVTactic {
             JUGEQEQUIVTactic::JUGEQEQUIV_TRANS => {
                 match tree.conclusion.clone() {
                     Judgment::JudgEq(ctx, a, c, ty) => {
-                        assert_ne!(args.len(), 0);
-                        let var = args.first().unwrap().clone();
+                        assert_eq!(args.len(), 1);
+                        let var = args[0].clone();
                         tree.hypo = vec![
                             Judgment::JudgEq(ctx.clone(), a.clone(), var.clone(), ty.clone()).to_tree(),
                             Judgment::JudgEq(ctx, var, c, ty).to_tree(),
@@ -77,8 +77,8 @@ impl Tactic for JUGEQEQUIVTactic {
             JUGEQEQUIVTactic::JUGEQEQUIV_CONV_TERM => {
                 match tree.conclusion.clone() {
                     Judgment::Typing(ctx, a, b) => {
-                        assert_ne!(args.len(), 0);
-                        let var = args.first().unwrap().clone();
+                        assert_eq!(args.len(), 1);
+                        let var = args[0].clone();
                         tree.hypo = vec![
                             Judgment::Typing(ctx.clone(), a.clone(), var.clone()).to_tree(),
                             Judgment::JudgEq(ctx, var, b, term!(U(0))).to_tree(), // TODO : handle universes

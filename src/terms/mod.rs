@@ -33,5 +33,13 @@ impl fmt::Display for Term {
 }
 
 impl TermTrait for Term {
-
+    fn replace(self, to_replace: Term, with: Term) -> Term {
+        match self {
+            Term::Universe(t) => t.replace(to_replace, with),
+            Term::Var(t) => t.replace(to_replace, with),
+            Term::Pi(t) => t.replace(to_replace, with),
+            Term::Lambda(t) => t.replace(to_replace, with),
+            Term::Apply(t) => t.replace(to_replace, with),
+        }
+    }
 }

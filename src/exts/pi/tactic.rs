@@ -1,11 +1,11 @@
 use std::fmt;
 use crate::exts::universe::Universe;
-use crate::terms::Term;
+use crate::terms::{Term, TermTrait};
 use crate::{inftree::InfTree, judgments::Judgment};
 
 use crate::{tactic, term};
 
-use super::{Lambda, Pi};
+use super::{Apply, Lambda, Pi};
 
 use crate::tactics::tactic_trait::Tactic;
 
@@ -20,6 +20,7 @@ use crate::tactics::tactic_trait::Tactic;
 pub enum PiTactic {
     PI_FORM,
     PI_INTRO,
+    PI_ELIM,
 }
 
 impl fmt::Display for PiTactic {
@@ -33,10 +34,11 @@ impl Tactic for PiTactic {
         match self {
             PiTactic::PI_FORM => "PI_FORM",
             PiTactic::PI_INTRO => "PI_INTRO",
+            PiTactic::PI_ELIM => "PI_ELIM",
         }
     }
 
-    fn apply(&self, tree: &mut InfTree, _args: Vec<Term>) {
+    fn apply(&self, tree: &mut InfTree, args: Vec<Term>) {
         match self {
             PiTactic::PI_FORM => {
                 match tree.conclusion.clone() {
@@ -69,6 +71,38 @@ impl Tactic for PiTactic {
                         tree.prouved = true;
                     }
                     _ => panic!("PI_INTRO: Cant do that here !"),
+                }
+            }
+            PiTactic::PI_ELIM => {
+                match tree.conclusion.clone() {
+                    Judgment::Typing(
+                        ctx, 
+                        Term::Apply(Apply(box f, box a)), 
+                        B
+                    ) => {
+                        assert_eq!(args.len(), 2);
+                        let x = args[0].clone();
+                        let A = args[1].clone();
+                        tree.hypo = vec![
+                            Judgment::Typing(
+                                ctx.clone(), 
+                                a.clone(), 
+                                A.clone()
+                            ).to_tree(),
+                            Judgment::Typing(
+                                ctx.clone(), 
+                                f, 
+                                term!(Pi(
+                                    x.clone(),
+                                    A,
+                                    B.replace(a, x) // TODO : check if works
+                                ))
+                            ).to_tree(),
+                        ];
+                        tree.tactic = Some(tactic!(PI_ELIM));
+                        tree.prouved = true;
+                    }
+                    _ => panic!("PI_ELIM: Cant do that here !"),
                 }
             }
         }
