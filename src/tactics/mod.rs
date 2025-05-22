@@ -10,6 +10,7 @@ use crate::exts::pi::PiTactic;
 use crate::exts::universe::UTactic;
 use crate::exts::ctx::CtxTactic;
 use crate::exts::jugeqequiv::JUGEQEQUIVTactic;
+use crate::exts::var::VarTactic;
 use crate::exts::zero::ZeroTactic;
 use crate::terms::Term;
 
@@ -20,7 +21,8 @@ pub enum Tactics {
     JUGEQEQUIV(JUGEQEQUIVTactic),
     PI(PiTactic),
     ZERO(ZeroTactic),
-    NAT(NatTactic)
+    NAT(NatTactic),
+    VAR(VarTactic),
 }
 
 impl Tactic for Tactics {
@@ -32,6 +34,7 @@ impl Tactic for Tactics {
             Tactics::PI(t) => t.name(),
             Tactics::ZERO(t) => t.name(),
             Tactics::NAT(t) => t.name(),
+            Tactics::VAR(t) => t.name(),
         }
     }
 
@@ -43,6 +46,7 @@ impl Tactic for Tactics {
             Tactics::PI(t) => t.apply(tree, args),
             Tactics::ZERO(t) => t.apply(tree, args),
             Tactics::NAT(t) => t.apply(tree, args),
+            Tactics::VAR(t) => t.apply(tree, args),
         }
     }
 }

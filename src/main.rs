@@ -124,7 +124,11 @@ fn main() {
     apply_tactic!(tree.hypo[1].hypo[0], CTX_EMP);
     apply_tactic!(tree.hypo[2], NINTRO2);
     apply_tactic!(tree.hypo[2].hypo[0], NINTRO2);
-    // TO PROVE : (n:Nat)(y:Nat) |- (y:Nat)
+    apply_tactic!(tree.hypo[2].hypo[0].hypo[0], VBLE);
+    apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0], CTX_EXT);
+    apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+    apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+    
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
 }

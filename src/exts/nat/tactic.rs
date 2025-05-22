@@ -1,5 +1,4 @@
 use std::fmt;
-use crate::exts::ctx;
 use crate::exts::pi::Lambda;
 use crate::exts::universe::Universe;
 use crate::terms::{Term, TermTrait};
