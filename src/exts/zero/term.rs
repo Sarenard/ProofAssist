@@ -11,7 +11,7 @@ impl fmt::Display for Zero {
 }
 
 impl TermTrait for Zero {
-    fn replace(self, to_replace: Term, with: Term) -> Term {
+    fn replace(self, _to_replace: Term, _with: Term) -> Term {
         todo!()
     }
 }

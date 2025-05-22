@@ -15,6 +15,7 @@ use crate::tactics::tactic_trait::Tactic;
 // TODO : add PI_INTRO_EQ
 #[derive(Debug, Clone, PartialEq)]
 #[allow(non_camel_case_types)]
+#[allow(unused)]
 pub enum PiTactic {
     PI_FORM,
     PI_INTRO,

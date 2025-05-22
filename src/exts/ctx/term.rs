@@ -11,7 +11,7 @@ impl fmt::Display for Universe {
 }
 
 impl TermTrait for Universe {
-    fn replace(self, to_replace: Term, with: Term) -> Term {
+    fn replace(self, _to_replace: Term, _with: Term) -> Term {
         todo!()
     }
 }

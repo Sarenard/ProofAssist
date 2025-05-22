@@ -13,6 +13,7 @@ use crate::exts::zero::Zero;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq)]
+#[allow(unused)]
 pub enum Term {
     Universe(Universe),
     Var(Var),

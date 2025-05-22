@@ -12,7 +12,7 @@ impl fmt::Display for Pi {
 }
 
 impl TermTrait for Pi {
-    fn replace(self, to_replace: Term, with: Term) -> Term {
+    fn replace(self, _to_replace: Term, _with: Term) -> Term {
         todo!()
     }
 }
@@ -28,7 +28,7 @@ impl fmt::Display for Lambda {
 }
 
 impl TermTrait for Lambda {
-    fn replace(self, to_replace: Term, with: Term) -> Term {
+    fn replace(self, _to_replace: Term, _with: Term) -> Term {
         todo!()
     }
 }
@@ -45,7 +45,7 @@ impl fmt::Display for Apply {
 }
 
 impl TermTrait for Apply {
-    fn replace(self, to_replace: Term, with: Term) -> Term {
+    fn replace(self, _to_replace: Term, _with: Term) -> Term {
         todo!()
     }
 }

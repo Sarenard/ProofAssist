@@ -3,7 +3,7 @@ use crate::exts::universe::Universe;
 use crate::terms::Term;
 use crate::{inftree::InfTree, judgments::Judgment};
 
-use crate::{tactic, term};
+use crate::tactic;
 
 use crate::tactics::tactic_trait::Tactic;
 
@@ -11,6 +11,7 @@ use super::Zero;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(non_camel_case_types)]
+#[allow(unused)]
 // TODO : add ZERO_ELIM
 pub enum ZeroTactic {
     ZERO_FORM,
@@ -36,7 +37,7 @@ impl Tactic for ZeroTactic {
                     Judgment::Typing(
                         ctx, 
                         Term::Zero(Zero),
-                        Term::Universe(Universe(i)),
+                        Term::Universe(Universe(_)),
                     ) => {
                         tree.hypo = vec![
                             Judgment::Ctx(ctx).to_tree(),

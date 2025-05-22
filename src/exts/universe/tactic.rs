@@ -10,6 +10,7 @@ use super::Universe;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(non_camel_case_types)]
+#[allow(unused)]
 pub enum UTactic {
     U_INTRO,
     U_CUMUL,

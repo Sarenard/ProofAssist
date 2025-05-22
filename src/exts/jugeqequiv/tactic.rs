@@ -8,6 +8,7 @@ use crate::tactics::tactic_trait::Tactic;
 
 #[derive(Debug, Clone, PartialEq)]
 #[allow(non_camel_case_types)]
+#[allow(unused)]
 pub enum JUGEQEQUIVTactic {
     JUGEQEQUIV_REFL,
     JUGEQEQUIV_SYM,
