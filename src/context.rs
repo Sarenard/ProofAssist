@@ -9,6 +9,7 @@ pub struct Context {
 
 impl Context {
     pub fn add_term(self, term: (Term, Term)) -> Context {
+        assert!(matches!(term.0, Term::Var(_)));
         let mut new = self.clone();
         new.content.push(term);
         new
