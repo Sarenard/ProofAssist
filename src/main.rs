@@ -8,6 +8,7 @@ mod tactics;
 mod terms;
 
 mod utils;
+use utils::{church, double};
 
 mod exts;
 
@@ -94,35 +95,13 @@ fn main() {
     println!("Is proven : {}", tree.is_proven());
     */
 
-    fn double(term: Term) -> Term {
-        term!(IndN(
-            term!(Lambda(
-                term!(Var("x")),
-                term!(Nat),
-                term!(Nat)
-            )),
-            term!(NZero),
-            term!(Lambda(
-                term!(Var("x")),
-                term!(Nat),
-                term!(Lambda(
-                    term!(Var("y")),
-                    term!(Nat),
-                    term!(NSucc(term!(NSucc(term!(Var("y"))))))
-                ))
-            )),
-            term
-        ))
-    }
-
     println!("\n=========================================================");
-    let mut tree = Judgment::Typing(
+    let mut tree = Judgment::JudgEq(
         Context {content: vec![]},
+        double(church(1)),
+        church(2),
         term!(Nat),
-        term!(U(0)),
     ).to_tree();
-    apply_tactic!(tree, NFORM);
-    apply_tactic!(tree.hypo[0], CTX_EMP);
     
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());

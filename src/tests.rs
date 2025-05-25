@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::{utils::church, *};
+    use crate::{utils::{church, double}, *};
 
     #[test]
     fn ctx_emp_1() {
@@ -105,33 +105,13 @@ mod tests {
     #[test]
     // double(0) == 0
     fn double_zero() {
-        fn double(term: Term) -> Term {
-            term!(IndN(
-                term!(Lambda(
-                    term!(Var("n")),
-                    term!(Nat),
-                    term!(Nat)
-                )),
-                term!(NZero),
-                term!(Lambda(
-                    term!(Var("n")),
-                    term!(Nat),
-                    term!(Lambda(
-                        term!(Var("y")),
-                        term!(Nat),
-                        term!(NSucc(term!(NSucc(term!(Var("y"))))))
-                    ))
-                )),
-                term
-            ))
-        }
         let mut tree = Judgment::JudgEq(
             Context {content: vec![]},
             double(church(0)),
             church(0),
             term!(Nat),
         ).to_tree();
-        apply_tactic!(tree, NCOMP1, vec![term!(Var("n")), term!(Var("y"))]);
+        apply_tactic!(tree, NCOMP1, vec![term!(Var("x")), term!(Var("y"))]);
         apply_tactic!(tree.hypo[0], NFORM);
         apply_tactic!(tree.hypo[0].hypo[0], CTX_EXT);
         apply_tactic!(tree.hypo[0].hypo[0].hypo[0], NFORM);
@@ -152,26 +132,6 @@ mod tests {
     #[test]
     // double(1) == 2
     fn double_1() {
-        fn double(term: Term) -> Term {
-            term!(IndN(
-                term!(Lambda(
-                    term!(Var("x")),
-                    term!(Nat),
-                    term!(Nat)
-                )),
-                term!(NZero),
-                term!(Lambda(
-                    term!(Var("x")),
-                    term!(Nat),
-                    term!(Lambda(
-                        term!(Var("y")),
-                        term!(Nat),
-                        term!(NSucc(term!(NSucc(term!(Var("y"))))))
-                    ))
-                )),
-                term
-            ))
-        }
         let mut tree = Judgment::JudgEq(
             Context {content: vec![]},
             double(church(1)),

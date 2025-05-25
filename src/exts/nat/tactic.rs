@@ -97,8 +97,10 @@ impl Tactic for NatTactic {
                     ) if C1.clone().replace(x.clone(), n.clone()) == C2 => {
                         tree.hypo = vec![
                             Judgment::Typing(
-                                ctx.clone().add_term((x.clone(), term!(Nat))), 
-                                C1.clone().replace(x.clone(), n.clone()), 
+                                ctx.clone().add_term(
+                                    (x.clone(), term!(Nat))
+                                ), 
+                                C1.clone(), 
                                 term!(U(0)) // todo : handle
                             ).to_tree(),
                             Judgment::Typing(
@@ -135,46 +137,34 @@ impl Tactic for NatTactic {
                     Judgment::JudgEq(
                         ctx, 
                         Term::IndN(IndN(
-                            box Term::Lambda(Lambda(
-                                box x1,
-                                box _,
-                                box C_1,
-                            )),
-                            box c0_2,
-                            box Term::Lambda(Lambda(
-                                box x2,
-                                box _,
-                                box Term::Lambda(Lambda(
-                                    box y1,
-                                    box _,
-                                    box cs,
-                                )),
-                            )),
+                            box C1,
+                            box c0_0,
+                            box cs,
                             box Term::NZero(NZero)
                         )), 
-                        c0_1, 
-                        C_2
-                    ) if C_1.clone().replace(x.clone(), term!(NZero)) == C_2.clone() && c0_1 == c0_2 
-                         && x1 == x.clone() && x2 == x.clone() && y1 == y.clone() => {
+                        c0_1,
+                        C2
+                    ) if C1.clone().replace(x.clone(), term!(NZero)) == C2.clone() 
+                        && c0_0 == c0_1 => {
                         tree.hypo = vec![
                             Judgment::Typing(
                                 ctx.clone().add_term((x.clone(), term!(Nat))), 
-                                C_1.clone(), 
+                                C1.clone(), 
                                 term!(U(0)) // todo : handle
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx.clone(), 
-                                c0_1.clone(), 
-                                C_2.clone()
+                                c0_0.clone(), 
+                                C2.clone() // ou alors C1[0/x], c'est pareil :D
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx.clone().add_term(
                                     (x.clone(), term!(Nat))
                                 ).add_term(
-                                    (y, C_2.clone())
+                                    (y, C1.clone())
                                 ),
                                 cs,
-                                C_2.clone().replace(x.clone(), term!(NSucc(x.clone())))
+                                C1.clone().replace(x.clone(), term!(NSucc(x.clone())))
                             ).to_tree(),
                         ];
                         tree.tactic = Some(tactic!(NCOMP1));
@@ -191,62 +181,44 @@ impl Tactic for NatTactic {
                     Judgment::JudgEq(
                         ctx, 
                         Term::IndN(IndN(
-                            box Term::Lambda(Lambda(
-                                box x1,
-                                box xtype1,
-                                box C_1,
-                            )),
-                            box c_0,
-                            box Term::Lambda(Lambda(
-                                box x2,
-                                box xtype2,
-                                box Term::Lambda(Lambda(
-                                    box y1,
-                                    box ytype,
-                                    box cs,
-                                )),
-                            )),
+                            box C0,
+                            box c0,
+                            box cs_0,
                             box Term::NSucc(NSucc(box n))
                         )),
-                        cs_edited,
-                        C_2,
-                    ) if x1 == x && x2 == x && y1 == y && C_1.clone() == C_2.clone().replace(term!(NSucc(n.clone())), x.clone())
-                    && xtype1 == xtype2 && cs_edited == cs.clone().replace(x.clone(), n.clone()).replace(
-                        y.clone(),
-                        term!(IndN(
-                            term!(Lambda(
-                                x.clone(),
-                                xtype1.clone(),
-                                C_1.clone()
-                            )), 
-                            c_0.clone(), 
-                            term!(Lambda(
-                                x.clone(),
-                                xtype1.clone(),
-                                term!(Lambda(
-                                    y.clone(),
-                                    ytype.clone(),
-                                    cs.clone()
-                                ))
-                            )),
-                            n.clone()
-                        )),
-                    ) => {
+                        cs_1,
+                        C1,
+                    ) if C1 == C0.clone().replace(x.clone(), term!(NSucc(n.clone())))
+                    && cs_1 == cs_0.clone().replace(
+                        x.clone(),
+                        n.clone()
+                    ).replace(
+                        y.clone(), 
+                    term!(IndN(
+                        C0.clone(),
+                        c0.clone(),
+                        cs_0.clone(),
+                        n.clone()
+                    ))) => {
                         tree.hypo = vec![
                             Judgment::Typing(
                                 ctx.clone().add_term((x.clone(), term!(Nat))), 
-                                C_1.clone(),
-                                term!(U(0))
+                                C0.clone(),
+                                term!(U(0)) // TODO : HANDLE THIS
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx.clone(), 
-                                c_0,
-                                C_1.clone().replace(x.clone(), term!(NZero))
+                                c0,
+                                C0.clone().replace(x.clone(), term!(NZero))
                             ).to_tree(),
                             Judgment::Typing(
-                                ctx.clone().add_term((x.clone(), term!(Nat))).add_term((y.clone(), C_1.clone())),
-                                cs.clone(),
-                                C_1.clone().replace(x.clone(), term!(NSucc(x))),
+                                ctx.clone().add_term(
+                                    (x.clone(), term!(Nat))
+                                ).add_term(
+                                    (y.clone(), C0.clone())
+                                ),
+                                cs_0.clone(),
+                                C0.clone().replace(x.clone(), term!(NSucc(x))),
                             ).to_tree(),
                             Judgment::Typing(
                                 ctx.clone(), 
