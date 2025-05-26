@@ -252,6 +252,8 @@ impl Tactic for NatTactic {
                             cs_0.clone(),
                             n.clone()
                         ))));
+                        println!("====");
+                        println!("{}", cs_0);
                         println!("{}", cs_0.clone().replace(
                             x.clone(),
                             n.clone()

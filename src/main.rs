@@ -95,26 +95,7 @@ fn main() {
     println!("Is proven : {}", tree.is_proven());
     */
 
-    /* 
-    println!("\n=========================================================");
-    let mut tree = Judgment::JudgEq(
-        Context {content: vec![]},
-        add(church(1)),
-        term!(Lambda(
-            term!(Var("VAR3")),
-            term!(Nat),
-            term!(NSucc(term!(Var("VAR3"))))
-        )),
-        term!(Pi(
-            term!(Var("_")), 
-            term!(Nat), 
-            term!(Nat)
-        ))
-    ).to_tree();
-    tree.apply_tactic(tactic!(NCOMP2), vec![term!(Var("FUNC1")), term!(Var("VAR2"))]);
-    println!("{}", tree);
-    */
-
+    /*
     println!("\n=========================================================");
     let mut tree = Judgment::JudgEq(
         Context {content: vec![]},
@@ -181,7 +162,26 @@ fn main() {
     apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
     apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
     apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
-    
+    */
+
+    println!("\n=========================================================");
+    let mut tree = Judgment::JudgEq(
+        Context {content: vec![]},
+        add(church(1)),
+        term!(Lambda(
+            term!(Var("VAR3")),
+            term!(Nat),
+            term!(NSucc(term!(Var("VAR3"))))
+        )),
+        term!(Pi(
+            term!(Var("_")), 
+            term!(Nat), 
+            term!(Nat)
+        ))
+    ).to_tree();
+    tree.apply_tactic(tactic!(NCOMP2), vec![term!(Var("VAR2")), term!(Var("FUNC1"))]);
+    println!("{}", tree);
+
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
 }
