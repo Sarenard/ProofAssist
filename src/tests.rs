@@ -176,5 +176,75 @@ mod tests {
         assert!(tree.is_proven());
     }
 
+    #[test]
+    // x+0 = x
+    fn add_0() {
+        let mut tree = Judgment::JudgEq(
+            Context {content: vec![]},
+            add(church(0)),
+            term!(Lambda(
+                term!(Var("VAR1")),
+                term!(Nat),
+                term!(Var("VAR1"))
+            )),
+            term!(Pi(
+                term!(Var("_")), 
+                term!(Nat), 
+                term!(Nat)
+            ))
+        ).to_tree();
+        println!("{}", tree);
+        apply_tactic!(tree, NCOMP1, vec![term!(Var("VAR2")), term!(Var("FUNC1"))]);
+        apply_tactic!(tree.hypo[0], PI_FORM);
+        apply_tactic!(tree.hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+        apply_tactic!(tree.hypo[0].hypo[1], NFORM);
+        apply_tactic!(tree.hypo[0].hypo[1].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[0].hypo[1].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[0].hypo[1].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+        apply_tactic!(tree.hypo[1], PI_INTRO);
+        apply_tactic!(tree.hypo[1].hypo[0], VBLE);
+        apply_tactic!(tree.hypo[1].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[1].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+        apply_tactic!(tree.hypo[2], PI_INTRO);
+        apply_tactic!(tree.hypo[2].hypo[0], NINTRO2);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0], PI_ELIM, vec![term!(Var("N1")), term!(Nat)]);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0], VBLE);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], PI_FORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1], VBLE);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0], PI_FORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EXT);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], NFORM);
+        apply_tactic!(tree.hypo[2].hypo[0].hypo[0].hypo[1].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0].hypo[0], CTX_EMP);
+        assert!(tree.is_proven());
+    }
  
 }

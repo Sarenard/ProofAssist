@@ -229,7 +229,44 @@ impl Tactic for NatTactic {
                         tree.tactic = Some(tactic!(NCOMP2));
                         tree.prouved = true;
                     }
-                    _ => panic!("NCOMP2: Cant do that here !"),
+                    Judgment::JudgEq(
+                        ctx, 
+                        Term::IndN(IndN(
+                            box C0,
+                            box c0,
+                            box cs_0,
+                            box Term::NSucc(NSucc(box n))
+                        )),
+                        cs_1,
+                        C1,
+                    ) => {
+                        println!("{}", C1 == C0.clone().replace(x.clone(), term!(NSucc(n.clone()))));
+                        println!("{}", cs_1 == cs_0.clone().replace(
+                            x.clone(),
+                            n.clone()
+                        ).replace(
+                            y.clone(), 
+                        term!(IndN(
+                            C0.clone(),
+                            c0.clone(),
+                            cs_0.clone(),
+                            n.clone()
+                        ))));
+                        println!("{}", cs_0.clone().replace(
+                            x.clone(),
+                            n.clone()
+                        ).replace(
+                            y.clone(), 
+                            term!(IndN(
+                                C0.clone(),
+                                c0.clone(),
+                                cs_0.clone(),
+                                n.clone()
+                        ))));
+                        println!("{}", cs_1);
+                        panic!("NCOMP2: KDLJFLKJDSF")
+                    }
+                    _ => panic!("NCOMP2: Cant do that here !")
                 }
             }
             NatTactic::NINTRO2_EQ => {

@@ -62,7 +62,7 @@ impl Tactic for PiTactic {
                         ctx, 
                         Term::Lambda(Lambda(box x1, box a1, box b1)),
                         Term::Pi(Pi(box x2, box a2, box b2)), 
-                    ) if x1 == x2 && a1 == a2=> {
+                    ) if a1 == a2 => {
                         tree.hypo = vec![
                             Judgment::Typing(ctx.add_term((x1, a1)), b1, b2).to_tree(),
                         ];
@@ -73,15 +73,15 @@ impl Tactic for PiTactic {
                 }
             }
             PiTactic::PI_ELIM => {
+                assert_eq!(args.len(), 2);
+                let x = args[0].clone();
+                let A = args[1].clone();
                 match tree.conclusion.clone() {
                     Judgment::Typing(
                         ctx, 
                         Term::Apply(Apply(box f, box a)), 
                         B
                     ) => {
-                        assert_eq!(args.len(), 2);
-                        let x = args[0].clone();
-                        let A = args[1].clone();
                         tree.hypo = vec![
                             Judgment::Typing(
                                 ctx.clone(), 

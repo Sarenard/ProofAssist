@@ -31,9 +31,20 @@ impl Tactic for VarTactic {
             VarTactic::VBLE => {
                 match tree.conclusion.clone() {
                     Judgment::Typing(ctx, xi, Ai) => {
-                        if !ctx.content.iter().any(|(name, typ)| name == &xi && typ == &Ai) {
-                            panic!("VBLE: (xi : Ai) not found in context");
+                        let mut found = false;
+                        for (name, typ) in &ctx.content {
+                            // TODO : remove this debug
+                            // println!("{} == {} : {}", typ, &Ai, typ == &Ai);
+                            if name == &xi && typ == &Ai {
+                                found = true;
+                                break;
+                            }
                         }
+
+                        if !found {
+                            panic!("VBLE: ({} : {}) not found in context", xi, Ai);
+                        }
+
                         tree.hypo = vec![
                             Judgment::Ctx(ctx).to_tree()
                         ];

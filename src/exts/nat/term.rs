@@ -12,7 +12,7 @@ impl fmt::Display for NZero {
 
 impl TermTrait for NZero {
     fn replace(self, _to_replace: Term, _with: Term) -> Term {
-        todo!()
+        term!(NZero)
     }
 }
 
