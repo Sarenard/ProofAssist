@@ -7,6 +7,7 @@ pub fn church(n: usize) -> Term {
     }
 }
 
+#[allow(dead_code)]
 pub fn double(term: Term) -> Term {
     term!(IndN(
         term!(Nat),
