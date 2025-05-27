@@ -56,7 +56,12 @@ impl fmt::Display for IndN {
 }
 
 impl TermTrait for IndN {
-    fn replace(self, _to_replace: Term, _with: Term) -> Term {
-        todo!()
+    fn replace(self, to_replace: Term, with: Term) -> Term {
+        term!(IndN( // UNSURE
+            *self.0,
+            self.1.clone().replace(to_replace.clone(), with.clone()),
+            self.2.clone().replace(to_replace.clone(), with.clone()),
+            self.3.clone().replace(to_replace.clone(), with.clone())
+        ))
     }
 }

@@ -14,7 +14,7 @@ use crate::exts::var::VarTactic;
 use crate::exts::zero::ZeroTactic;
 use crate::terms::Term;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub enum Tactics {
     Ctx(CtxTactic),
     U(UTactic),

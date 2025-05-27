@@ -8,7 +8,7 @@ mod tactics;
 mod terms;
 
 mod utils;
-use utils::{add, church, double};
+use utils::{add, church, double, lemma::apply_lemma};
 
 mod exts;
 
@@ -18,6 +18,10 @@ use judgments::Judgment;
 use context::Context;
 use inftree::InfTree;
 use terms::Term;
+
+pub use std::sync::atomic::{AtomicUsize, Ordering};
+
+pub static VAR_COUNTER: AtomicUsize = AtomicUsize::new(0);
 
 fn main() {
     /*
@@ -169,9 +173,12 @@ fn main() {
         Context {content: vec![]},
         add(church(1)),
         term!(Lambda(
-            term!(Var("VAR3")),
+            term!(Var("VAR1")),
             term!(Nat),
-            term!(NSucc(term!(Var("VAR3"))))
+            term!(NSucc(term!(Apply(
+                add(church(0)),
+                term!(Var("VAR1"))
+            ))))
         )),
         term!(Pi(
             term!(Var("_")), 
@@ -179,9 +186,26 @@ fn main() {
             term!(Nat)
         ))
     ).to_tree();
-    tree.apply_tactic(tactic!(NCOMP2), vec![term!(Var("VAR2")), term!(Var("FUNC1"))]);
-    println!("{}", tree);
-
+    tree.apply_tactic(tactic!(NCOMP2), vec![term!(Var("__")), term!(Var("ADD"))]);
+    // we can consider it prooven, its only trivial shit from here
     println!("{}", tree);
     println!("Is proven : {}", tree.is_proven());
-}
+
+    println!("\n=========================================================");
+    let mut tree1 = Judgment::Typing(
+        Context {content: vec![]},
+        term!(NZero),
+        term!(Nat),
+    ).to_tree();
+    apply_tactic!(tree1, NINTRO1);
+    apply_tactic!(tree1.hypo[0], CTX_EMP);
+
+    let mut tree2 = Judgment::Typing(
+        Context {content: vec![]},
+        term!(NZero),
+        term!(Nat),
+    ).to_tree();
+
+    apply_lemma!(tree2, tree1);
+    assert!(tree2.is_proven())
+} 

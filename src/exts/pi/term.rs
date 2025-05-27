@@ -1,5 +1,5 @@
-use std::fmt;
-use crate::{term, terms::{term_trait::TermTrait, Term}};
+use std::{fmt, sync::atomic::Ordering};
+use crate::{term, terms::{term_trait::TermTrait, Term}, VAR_COUNTER};
 
 #[derive(Debug, Clone)]
 // \forall x:A B
@@ -18,7 +18,8 @@ impl fmt::Display for Pi {
 
 impl PartialEq for Pi {
     fn eq(&self, other: &Self) -> bool {
-        let fresh = term!(Var("__NEWVAR")); // TODO : make real new vars
+        let id = VAR_COUNTER.fetch_add(1, Ordering::Relaxed);
+        let fresh = term!(Var(format!("__{}", id))); // TODO : make real new vars
 
         // Rename bound vars to fresh in both bodies
         let self_body = self.2.clone().replace(*self.0.clone(), fresh.clone());
@@ -46,7 +47,7 @@ impl TermTrait for Pi {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone)]
 // \lambda (x:A) b
 pub struct Lambda(pub Box<Term>, pub Box<Term>, pub Box<Term>);
 
@@ -56,14 +57,36 @@ impl fmt::Display for Lambda {
     }
 }
 
+
+impl PartialEq for Lambda {
+    fn eq(&self, other: &Self) -> bool {
+        let id = VAR_COUNTER.fetch_add(1, Ordering::Relaxed);
+        let fresh = term!(Var(format!("__{}", id))); // TODO : make real new vars
+
+        // Rename bound vars to fresh in both bodies
+        let self_body = self.2.clone().replace(*self.0.clone(), fresh.clone());
+        let other_body = other.2.clone().replace(*other.0.clone(), fresh.clone());
+
+        self.1 == other.1 && self_body == other_body
+    }
+}
+
 impl TermTrait for Lambda {
     fn replace(self, to_replace: Term, with: Term) -> Term {
         // TODO : DO THAT BUT GOOD
-        term!(Lambda(
-            self.0.replace(to_replace.clone(), with.clone()),
-            self.1.replace(to_replace.clone(), with.clone()),
-            self.2.replace(to_replace.clone(), with.clone())
-        ))
+        if to_replace == *self.0 {
+            term!(Lambda(
+                *self.0,
+                *self.1,
+                *self.2
+            ))
+        } else {
+            term!(Lambda(
+                *self.0,
+                self.1.replace(to_replace.clone(), with.clone()),
+                self.2.replace(to_replace.clone(), with.clone())
+            ))
+        }
     }
 }
 

@@ -1,4 +1,6 @@
-use crate::{term, terms::Term};
+use std::sync::atomic::Ordering;
+
+use crate::{term, terms::Term, VAR_COUNTER};
 
 pub fn church(n: usize) -> Term {
     match n {
@@ -12,12 +14,14 @@ pub fn double(term: Term) -> Term {
     term!(IndN(
         term!(Nat),
         term!(NZero),
-        term!(NSucc(term!(NSucc(term!(Var("y")))))),
+        term!(NSucc(term!(NSucc(term!(Var("DOUBLE")))))),
         term
     ))
 }
 
 pub fn add(term: Term) -> Term {
+    let id1 = VAR_COUNTER.fetch_add(1, Ordering::Relaxed);
+    let id2 = VAR_COUNTER.fetch_add(1, Ordering::Relaxed);
     term!(IndN(
         term!(Pi(
             term!(Var("_")),
@@ -25,16 +29,16 @@ pub fn add(term: Term) -> Term {
             term!(Nat)
         )),
         term!(Lambda(
-            term!(Var("VAR1")),
+            term!(Var(format!("__{}", id1))),
             term!(Nat),
-            term!(Var("VAR1"))
+            term!(Var(format!("__{}", id1)))
         )),
         term!(Lambda(
-            term!(Var("VAR2")),
+            term!(Var(format!("__{}", id2))),
             term!(Nat),
             term!(NSucc(term!(Apply(
-                term!(Var("FUNC1")),
-                term!(Var("VAR2"))
+                term!(Var("ADD")),
+                term!(Var(format!("__{}", id2)))
             ))))
         )),
         

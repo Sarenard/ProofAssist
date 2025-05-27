@@ -5,7 +5,7 @@ use crate::Judgment;
 
 use std::fmt;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct InfTree {
     pub hypo: Vec<InfTree>,
     pub conclusion: Judgment,
